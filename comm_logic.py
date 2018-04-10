@@ -5,12 +5,57 @@ from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import JointState
 
 
+# Define the control Mode as a class for uniformity in the rest of the code
+class ControlMode(object):
+    # We are segmenting the mode as <mode>_<op_space><controller>
+    # Thus using this class, we can always check back for what mode
+    # does the topic specify
+    mode = {}
+    op_space = {}
+    controller = {}
+    # Three possible modes, interp, servo and move
+    mode['interpolate'] = 0
+    mode['servo'] = 1
+    mode['move'] = 2
+    # Two possible configuration spaces, cartesian and joint
+    op_space['c'] = 0
+    op_space['j'] = 1
+    # Four possible controllers, position, relative, velocity and effort
+    controller['p'] = 0
+    controller['r'] = 1
+    controller['v'] = 2
+    controller['f'] = 3
+
+
+def interpret_mode_from_topic(topic_str):
+    # First split to the topic name by '/'
+    parsed_str = topic_str.split('/')
+    # The last element should be the control mode (Maybe?)
+    control_mode_str = parsed_str[-1]
+    # Split the control mode string by '_' now
+    control_mode_str = control_mode_str.split('_')
+    # Check for format now, throw exception if the mode is not what we discussed in crtk API
+    if control_mode_str.__len__() < 2:
+        raise Exception('Failed to parse topic string to mode, '
+                        'format should be <mode>_<op_space><controller>. E.g interp_cp')
+    if control_mode_str[1].__len__() < 2:
+        raise Exception('Failed to parse topic string to mode, '
+                        'format should be <mode>_<op_space><controller>. E.g interp_cp')
+    # Now get the relevant data for figuring out the correct mode from the control mode string
+    mode_str = control_mode_str[0]
+    op_space_str = control_mode_str[1][0]
+    controller_str = control_mode_str[1][1]
+    # Return the ControlMode now, naturally this would throw an exception if we aren't using the crtk API names
+    return [ControlMode.mode[mode_str], ControlMode.op_space[op_space_str], ControlMode.controller[controller_str]]
+
+
 class CommIfc(object):
-    def __init__(self, topic_name, data_type, enable_wd = False, queue_size=10):
+    def __init__(self, topic_name, data_type, enable_wd=False, queue_size=10):
         self.topic_name = topic_name
         self.cmd = data_type()
         self.watch_dog = WatchDog
         self.enable_wd = enable_wd
+        self.interpreted_mode = interpret_mode_from_topic(topic_name)
 
         self.sub = rospy.Subscriber(topic_name, data_type, self.message_cb, queue_size=queue_size)
 
@@ -18,6 +63,13 @@ class CommIfc(object):
         self.cmd = data
         if self.enable_wd:
             self.watch_dog.acknowledge_wd()
+
+    def is_active(self, data):
+        return self.watch_dog.is_wd_expired()
+
+    def get_interpreted_mode(self):
+        return self.interpreted_mode
+
 
 
 class CommIfcHandler(object):
