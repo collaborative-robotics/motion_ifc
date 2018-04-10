@@ -29,9 +29,9 @@ class ControlMode(object):
     # We are segmenting the mode as <mode>_<op_space><controller>
     # Thus using this class, we can always check back for what mode
     # does the topic specify
-    mode = {}
-    op_space = {}
-    controller = {}
+    mode = dict()
+    op_space = dict()
+    controller = dict()
     # Three possible modes: interp, servo and move
     mode['interpolate'] = Mode.interpolate
     mode['servo'] = Mode.servo
@@ -73,13 +73,13 @@ class CommIfc(object):
         self.topic_name = topic_name
         self.cmd = data_type()
         self.enable_wd = enable_wd
-        self.interpreted_mode = interpret_mode_from_topic(topic_name)
+        self.control_mode = interpret_mode_from_topic(topic_name)
         self.wd_time_out = 0.0
-        if self.interpreted_mode[0] is Mode.interpolate:
+        if self.control_mode[0] is Mode.interpolate:
             self.wd_time_out = 0.1
-        elif self.interpreted_mode[0] is Mode.move:
+        elif self.control_mode[0] is Mode.move:
             self.wd_time_out = 10.0
-        elif self.interpreted_mode[0] is Mode.servo:
+        elif self.control_mode[0] is Mode.servo:
             self.wd_time_out = 0.01
         else:
             raise Exception('Failed to find the right mode from topic')
@@ -95,8 +95,8 @@ class CommIfc(object):
     def is_active(self):
         return not self.watch_dog.is_wd_expired()
 
-    def get_interpreted_mode(self):
-        return self.interpreted_mode
+    def get_control_mode(self):
+        return self.control_mode
 
 
 class CommIfcHandler(object):
@@ -125,6 +125,15 @@ class CommIfcHandler(object):
             CommIfc(prefix + 'move_jr',        JointState,       True,  10)
         ]
 
+    # Poll through all the interfaces and check which ones are active, return a list
+    # Remember, the interfaces expire based on their watchdog timeout.
+    def get_active_ifcs(self):
+        active_ifcs_list = []
+        for ifc in self.comm_ifc_list:
+            if ifc.is_active():
+                active_ifcs_list.append(ifc)
+        return active_ifcs_list
+
 
 class CommLogic(CommIfcHandler):
     def __init__(self):
@@ -135,10 +144,10 @@ class CommLogic(CommIfcHandler):
 
     def run(self):
         while not rospy.is_shutdown():
-            self._rate.sleep()
-            print 'Running: i = {}'.format(self._counter)
+            active_ifcs_list = self.get_active_ifcs()
+            print 'i: {}, Number of active interfaces: {}'.format(self._counter, active_ifcs_list.__len__())
             self._counter = self._counter + 1
-            pass
+            self._rate.sleep()
         self._clean()
 
     def _clean(self):
