@@ -3,6 +3,25 @@ import numpy as np
 from watch_dog import WatchDog
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import JointState
+import enum
+
+
+class Mode(enum.Enum):
+    interpolate = 0
+    servo = 1
+    move = 2
+
+
+class OpSpace(enum.Enum):
+    cartesian = 0
+    joint = 1
+
+
+class Controller(enum.Enum):
+    position = 0
+    relative = 1
+    velocity = 2
+    effort = 3
 
 
 # Define the control Mode as a class for uniformity in the rest of the code
@@ -14,17 +33,17 @@ class ControlMode(object):
     op_space = {}
     controller = {}
     # Three possible modes, interp, servo and move
-    mode['interpolate'] = 0
-    mode['servo'] = 1
-    mode['move'] = 2
+    mode['interpolate'] = Mode.interpolate
+    mode['servo'] = Mode.servo
+    mode['move'] = Mode.move
     # Two possible configuration spaces, cartesian and joint
-    op_space['c'] = 0
-    op_space['j'] = 1
+    op_space['c'] = OpSpace.cartesian
+    op_space['j'] = OpSpace.joint
     # Four possible controllers, position, relative, velocity and effort
-    controller['p'] = 0
-    controller['r'] = 1
-    controller['v'] = 2
-    controller['f'] = 3
+    controller['p'] = Controller.position
+    controller['r'] = Controller.relative
+    controller['v'] = Controller.velocity
+    controller['f'] = Controller.effort
 
 
 def interpret_mode_from_topic(topic_str):
