@@ -32,14 +32,14 @@ class ControlMode(object):
     mode = {}
     op_space = {}
     controller = {}
-    # Three possible modes, interp, servo and move
+    # Three possible modes: interp, servo and move
     mode['interpolate'] = Mode.interpolate
     mode['servo'] = Mode.servo
     mode['move'] = Mode.move
-    # Two possible configuration spaces, cartesian and joint
+    # Two possible configuration spaces: cartesian and joint
     op_space['c'] = OpSpace.cartesian
     op_space['j'] = OpSpace.joint
-    # Four possible controllers, position, relative, velocity and effort
+    # Four possible controllers: position, relative, velocity and effort
     controller['p'] = Controller.position
     controller['r'] = Controller.relative
     controller['v'] = Controller.velocity
@@ -47,11 +47,11 @@ class ControlMode(object):
 
 
 def interpret_mode_from_topic(topic_str):
-    # First split to the topic name by '/'
+    # First split the topic name by '/'
     parsed_str = topic_str.split('/')
-    # The last element should be the control mode (Maybe?)
+    # The last element should be the control mode (Maybe? Should discuss this)
     control_mode_str = parsed_str[-1]
-    # Split the control mode string by '_' now
+    # Split the control mode string by '_' to break Mode,OpSpace and Controller
     control_mode_str = control_mode_str.split('_')
     # Check for format now, throw exception if the mode is not what we discussed in crtk API
     if control_mode_str.__len__() < 2:
@@ -83,6 +83,7 @@ class CommIfc(object):
             self.wd_time_out = 0.01
         else:
             raise Exception('Failed to find the right mode from topic')
+        self.watch_dog = WatchDog(self.wd_time_out)
 
         self.sub = rospy.Subscriber(topic_name, data_type, self.message_cb, queue_size=queue_size)
 
@@ -91,8 +92,8 @@ class CommIfc(object):
         if self.enable_wd:
             self.watch_dog.acknowledge_wd()
 
-    def is_active(self, data):
-        return self.watch_dog.is_wd_expired()
+    def is_active(self):
+        return not self.watch_dog.is_wd_expired()
 
     def get_interpreted_mode(self):
         return self.interpreted_mode
