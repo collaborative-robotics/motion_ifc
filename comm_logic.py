@@ -72,9 +72,17 @@ class CommIfc(object):
     def __init__(self, topic_name, data_type, enable_wd=False, queue_size=10):
         self.topic_name = topic_name
         self.cmd = data_type()
-        self.watch_dog = WatchDog
         self.enable_wd = enable_wd
         self.interpreted_mode = interpret_mode_from_topic(topic_name)
+        self.wd_time_out = 0.0
+        if self.interpreted_mode[0] is Mode.interpolate:
+            self.wd_time_out = 0.1
+        elif self.interpreted_mode[0] is Mode.move:
+            self.wd_time_out = 10.0
+        elif self.interpreted_mode[0] is Mode.servo:
+            self.wd_time_out = 0.01
+        else:
+            raise Exception('Failed to find the right mode from topic')
 
         self.sub = rospy.Subscriber(topic_name, data_type, self.message_cb, queue_size=queue_size)
 
@@ -90,7 +98,6 @@ class CommIfc(object):
         return self.interpreted_mode
 
 
-
 class CommIfcHandler(object):
     def __init__(self):
         prefix = '/motion_ifc/'
@@ -103,18 +110,18 @@ class CommIfcHandler(object):
             CommIfc(prefix + 'interpolate_jr', JointState,       True,  10),
             CommIfc(prefix + 'interpolate_jv', JointState,       True,  10),
             CommIfc(prefix + 'interpolate_jf', JointState,       True,  10),
-            CommIfc(prefix + 'servo_cp',       TransformStamped, False, 10),
-            CommIfc(prefix + 'servo_cr',       TransformStamped, False, 10),
-            CommIfc(prefix + 'servo_cv',       TransformStamped, False, 10),
-            CommIfc(prefix + 'servo_cf',       TransformStamped, False, 10),
-            CommIfc(prefix + 'servo_jp',       JointState,       False, 10),
-            CommIfc(prefix + 'servo_jr',       JointState,       False, 10),
-            CommIfc(prefix + 'servo_jv',       JointState,       False, 10),
-            CommIfc(prefix + 'servo_jf',       JointState,       False, 10),
-            CommIfc(prefix + 'move_cp',        JointState,       False, 10),
-            CommIfc(prefix + 'move_cr',        JointState,       False, 10),
-            CommIfc(prefix + 'move_jp',        JointState,       False, 10),
-            CommIfc(prefix + 'move_jr',        JointState,       False, 10)
+            CommIfc(prefix + 'servo_cp',       TransformStamped, True,  10),
+            CommIfc(prefix + 'servo_cr',       TransformStamped, True,  10),
+            CommIfc(prefix + 'servo_cv',       TransformStamped, True,  10),
+            CommIfc(prefix + 'servo_cf',       TransformStamped, True,  10),
+            CommIfc(prefix + 'servo_jp',       JointState,       True,  10),
+            CommIfc(prefix + 'servo_jr',       JointState,       True,  10),
+            CommIfc(prefix + 'servo_jv',       JointState,       True,  10),
+            CommIfc(prefix + 'servo_jf',       JointState,       True,  10),
+            CommIfc(prefix + 'move_cp',        JointState,       True,  10),
+            CommIfc(prefix + 'move_cr',        JointState,       True,  10),
+            CommIfc(prefix + 'move_jp',        JointState,       True,  10),
+            CommIfc(prefix + 'move_jr',        JointState,       True,  10)
         ]
 
 
