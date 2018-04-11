@@ -6,7 +6,7 @@ from sensor_msgs.msg import JointState
 import enum
 from controllers import Controllers
 
-controllers = Controllers()
+
 # Define the control Mode as a class for uniformity in the rest of the code
 class EnumControlMode(object):
     class Mode(enum.Enum):
@@ -65,22 +65,13 @@ def interpret_mode_from_topic(topic_str):
     return [EnumControlMode.mode[mode_str], EnumControlMode.op_space[op_space_str], EnumControlMode.controller[controller_str]]
 
 
-def get_method_by_name(topic_str):
-    # First split the topic name by '/'
-    parsed_str = topic_str.split('/')
-    # The last element should be the control mode (Maybe? Should discuss this)
-    control_mode_str = parsed_str[-1]
-
-    return controllers.methods_dict[control_mode_str]
-
-
 class CommIfc(object):
-    def __init__(self, topic_name, data_type, enable_wd=False, queue_size=10):
+    def __init__(self, topic_name, data_type, controller_ifc, enable_wd=False, queue_size=10):
         self.topic_name = topic_name
         self.cmd = data_type()
         self.enable_wd = enable_wd
         self.control_mode = interpret_mode_from_topic(topic_name)
-        self.control_method = get_method_by_name(topic_name)
+        self.control_method = controller_ifc.get_method_by_name(topic_name)
         self.wd_time_out = 0.0
         if self.control_mode[0] is EnumControlMode.Mode.interpolate:
             self.wd_time_out = 0.1
@@ -107,28 +98,29 @@ class CommIfc(object):
 
 class CommIfcHandler(object):
     def __init__(self):
+        self.controllers_ifc = Controllers()
         prefix = '/motion_ifc/'
         self.comm_ifc_list = [
-            CommIfc(prefix + 'interpolate_cp', TransformStamped, True,  10),
-            CommIfc(prefix + 'interpolate_cr', TransformStamped, True,  10),
-            CommIfc(prefix + 'interpolate_cv', TransformStamped, True,  10),
-            CommIfc(prefix + 'interpolate_cf', TransformStamped, True,  10),
-            CommIfc(prefix + 'interpolate_jp', JointState,       True,  10),
-            CommIfc(prefix + 'interpolate_jr', JointState,       True,  10),
-            CommIfc(prefix + 'interpolate_jv', JointState,       True,  10),
-            CommIfc(prefix + 'interpolate_jf', JointState,       True,  10),
-            CommIfc(prefix + 'servo_cp',       TransformStamped, True,  10),
-            CommIfc(prefix + 'servo_cr',       TransformStamped, True,  10),
-            CommIfc(prefix + 'servo_cv',       TransformStamped, True,  10),
-            CommIfc(prefix + 'servo_cf',       TransformStamped, True,  10),
-            CommIfc(prefix + 'servo_jp',       JointState,       True,  10),
-            CommIfc(prefix + 'servo_jr',       JointState,       True,  10),
-            CommIfc(prefix + 'servo_jv',       JointState,       True,  10),
-            CommIfc(prefix + 'servo_jf',       JointState,       True,  10),
-            CommIfc(prefix + 'move_cp',        JointState,       True,  10),
-            CommIfc(prefix + 'move_cr',        JointState,       True,  10),
-            CommIfc(prefix + 'move_jp',        JointState,       True,  10),
-            CommIfc(prefix + 'move_jr',        JointState,       True,  10)
+            CommIfc(prefix + 'interpolate_cp', TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'interpolate_cr', TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'interpolate_cv', TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'interpolate_cf', TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'interpolate_jp', JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'interpolate_jr', JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'interpolate_jv', JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'interpolate_jf', JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_cp',       TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_cr',       TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_cv',       TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_cf',       TransformStamped, self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_jp',       JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_jr',       JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_jv',       JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'servo_jf',       JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'move_cp',        JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'move_cr',        JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'move_jp',        JointState,       self.controllers_ifc, True,  10),
+            CommIfc(prefix + 'move_jr',        JointState,       self.controllers_ifc, True,  10)
         ]
 
     # Poll through all the interfaces and check which ones are active, return a list
