@@ -4,28 +4,25 @@ from watch_dog import WatchDog
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import JointState
 import enum
+from controllers import Controllers
 
-
-class Mode(enum.Enum):
-    interpolate = 0
-    servo = 1
-    move = 2
-
-
-class OpSpace(enum.Enum):
-    cartesian = 0
-    joint = 1
-
-
-class Controller(enum.Enum):
-    position = 0
-    relative = 1
-    velocity = 2
-    effort = 3
-
-
+controllers = Controllers()
 # Define the control Mode as a class for uniformity in the rest of the code
-class ControlMode(object):
+class EnumControlMode(object):
+    class Mode(enum.Enum):
+        interpolate = 0
+        servo = 1
+        move = 2
+
+    class OpSpace(enum.Enum):
+        cartesian = 0
+        joint = 1
+
+    class Controller(enum.Enum):
+        position = 0
+        relative = 1
+        velocity = 2
+        effort = 3
     # We are segmenting the mode as <mode>_<op_space><controller>
     # Thus using this class, we can always check back for what mode
     # does the topic specify
@@ -65,7 +62,16 @@ def interpret_mode_from_topic(topic_str):
     op_space_str = control_mode_str[1][0]
     controller_str = control_mode_str[1][1]
     # Return the ControlMode now, naturally this would throw an exception if we aren't using the crtk API names
-    return [ControlMode.mode[mode_str], ControlMode.op_space[op_space_str], ControlMode.controller[controller_str]]
+    return [EnumControlMode.mode[mode_str], EnumControlMode.op_space[op_space_str], EnumControlMode.controller[controller_str]]
+
+
+def get_method_by_name(topic_str):
+    # First split the topic name by '/'
+    parsed_str = topic_str.split('/')
+    # The last element should be the control mode (Maybe? Should discuss this)
+    control_mode_str = parsed_str[-1]
+
+    return controllers.methods_dict[control_mode_str]
 
 
 class CommIfc(object):
@@ -74,17 +80,17 @@ class CommIfc(object):
         self.cmd = data_type()
         self.enable_wd = enable_wd
         self.control_mode = interpret_mode_from_topic(topic_name)
+        self.control_method = get_method_by_name(topic_name)
         self.wd_time_out = 0.0
-        if self.control_mode[0] is Mode.interpolate:
+        if self.control_mode[0] is EnumControlMode.Mode.interpolate:
             self.wd_time_out = 0.1
-        elif self.control_mode[0] is Mode.move:
+        elif self.control_mode[0] is EnumControlMode.Mode.move:
             self.wd_time_out = 10.0
-        elif self.control_mode[0] is Mode.servo:
+        elif self.control_mode[0] is EnumControlMode.Mode.servo:
             self.wd_time_out = 0.01
         else:
             raise Exception('Failed to find the right mode from topic')
         self.watch_dog = WatchDog(self.wd_time_out)
-
         self.sub = rospy.Subscriber(topic_name, data_type, self.message_cb, queue_size=queue_size)
 
     def message_cb(self, data):
@@ -146,6 +152,9 @@ class CommLogic(CommIfcHandler):
         while not rospy.is_shutdown():
             active_ifcs_list = self.get_active_ifcs()
             print 'i: {}, Number of active interfaces: {}'.format(self._counter, active_ifcs_list.__len__())
+            if active_ifcs_list.__len__() > 0:
+                ifc = active_ifcs_list[0]
+                ifc.control_method()
             self._counter = self._counter + 1
             self._rate.sleep()
         self._clean()
