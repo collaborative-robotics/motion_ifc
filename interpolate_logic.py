@@ -1,6 +1,9 @@
 import numpy
 
 
+# Each sub-controller must provide a dict() of all the methods with the method
+# name as the key and the method handle as the value so that the Controller
+# class can append all the dict() items in a unified way
 class Interpolate(object):
     def __init__(self):
         self.methods_dict = dict()
