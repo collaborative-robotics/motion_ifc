@@ -62,7 +62,26 @@ def interpret_mode_from_topic(topic_str):
     op_space_str = control_mode_str[1][0]
     controller_str = control_mode_str[1][1]
     # Return the ControlMode now, naturally this would throw an exception if we aren't using the crtk API names
-    return [EnumControlMode.mode[mode_str], EnumControlMode.op_space[op_space_str], EnumControlMode.controller[controller_str]]
+    return [EnumControlMode.mode[mode_str],
+            EnumControlMode.op_space[op_space_str],
+            EnumControlMode.controller[controller_str]
+            ]
+
+def interpret_crtk_name_from_topic(topic_str):
+    # First split the topic name by '/'
+    parsed_str = topic_str.split('/')
+    # The last element should be the control mode (Maybe? Should discuss this)
+    crtk_name = parsed_str[-1]
+    # Split the control mode string by '_' to break Mode,OpSpace and Controller
+    control_mode_str = crtk_name.split('_')
+    # Check for format now, throw exception if the mode is not what we discussed in crtk API
+    if control_mode_str.__len__() < 2:
+        raise Exception('Failed to parse topic string to mode, '
+                        'format should be <mode>_<op_space><controller>. E.g interp_cp')
+    if control_mode_str[1].__len__() < 2:
+        raise Exception('Failed to parse topic string to mode, '
+                        'format should be <mode>_<op_space><controller>. E.g interp_cp')
+    return crtk_name
 
 
 class CommIfc(object):
@@ -71,8 +90,10 @@ class CommIfc(object):
         self.cmd = data_type()
         self.enable_wd = enable_wd
         self.control_mode = interpret_mode_from_topic(topic_name)
+        self.crtk_name = interpret_crtk_name_from_topic(topic_name)
         self.control_method = controller_ifc.get_method_by_name(topic_name)
         self.wd_time_out = 0.0
+        self.last_received_time = 0.0
         if self.control_mode[0] is EnumControlMode.Mode.interpolate:
             self.wd_time_out = 0.1
         elif self.control_mode[0] is EnumControlMode.Mode.move:
@@ -86,6 +107,7 @@ class CommIfc(object):
 
     def message_cb(self, data):
         self.cmd = data
+        self.last_received_time = rospy.Time.now().to_sec()
         if self.enable_wd:
             self.watch_dog.acknowledge_wd()
 
@@ -94,6 +116,12 @@ class CommIfc(object):
 
     def get_control_mode(self):
         return self.control_mode
+
+    def get_last_received_time(self):
+        return self.last_received_time
+
+    def get_crtk_name(self):
+        return self.crtk_name
 
 
 class CommIfcHandler(object):
@@ -132,6 +160,17 @@ class CommIfcHandler(object):
                 active_ifcs_list.append(ifc)
         return active_ifcs_list
 
+    def get_last_activated_ifc(self):
+        active_ifcs_list = self.get_active_ifcs()
+        last_activated_ifc = None
+        lastest_time = 0.0
+        for ifc in active_ifcs_list:
+            ifc_time = ifc.get_last_received_time()
+            if ifc_time > lastest_time:
+                lastest_time = ifc_time
+                last_activated_ifc = ifc
+        return last_activated_ifc
+
 
 class CommLogic(CommIfcHandler):
     def __init__(self):
@@ -143,7 +182,10 @@ class CommLogic(CommIfcHandler):
     def run(self):
         while not rospy.is_shutdown():
             active_ifcs_list = self.get_active_ifcs()
+            last_active_ifc = self.get_last_activated_ifc()
             print 'i: {}, Number of active interfaces: {}'.format(self._counter, active_ifcs_list.__len__())
+            if not last_active_ifc is None:
+                print 'Lastest active ifc: {}'.format(last_active_ifc.get_crtk_name())
             if active_ifcs_list.__len__() > 0:
                 ifc = active_ifcs_list[0]
                 ifc.control_method()
