@@ -65,10 +65,9 @@ class RobotCmdIfc(object):
         return active_ifcs_list
 
     def get_last_activated_ifc(self):
-        active_ifcs_list = self.get_active_ifcs()
         last_activated_ifc = None
         lastest_time = 0.0
-        for ifc in active_ifcs_list:
+        for ifc in self.comm_ifc_list:
             ifc_time = ifc.get_last_received_time()
             if ifc_time > lastest_time:
                 lastest_time = ifc_time
