@@ -76,10 +76,10 @@ class CommIfcHandler(object):
         return last_activated_ifc
 
 
-class CommLogic(CommIfcHandler):
+class RobotCmdQuery(CommIfcHandler):
     def __init__(self):
         self._n_handle = rospy.init_node("motion_interface")
-        super(CommLogic, self).__init__()
+        super(RobotCmdQuery, self).__init__()
         self._rate = rospy.Rate(10)
         self._counter = 0
 

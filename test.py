@@ -1,7 +1,7 @@
-from comm_logic import CommLogic
+from robot_cmd_query import RobotCmdQuery
 from robot_state_query import RobotStateQuery
 
-# obj = CommLogic()
+# obj = RobotCmdQuery()
 # obj.run()
 
 obj2 = RobotStateQuery()
