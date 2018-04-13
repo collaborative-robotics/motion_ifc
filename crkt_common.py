@@ -2,7 +2,7 @@ import enum
 
 
 # Define the control Mode as a class for uniformity in the rest of the code
-class EnumControlMode(object):
+class ControlMode(object):
     class Mode(enum.Enum):
         interpolate = 0
         servo = 1
@@ -56,9 +56,9 @@ def interpret_mode_from_topic(topic_str):
     op_space_str = control_mode_str[1][0]
     controller_str = control_mode_str[1][1]
     # Return the ControlMode now, naturally this would throw an exception if we aren't using the crtk API names
-    return [EnumControlMode.mode[mode_str],
-            EnumControlMode.op_space[op_space_str],
-            EnumControlMode.controller[controller_str]
+    return [ControlMode.mode[mode_str],
+            ControlMode.op_space[op_space_str],
+            ControlMode.controller[controller_str]
             ]
 
 

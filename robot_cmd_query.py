@@ -12,11 +12,11 @@ class CmdCommIfc(CommunicationIfc):
     def __init__(self, topic_name, data_type, controller_ifc, enable_wd=False, queue_size=10):
         super(CmdCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
         self.control_mode = interpret_mode_from_topic(topic_name)
-        if self.control_mode[0] is EnumControlMode.Mode.interpolate:
+        if self.control_mode[0] is ControlMode.Mode.interpolate:
             self.wd_time_out = 0.1
-        elif self.control_mode[0] is EnumControlMode.Mode.move:
+        elif self.control_mode[0] is ControlMode.Mode.move:
             self.wd_time_out = 10.0
-        elif self.control_mode[0] is EnumControlMode.Mode.servo:
+        elif self.control_mode[0] is ControlMode.Mode.servo:
             self.wd_time_out = 0.01
         else:
             raise Exception('Failed to find the right mode from topic')
