@@ -14,10 +14,6 @@ class Controllers(object):
             self.methods_dict.update(controller.methods_dict)
         pass
 
-    def get_method_by_name(self, topic_str):
-        # First split the topic name by '/'
-        parsed_str = topic_str.split('/')
-        # The last element should be the control mode (Maybe? Should discuss this)
-        control_mode_str = parsed_str[-1]
-        return self.methods_dict[control_mode_str]
+    def get_method_by_name(self, method_name):
+        return self.methods_dict[method_name]
 
