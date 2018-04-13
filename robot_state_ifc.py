@@ -89,39 +89,39 @@ class SetPointState(object):
         self.js = data
 
 
-class RobotStateQuery(object):
+class Feedback(object):
     def __init__(self):
         self.state_class_list = [MeasuredState(), GoalState(), SetPointState()]
         self.methods_dict = dict()
         for state_class in self.state_class_list:
             self.methods_dict.update(state_class.methods_dict)
         pass
-        self._counter = 0
-        self._n_handle = rospy.init_node("motion_interface")
-        self.rate = rospy.Rate(10)
-        prefix = '/motion_ifc/'
-        self.comm_ifc_list = [
-            StateCommIfc(prefix + 'measured_cp', TransformStamped, self, True, 10),
-            StateCommIfc(prefix + 'measured_cv', TwistStamped,     self, True, 10),
-            StateCommIfc(prefix + 'measured_cf', WrenchStamped,    self, True, 10),
-            StateCommIfc(prefix + 'measured_js', JointState,       self, True, 10),
-            StateCommIfc(prefix + 'goal_cp',     TransformStamped, self, True, 10),
-            StateCommIfc(prefix + 'goal_cv',     WrenchStamped,    self, True, 10),
-            StateCommIfc(prefix + 'goal_js',     JointState,       self, True, 10),
-            StateCommIfc(prefix + 'setpoint_cp', TransformStamped, self, True, 10),
-            StateCommIfc(prefix + 'setpoint_cv', TwistStamped,     self, True, 10),
-            StateCommIfc(prefix + 'setpoint_cf', WrenchStamped,    self, True, 10),
-            StateCommIfc(prefix + 'setpoint_js', JointState,       self, True, 10),
-        ]
 
     def get_method_by_name(self, method_name):
         return self.methods_dict[method_name]
 
-    def run(self):
-        while not rospy.is_shutdown():
-            self.rate.sleep()
-            print 'i: {}'.format(self._counter)
-            self._counter = self._counter + 1
+
+class RobotStateIfc(object):
+    def __init__(self):
+        self.feedback = Feedback()
+        prefix = '/motion_ifc/'
+        self.comm_ifc_list = [
+            StateCommIfc(prefix + 'measured_cp', TransformStamped, self.feedback, True, 10),
+            StateCommIfc(prefix + 'measured_cv', TwistStamped,     self.feedback, True, 10),
+            StateCommIfc(prefix + 'measured_cf', WrenchStamped,    self.feedback, True, 10),
+            StateCommIfc(prefix + 'measured_js', JointState,       self.feedback, True, 10),
+            StateCommIfc(prefix + 'goal_cp',     TransformStamped, self.feedback, True, 10),
+            StateCommIfc(prefix + 'goal_cv',     WrenchStamped,    self.feedback, True, 10),
+            StateCommIfc(prefix + 'goal_js',     JointState,       self.feedback, True, 10),
+            StateCommIfc(prefix + 'setpoint_cp', TransformStamped, self.feedback, True, 10),
+            StateCommIfc(prefix + 'setpoint_cv', TwistStamped,     self.feedback, True, 10),
+            StateCommIfc(prefix + 'setpoint_cf', WrenchStamped,    self.feedback, True, 10),
+            StateCommIfc(prefix + 'setpoint_js', JointState,       self.feedback, True, 10),
+        ]
+
+    def clean(self):
+        for ifc in self.comm_ifc_list:
+            ifc.sub.unregister()
 
 
 

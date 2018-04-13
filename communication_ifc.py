@@ -8,7 +8,7 @@ class CommunicationIfc(object):
         self.topic_name = topic_name
         self.cmd = data_type()
         self.enable_wd = enable_wd
-        self.crtk_name = interpret_crtk_name_from_topic(topic_name)
+        self.crtk_name = ''
         self.wd_time_out = 0.0
         self.last_received_time = 0.0
 
@@ -28,4 +28,5 @@ class CommunicationIfc(object):
         return self.last_received_time
 
     def get_crtk_name(self):
+        self.crtk_name = interpret_crtk_name_from_topic(self.topic_name)
         return self.crtk_name

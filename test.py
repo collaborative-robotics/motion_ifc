@@ -1,9 +1,6 @@
-from robot_cmd_query import RobotCmdQuery
-from robot_state_query import RobotStateQuery
+from motion_ifc import MotionIfc
 
-obj = RobotCmdQuery()
+
+obj = MotionIfc()
 obj.run()
-
-obj2 = RobotStateQuery()
-obj2.run()
 

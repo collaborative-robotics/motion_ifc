@@ -28,7 +28,7 @@ class CmdCommIfc(CommunicationIfc):
         return self.control_mode
 
 
-class CommIfcHandler(object):
+class RobotCmdIfc(object):
     def __init__(self):
         self.controllers_ifc = Controllers()
         prefix = '/motion_ifc/'
@@ -75,28 +75,6 @@ class CommIfcHandler(object):
                 last_activated_ifc = ifc
         return last_activated_ifc
 
-
-class RobotCmdQuery(CommIfcHandler):
-    def __init__(self):
-        self._n_handle = rospy.init_node("motion_interface")
-        super(RobotCmdQuery, self).__init__()
-        self._rate = rospy.Rate(10)
-        self._counter = 0
-
-    def run(self):
-        while not rospy.is_shutdown():
-            active_ifcs_list = self.get_active_ifcs()
-            last_active_ifc = self.get_last_activated_ifc()
-            print 'i: {}, Number of active interfaces: {}'.format(self._counter, active_ifcs_list.__len__())
-            if not last_active_ifc is None:
-                print 'Lastest active ifc: {}'.format(last_active_ifc.get_crtk_name())
-            if active_ifcs_list.__len__() > 0:
-                ifc = active_ifcs_list[0]
-                ifc.control_method()
-            self._counter = self._counter + 1
-            self._rate.sleep()
-        self._clean()
-
-    def _clean(self):
+    def clean(self):
         for ifc in self.comm_ifc_list:
             ifc.sub.unregister()
