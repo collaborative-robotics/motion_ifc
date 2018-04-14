@@ -23,11 +23,11 @@ class MeasuredState(object):
         self.cv = None
         self.cf = None
         self.js = None
-        self.methods_dict = dict()
-        self.methods_dict['measured_cp'] = self.measured_cp
-        self.methods_dict['measured_cv'] = self.measured_cv
-        self.methods_dict['measured_cf'] = self.measured_cf
-        self.methods_dict['measured_js'] = self.measured_js
+        self._methods_dict = dict()
+        self._methods_dict['measured_cp'] = self.measured_cp
+        self._methods_dict['measured_cv'] = self.measured_cv
+        self._methods_dict['measured_cf'] = self.measured_cf
+        self._methods_dict['measured_js'] = self.measured_js
 
     def measured_cp(self, data):
         self.cp = data
@@ -41,16 +41,19 @@ class MeasuredState(object):
     def measured_js(self, data):
         self.js = data
 
+    def get_methods_dict(self):
+        return self._methods_dict
+
 
 class GoalState(object):
     def __init__(self):
         self.cp = None
         self.cv = None
         self.js = None
-        self.methods_dict = dict()
-        self.methods_dict['goal_cp'] = self.goal_cp
-        self.methods_dict['goal_cv'] = self.goal_cv
-        self.methods_dict['goal_js'] = self.goal_js
+        self._methods_dict = dict()
+        self._methods_dict['goal_cp'] = self.goal_cp
+        self._methods_dict['goal_cv'] = self.goal_cv
+        self._methods_dict['goal_js'] = self.goal_js
 
     def goal_cp(self, data):
         print 'IMAPOTATO3'
@@ -62,6 +65,9 @@ class GoalState(object):
     def goal_js(self, data):
         self.js = data
 
+    def get_methods_dict(self):
+        return self._methods_dict
+
 
 class SetPointState(object):
     def __init__(self):
@@ -69,11 +75,11 @@ class SetPointState(object):
         self.cv = None
         self.cf = None
         self.js = None
-        self.methods_dict = dict()
-        self.methods_dict['setpoint_js'] = self.setpoint_js
-        self.methods_dict['setpoint_cp'] = self.setpoint_cp
-        self.methods_dict['setpoint_cv'] = self.setpoint_cv
-        self.methods_dict['setpoint_cf'] = self.setpoint_cf
+        self._methods_dict = dict()
+        self._methods_dict['setpoint_js'] = self.setpoint_js
+        self._methods_dict['setpoint_cp'] = self.setpoint_cp
+        self._methods_dict['setpoint_cv'] = self.setpoint_cv
+        self._methods_dict['setpoint_cf'] = self.setpoint_cf
 
     def setpoint_cp(self, data):
         print 'IMAPOTATO2'
@@ -88,17 +94,20 @@ class SetPointState(object):
     def setpoint_js(self, data):
         self.js = data
 
+    def get_methods_dict(self):
+        return self._methods_dict
+
 
 class Feedback(object):
     def __init__(self):
         self.state_class_list = [MeasuredState(), GoalState(), SetPointState()]
-        self.methods_dict = dict()
+        self._methods_dict = dict()
         for state_class in self.state_class_list:
-            self.methods_dict.update(state_class.methods_dict)
+            self._methods_dict.update(state_class.get_methods_dict())
         pass
 
     def get_method_by_name(self, method_name):
-        return self.methods_dict[method_name]
+        return self._methods_dict[method_name]
 
 
 class RobotStateIfc(object):

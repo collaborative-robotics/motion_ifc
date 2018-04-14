@@ -5,15 +5,15 @@
 
 class Interpolate(object):
     def __init__(self):
-        self.methods_dict = dict()
-        self.methods_dict['interpolate_cp'] = self.interpolate_cp
-        self.methods_dict['interpolate_cr'] = self.interpolate_cr
-        self.methods_dict['interpolate_cv'] = self.interpolate_cv
-        self.methods_dict['interpolate_cf'] = self.interpolate_cf
-        self.methods_dict['interpolate_jp'] = self.interpolate_jp
-        self.methods_dict['interpolate_jr'] = self.interpolate_jr
-        self.methods_dict['interpolate_jv'] = self.interpolate_jv
-        self.methods_dict['interpolate_jf'] = self.interpolate_jf
+        self._methods_dict = dict()
+        self._methods_dict['interpolate_cp'] = self.interpolate_cp
+        self._methods_dict['interpolate_cr'] = self.interpolate_cr
+        self._methods_dict['interpolate_cv'] = self.interpolate_cv
+        self._methods_dict['interpolate_cf'] = self.interpolate_cf
+        self._methods_dict['interpolate_jp'] = self.interpolate_jp
+        self._methods_dict['interpolate_jr'] = self.interpolate_jr
+        self._methods_dict['interpolate_jv'] = self.interpolate_jv
+        self._methods_dict['interpolate_jf'] = self.interpolate_jf
 
     def interpolate_cp(self):
         print 'IMAPOTATO'
@@ -40,18 +40,21 @@ class Interpolate(object):
     def interpolate_jf(self):
         pass
 
+    def get_methods_dict(self):
+        return self._methods_dict
+
 
 class Servo(object):
     def __init__(self):
-        self.methods_dict = dict()
-        self.methods_dict['servo_cp'] = self.servo_cp
-        self.methods_dict['servo_cr'] = self.servo_cr
-        self.methods_dict['servo_cv'] = self.servo_cv
-        self.methods_dict['servo_cf'] = self.servo_cf
-        self.methods_dict['servo_jp'] = self.servo_jp
-        self.methods_dict['servo_jr'] = self.servo_jr
-        self.methods_dict['servo_jv'] = self.servo_jv
-        self.methods_dict['servo_jf'] = self.servo_jf
+        self._methods_dict = dict()
+        self._methods_dict['servo_cp'] = self.servo_cp
+        self._methods_dict['servo_cr'] = self.servo_cr
+        self._methods_dict['servo_cv'] = self.servo_cv
+        self._methods_dict['servo_cf'] = self.servo_cf
+        self._methods_dict['servo_jp'] = self.servo_jp
+        self._methods_dict['servo_jr'] = self.servo_jr
+        self._methods_dict['servo_jv'] = self.servo_jv
+        self._methods_dict['servo_jf'] = self.servo_jf
 
     def servo_cp(self):
         pass
@@ -77,14 +80,17 @@ class Servo(object):
     def servo_jf(self):
         pass
 
+    def get_methods_dict(self):
+        return self._methods_dict
+
 
 class Move(object):
     def __init__(self):
-        self.methods_dict = dict()
-        self.methods_dict['move_cp'] = self.move_cp
-        self.methods_dict['move_cr'] = self.move_cr
-        self.methods_dict['move_jp'] = self.move_jp
-        self.methods_dict['move_jr'] = self.move_jr
+        self._methods_dict = dict()
+        self._methods_dict['move_cp'] = self.move_cp
+        self._methods_dict['move_cr'] = self.move_cr
+        self._methods_dict['move_jp'] = self.move_jp
+        self._methods_dict['move_jr'] = self.move_jr
 
     def move_cp(self):
         pass
@@ -98,15 +104,18 @@ class Move(object):
     def move_jr(self):
         pass
 
+    def get_methods_dict(self):
+        return self._methods_dict
+
 
 class Controllers(object):
     def __init__(self):
         self.controllers_list = [Interpolate(), Servo(), Move()]
-        self.methods_dict = dict()
+        self._methods_dict = dict()
         for controller in self.controllers_list:
-            self.methods_dict.update(controller.methods_dict)
+            self._methods_dict.update(controller.get_methods_dict())
         pass
 
     def get_method_by_name(self, method_name):
-        return self.methods_dict[method_name]
+        return self._methods_dict[method_name]
 
