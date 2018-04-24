@@ -16,17 +16,17 @@ class Interpolation(object):
                         [0, 0, 2, 6 * tf, 12 * tf ** 2, 20 * tf ** 3]])
         return T_mat
 
+    def get_interpolated_trajectory(self, t, coeff):
+        pos = coeff[0] + coeff[1] * t + coeff[2] * (t**2) + coeff[3] * (t**3) + coeff[4] * (t**4) + coeff[5] * (t**5)
+        vel = coeff[1] + 2 * coeff[2] * t + 3 * coeff[3] * (t**2) + 4 * coeff[4] * (t**3) + 5 * coeff[5] * (t**4)
+        acc = 2 * coeff[2] + 6 * coeff[3] * t + 12 * coeff[4] * (t**2) + 20 * coeff[5] * (t**3)
+        return [pos, vel, acc]
+
     def interpolate(self, p0, pf, v0, vf, a0, af, t0, tf):
         dims = p0.__len__()
         print 'Number of Dimensions = {}'.format(dims)
-        # p0 = p0
-        # pf = pf
-        # v0 = v0
-        # vf = vf
-        # a0 = a0
-        # af = af
-        # t0 = t0
-        # tf = tf
+        if p0.__len__() != pf.__len__() or v0.__len__() != vf.__len__() or a0.__len__() != af.__len__():
+            raise Exception('All arrays for initial and final P,V & A must be of same length')
 
         n = 50
 
@@ -48,18 +48,6 @@ class Interpolation(object):
         plt.plot(t, pos, 'o', t, vel, '-', t, acc, '--')
         plt.legend([['position'], 'velocity', 'acceleration'], loc='best')
         plt.show()
-
-    def get_pva_at_t(self, t, coeff):
-        pos = coeff[0] + coeff[1] * t + coeff[2] * (t**2) + coeff[3] * (t**3) + coeff[4] * (t**4) + coeff[5] * (t**5)
-        vel = coeff[1] + 2 * coeff[2] * t + 3 * coeff[3] * (t**2) + 4 * coeff[4] * (t**3) + 5 * coeff[5] * (t**4)
-        acc = 2 * coeff[2] + 6 * coeff[3] * t + 12 * coeff[4] * (t**2) + 20 * coeff[5] * (t**3)
-        return [pos, vel, acc]
-
-    def get_interpolated_trajectory(self, t, coeff):
-        pos = coeff[0] + coeff[1] * t + coeff[2] * (t**2) + coeff[3] * (t**3) + coeff[4] * (t**4) + coeff[5] * (t**5)
-        vel = coeff[1] + 2 * coeff[2] * t + 3 * coeff[3] * (t**2) + 4 * coeff[4] * (t**3) + 5 * coeff[5] * (t**4)
-        acc = 2 * coeff[2] + 6 * coeff[3] * t + 12 * coeff[4] * (t**2) + 20 * coeff[5] * (t**3)
-        return [pos, vel, acc]
 
 
 obj = Interpolation()
