@@ -8,10 +8,6 @@ class Interpolation(object):
         self._t0 = 0.0
         self._tf = 0.0
 
-        self._p_trajectory = []
-        self._v_trajectory = []
-        self._a_trajectory = []
-
         self._coefficients = []
         self._T_mat = []
         self._boundary_conditions = []
@@ -29,7 +25,7 @@ class Interpolation(object):
                         [0,  0,     2,      6*tf, 12*(tf**2), 20*(tf**3)]])
         return T_mat
 
-    def get_interpolated_trajectory(self, t, coefficients):
+    def pva_interpolated(self, t, coefficients):
         pos = self.p_interpolated(t, coefficients)
         vel = self.v_interpolated(t, coefficients)
         acc = self.a_interpolated(t, coefficients)
@@ -58,14 +54,13 @@ class Interpolation(object):
             acc = 2 * coeff[2] + 6 * coeff[3] * t + 12 * coeff[4] * (t**2) + 20 * coeff[5] * (t**3)
             return acc
 
-    def interpolate(self, p0, pf, v0, vf, a0, af, t0, tf):
+    def compute_interpolation_params(self, p0, pf, v0, vf, a0, af, t0, tf):
         if p0.__len__() != pf.__len__() or v0.__len__() != vf.__len__() or a0.__len__() != af.__len__():
             raise Exception('All arrays for initial and final P,V & A must be of same length')
 
         self._dimensions = p0.__len__()
         dims = self._dimensions
         print 'Number of Dimensions = {}'.format(dims)
-        n = 50
 
         self._boundary_conditions = np.zeros([dims, 6])
         self._coefficients = np.zeros([6, dims])
@@ -74,35 +69,38 @@ class Interpolation(object):
         self._t0 = t0
         self._tf = tf
 
-        self._p_trajectory = np.zeros([n, dims])
-        self._v_trajectory = np.zeros([n, dims])
-        self._a_trajectory = np.zeros([n, dims])
-
-        self._t_array = np.linspace(self._t0, self._tf, n)
-
         for i in range(0, dims):
             self._boundary_conditions[i, :] = np.mat([p0[i], v0[i], a0[i], pf[i], vf[i], af[i]])
             self._T_mat[:, :, i] = self._compute_time_mat(t0, tf)
             self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
                                                  np.transpose(self._boundary_conditions[i, :]))
-            [self._p_trajectory[:, i], self._v_trajectory[:, i], self._a_trajectory[:, i]] = \
-                self.get_interpolated_trajectory(self._t_array, self._coefficients[:, i])
 
-    def plot_trajectory(self):
-        plt.plot(self._t_array, self._p_trajectory, 'o',
-                 self._t_array, self._v_trajectory, '-',
-                 self._t_array, self._a_trajectory, '--')
+    def plot_trajectory(self, n_steps=50):
+        if n_steps < 5:
+            raise Exception('n_steps is very low, provide a value greater than 5')
+        n = n_steps
+        self._t_array = np.linspace(self._t0, self._tf, n)
+
+        p = np.zeros([n, self._dimensions])
+        v = np.zeros([n, self._dimensions])
+        a = np.zeros([n, self._dimensions])
+
+        for i in range(0, self._dimensions):
+            [p[:, i], v[:, i], a[:, i]] = self.pva_interpolated(self._t_array, self._coefficients[:, i])
+
+        plt.plot(self._t_array, p, 'o',
+                 self._t_array, v, '-',
+                 self._t_array, a, '--')
         plt.legend([['position'], 'velocity', 'acceleration'], loc='best')
         plt.show()
 
 
-
 obj = Interpolation()
-obj.interpolate([ 0.5, 1.0,-0.3],
-                [-0.5, 0.0, 0.2],
-                [ 0.0, 0.0,-0.2],
-                [ 0.5, 0.0, 0.0],
-                [ 0.0, 0.0, 0.0],
-                [-0.3, 0.0, 0.0],
-                  0.0, 10.0)
-obj.plot_trajectory()
+obj.compute_interpolation_params([ 0.5, 1.0,-0.3],
+                                 [-0.5, 0.0, 0.2],
+                                 [ 0.0, 0.0,-0.2],
+                                 [ 0.5, 0.0, 0.0],
+                                 [ 0.0, 0.0, 0.0],
+                                 [-0.3, 0.0, 0.0],
+                                   0.0, 10.0)
+obj.plot_trajectory(500)
