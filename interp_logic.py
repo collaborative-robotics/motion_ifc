@@ -25,47 +25,64 @@ class Interpolation(object):
                         [0,  0,     2,      6*tf, 12*(tf**2), 20*(tf**3)]])
         return T_mat
 
-    def pva_interpolated(self, t, coefficients):
-        pos = self.p_interpolated(t)
-        vel = self.v_interpolated(t)
-        acc = self.a_interpolated(t)
-        return [pos, vel, acc]
+    def pva_interpolated(self, t):
+        return self.p_interpolated(t), self.v_interpolated(t), self.a_interpolated(t)
 
     def p_interpolated(self, t):
-            if t.__len__() == 1:
+            if not type(t) is np.array:
+                t = np.array(t)
+            if t.size == 1:
                 if t < self._t0 or t > self._tf:
                     raise Exception('Time should be between t0 and tf')
-            pos = np.zeros([t.__len__(), self._dimensions])
+            pos = np.zeros([t.size, self._dimensions])
             for i in range(0, self._dimensions):
                 c = self._coefficients[:, i]
                 pos[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
             return pos
 
     def v_interpolated(self, t):
-            if t.__len__() == 1:
+            if not type(t) is np.array:
+                t = np.array(t)
+            t = np.array(t)
+            if t.size == 1:
                 if t < self._t0 or t > self._tf:
-                    raise Exception('Time should be between t0 and tf')
-            vel = np.zeros([t.__len__(), self._dimensions])
+                    raise Exception('Time should be between {} and {}'.format(self._t0, self._tf))
+            vel = np.zeros([t.size, self._dimensions])
             for i in range(0, self._dimensions):
                 c = self._coefficients[:, i]
                 vel[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
             return vel
 
     def a_interpolated(self, t):
-            if t.__len__() == 1:
+            if not type(t) is np.array:
+                t = np.array(t)
+            t = np.array(t)
+            if t.size == 1:
                 if t < self._t0 or t > self._tf:
                     raise Exception('Time should be between t0 and tf')
-            acc = np.zeros([t.__len__(), self._dimensions])
+            acc = np.zeros([t.size, self._dimensions])
             for i in range(0, self._dimensions):
                 c = self._coefficients[:, i]
                 acc[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
             return acc
 
     def compute_interpolation_params(self, p0, pf, v0, vf, a0, af, t0, tf):
-        if p0.__len__() != pf.__len__() or v0.__len__() != vf.__len__() or a0.__len__() != af.__len__():
+        if not type(p0) is np.array:
+            p0 = np.asarray(p0)
+        if not type(pf) is np.array:
+            pf = np.asarray(pf)
+        if not type(v0) is np.array:
+            v0 = np.asarray(v0)
+        if not type(vf) is np.array:
+            vf = np.asarray(vf)
+        if not type(a0) is np.array:
+            a0 = np.asarray(a0)
+        if not type(af) is np.array:
+            af = np.asarray(af)
+        if p0.size != pf.size or v0.size != vf.size or a0.size != af.size:
             raise Exception('All arrays for initial and final P,V & A must be of same length')
 
-        self._dimensions = p0.__len__()
+        self._dimensions = p0.size
         dims = self._dimensions
         print 'Number of Dimensions = {}'.format(dims)
 
@@ -88,7 +105,7 @@ class Interpolation(object):
         n = n_steps
         self._t_array = np.linspace(self._t0, self._tf, n)
 
-        p, v, a = self.pva_interpolated(self._t_array, self._coefficients)
+        p, v, a = self.pva_interpolated(self._t_array)
 
         plt.plot(self._t_array, p, 'o',
                  self._t_array, v, '-',
