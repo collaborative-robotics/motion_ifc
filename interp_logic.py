@@ -26,32 +26,39 @@ class Interpolation(object):
         return T_mat
 
     def pva_interpolated(self, t, coefficients):
-        pos = self.p_interpolated(t, coefficients)
-        vel = self.v_interpolated(t, coefficients)
-        acc = self.a_interpolated(t, coefficients)
+        pos = self.p_interpolated(t)
+        vel = self.v_interpolated(t)
+        acc = self.a_interpolated(t)
         return [pos, vel, acc]
 
-    def p_interpolated(self, t, coefficients):
+    def p_interpolated(self, t):
             if t.__len__() == 1:
                 if t < self._t0 or t > self._tf:
                     raise Exception('Time should be between t0 and tf')
-            c = coefficients
-            pos = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
+            pos = np.zeros([t.__len__(), self._dimensions])
+            for i in range(0, self._dimensions):
+                c = self._coefficients[:, i]
+                pos[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
             return pos
 
-    def v_interpolated(self, t, coefficients):
+    def v_interpolated(self, t):
             if t.__len__() == 1:
                 if t < self._t0 or t > self._tf:
                     raise Exception('Time should be between t0 and tf')
-            c = coefficients
-            vel = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
+            vel = np.zeros([t.__len__(), self._dimensions])
+            for i in range(0, self._dimensions):
+                c = self._coefficients[:, i]
+                vel[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
             return vel
 
-    def a_interpolated(self, t, coeff):
+    def a_interpolated(self, t):
             if t.__len__() == 1:
                 if t < self._t0 or t > self._tf:
                     raise Exception('Time should be between t0 and tf')
-            acc = 2 * coeff[2] + 6 * coeff[3] * t + 12 * coeff[4] * (t**2) + 20 * coeff[5] * (t**3)
+            acc = np.zeros([t.__len__(), self._dimensions])
+            for i in range(0, self._dimensions):
+                c = self._coefficients[:, i]
+                acc[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
             return acc
 
     def compute_interpolation_params(self, p0, pf, v0, vf, a0, af, t0, tf):
@@ -81,26 +88,17 @@ class Interpolation(object):
         n = n_steps
         self._t_array = np.linspace(self._t0, self._tf, n)
 
-        p = np.zeros([n, self._dimensions])
-        v = np.zeros([n, self._dimensions])
-        a = np.zeros([n, self._dimensions])
-
-        for i in range(0, self._dimensions):
-            [p[:, i], v[:, i], a[:, i]] = self.pva_interpolated(self._t_array, self._coefficients[:, i])
+        p, v, a = self.pva_interpolated(self._t_array, self._coefficients)
 
         plt.plot(self._t_array, p, 'o',
                  self._t_array, v, '-',
                  self._t_array, a, '--')
-        plt.legend([['position'], 'velocity', 'acceleration'], loc='best')
+        p_legend_str = [''] * self._dimensions
+        v_legend_str = [''] * self._dimensions
+        a_legend_str = [''] * self._dimensions
+        for i in range(0, self._dimensions):
+            p_legend_str[i] = 'pos '
+            v_legend_str[i] = 'vel '
+            a_legend_str[i] = 'acc '
+        plt.legend(p_legend_str, loc='best')
         plt.show()
-
-
-obj = Interpolation()
-obj.compute_interpolation_params([ 0.5, 1.0,-0.3],
-                                 [-0.5, 0.0, 0.2],
-                                 [ 0.0, 0.0,-0.2],
-                                 [ 0.5, 0.0, 0.0],
-                                 [ 0.0, 0.0, 0.0],
-                                 [-0.3, 0.0, 0.0],
-                                   0.0, 10.0)
-obj.plot_trajectory(500)
