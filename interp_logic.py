@@ -66,23 +66,23 @@ class Interpolation(object):
                 acc[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
             return acc
 
-    def compute_interpolation_params(self, p0, pf, v0, vf, a0, af, t0, tf):
-        if not type(p0) is np.array:
-            p0 = np.asarray(p0)
-        if not type(pf) is np.array:
-            pf = np.asarray(pf)
-        if not type(v0) is np.array:
-            v0 = np.asarray(v0)
-        if not type(vf) is np.array:
-            vf = np.asarray(vf)
-        if not type(a0) is np.array:
-            a0 = np.asarray(a0)
-        if not type(af) is np.array:
-            af = np.asarray(af)
-        if p0.size != pf.size or v0.size != vf.size or a0.size != af.size:
+    def compute_interpolation_params(self, x0, xf, dx0, dxf, ddx0, ddxf, t0, tf):
+        if not type(x0) is np.array:
+            x0 = np.asarray(x0)
+        if not type(xf) is np.array:
+            xf = np.asarray(xf)
+        if not type(dx0) is np.array:
+            dx0 = np.asarray(dx0)
+        if not type(dxf) is np.array:
+            dxf = np.asarray(dxf)
+        if not type(ddx0) is np.array:
+            ddx0 = np.asarray(ddx0)
+        if not type(ddxf) is np.array:
+            ddxf = np.asarray(ddxf)
+        if x0.size != xf.size or dx0.size != dxf.size or ddx0.size != ddxf.size:
             raise Exception('All arrays for initial and final P,V & A must be of same length')
 
-        self._dimensions = p0.size
+        self._dimensions = x0.size
         dims = self._dimensions
         print 'Number of Dimensions = {}'.format(dims)
 
@@ -94,7 +94,7 @@ class Interpolation(object):
         self._tf = tf
 
         for i in range(0, dims):
-            self._boundary_conditions[i, :] = np.mat([p0[i], v0[i], a0[i], pf[i], vf[i], af[i]])
+            self._boundary_conditions[i, :] = np.mat([x0[i], dx0[i], ddx0[i], xf[i], dxf[i], ddxf[i]])
             self._T_mat[:, :, i] = self._compute_time_mat(t0, tf)
             self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
                                                  np.transpose(self._boundary_conditions[i, :]))
