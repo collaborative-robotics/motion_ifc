@@ -10,36 +10,53 @@ class StateCommIfc(CommunicationIfc):
         self.state_update_method = robot_state_ifc.get_method_by_name(self.get_crtk_name())
 
     def message_cb(self, data):
-        self.cmd = data
+        self._data = data
         self.last_received_time = rospy.Time.now().to_sec()
         if self.enable_wd:
             self.watch_dog.acknowledge_wd()
         self.state_update_method(data)
 
+# The methods in these classes are used to both set the data and get the data. If the input argument is not 'None', the
+# data is set, if the input argument is None(default) then the method returns the associated stored data. Remember that
+# these methods are assigned to ros callbacks and hence they are automatically called there with the corresponding data
+# passed to them as arguments
+
 
 class MeasuredState(object):
     def __init__(self):
-        self.cp = None
-        self.cv = None
-        self.cf = None
-        self.js = None
+        self._cp = None
+        self._cv = None
+        self._cf = None
+        self._js = None
         self._methods_dict = dict()
         self._methods_dict['measured_cp'] = self.measured_cp
         self._methods_dict['measured_cv'] = self.measured_cv
         self._methods_dict['measured_cf'] = self.measured_cf
         self._methods_dict['measured_js'] = self.measured_js
 
-    def measured_cp(self, data):
-        self.cp = data
+    def measured_cp(self, data=None):
+        if data is not None:
+            self._cp = data
+        else:
+            return self._cp
 
-    def measured_cv(self, data):
-        self.cv = data
+    def measured_cv(self, data=None):
+        if data is not None:
+            self._cv = data
+        else:
+            return self._cv
 
-    def measured_cf(self, data):
-        self.cf = data
+    def measured_cf(self, data=None):
+        if data is not None:
+            self._cf = data
+        else:
+            return self._cf
 
-    def measured_js(self, data):
-        self.js = data
+    def measured_js(self, data=None):
+        if data is not None:
+            self._js = data
+        else:
+            return self._js
 
     def get_methods_dict(self):
         return self._methods_dict
@@ -47,23 +64,32 @@ class MeasuredState(object):
 
 class GoalState(object):
     def __init__(self):
-        self.cp = None
-        self.cv = None
-        self.js = None
+        self._cp = None
+        self._cv = None
+        self._js = None
         self._methods_dict = dict()
         self._methods_dict['goal_cp'] = self.goal_cp
         self._methods_dict['goal_cv'] = self.goal_cv
         self._methods_dict['goal_js'] = self.goal_js
 
-    def goal_cp(self, data):
+    def goal_cp(self, data=None):
         print 'IMAPOTATO3'
-        self.cp = data
+        if data is not None:
+            self._cp = data
+        else:
+            return self._cp
 
-    def goal_cv(self, data):
-        self.cv = data
+    def goal_cv(self, data=None):
+        if data is not None:
+            self._cv = data
+        else:
+            return self._cv
 
-    def goal_js(self, data):
-        self.js = data
+    def goal_js(self, data=None):
+        if data is not None:
+            self._js = data
+        else:
+            return self._js
 
     def get_methods_dict(self):
         return self._methods_dict
@@ -71,28 +97,40 @@ class GoalState(object):
 
 class SetPointState(object):
     def __init__(self):
-        self.cp = None
-        self.cv = None
-        self.cf = None
-        self.js = None
+        self._cp = None
+        self._cv = None
+        self._cf = None
+        self._js = None
         self._methods_dict = dict()
-        self._methods_dict['setpoint_js'] = self.setpoint_js
         self._methods_dict['setpoint_cp'] = self.setpoint_cp
         self._methods_dict['setpoint_cv'] = self.setpoint_cv
         self._methods_dict['setpoint_cf'] = self.setpoint_cf
+        self._methods_dict['setpoint_js'] = self.setpoint_js
 
-    def setpoint_cp(self, data):
+    def setpoint_cp(self, data=None):
         print 'IMAPOTATO2'
-        self.cp = data
+        if data is not None:
+            self._cp = data
+        else:
+            return self._cp
 
-    def setpoint_cv(self, data):
-        self.cv = data
+    def setpoint_cv(self, data=None):
+        if data is not None:
+            self._cv = data
+        else:
+            return self._cv
 
-    def setpoint_cf(self, data):
-        self.cf = data
+    def setpoint_cf(self, data=None):
+        if data is not None:
+            self._cf = data
+        else:
+            return self._cf
 
-    def setpoint_js(self, data):
-        self.js = data
+    def setpoint_js(self, data=None):
+        if data is not None:
+            self._js = data
+        else:
+            return self._js
 
     def get_methods_dict(self):
         return self._methods_dict
