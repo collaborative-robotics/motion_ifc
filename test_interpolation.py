@@ -21,7 +21,7 @@ tf = 10.0
 interp.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
 # get the value of p, v or a at any time instance
 t = 0.5
-p = interp.pva_interpolated(t)
+p = interp.get_interpolated_x_dx_ddx(t)
 print p
 
 # We can plot the entire trajectory by using the method below. The argument is the desired number of data points,
@@ -47,9 +47,9 @@ interp.plot_trajectory(100)
 # We can also specify a list of t and get a list of p, v and a rather than the interpolated value at a single t
 t = [0.1, 0.5, 0.9, 5.6, 5.9, 9.9]
 
-p = interp.p_interpolated(t)
-v = interp.v_interpolated(t)
-a = interp.a_interpolated(t)
+p = interp.get_interpolated_x(t)
+v = interp.get_interpolated_dx(t)
+a = interp.get_interpolated_ddx(t)
 
 plt.plot(t, p, '.')
 plt.legend(['pos'], loc='best')
@@ -58,7 +58,7 @@ plt.show()
 # Lastly, we can use linspace to get an array of times for getting the trajectory
 
 t = np.linspace(5.0,9.0, 30)
-p = interp.p_interpolated(t)
+p = interp.get_interpolated_x(t)
 
 # Here is the plotted result
 plt.plot(t, p, '.')

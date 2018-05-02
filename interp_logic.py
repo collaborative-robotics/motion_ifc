@@ -25,10 +25,10 @@ class Interpolation(object):
                         [0,  0,     2,      6*tf, 12*(tf**2), 20*(tf**3)]])
         return T_mat
 
-    def pva_interpolated(self, t):
-        return self.p_interpolated(t), self.v_interpolated(t), self.a_interpolated(t)
+    def get_interpolated_x_dx_ddx(self, t):
+        return self.get_interpolated_x(t), self.get_interpolated_dx(t), self.get_interpolated_ddx(t)
 
-    def p_interpolated(self, t):
+    def get_interpolated_x(self, t):
             if not type(t) is np.array:
                 t = np.array(t)
             if t.size == 1:
@@ -40,7 +40,7 @@ class Interpolation(object):
                 pos[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
             return pos
 
-    def v_interpolated(self, t):
+    def get_interpolated_dx(self, t):
             if not type(t) is np.array:
                 t = np.array(t)
             t = np.array(t)
@@ -53,7 +53,7 @@ class Interpolation(object):
                 vel[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
             return vel
 
-    def a_interpolated(self, t):
+    def get_interpolated_ddx(self, t):
             if not type(t) is np.array:
                 t = np.array(t)
             t = np.array(t)
@@ -105,7 +105,7 @@ class Interpolation(object):
         n = n_steps
         self._t_array = np.linspace(self._t0, self._tf, n)
 
-        p, v, a = self.pva_interpolated(self._t_array)
+        p, v, a = self.get_interpolated_x_dx_ddx(self._t_array)
 
         plt.plot(self._t_array, p, 'o',
                  self._t_array, v, '-',
