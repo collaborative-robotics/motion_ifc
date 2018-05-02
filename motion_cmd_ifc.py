@@ -14,7 +14,7 @@ class CmdCommIfc(CommunicationIfc):
         super(CmdCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
         self.control_mode = interpret_mode_from_topic(topic_name)
         if self.control_mode[0] is ControlMode.Mode.interpolate:
-            self.wd_time_out = 0.1
+            self.wd_time_out = 2.0
         elif self.control_mode[0] is ControlMode.Mode.move:
             self.wd_time_out = 10.0
         elif self.control_mode[0] is ControlMode.Mode.servo:
@@ -44,7 +44,7 @@ class CmdCommIfc(CommunicationIfc):
 
 class MotionCmdIfc(object):
     def __init__(self):
-        self.controllers_ifc = Controllers()
+        self.controllers_ifc = Controllers(rospy.Time.now().to_sec())
         self.robot_state_ifc = RobotStateIfc()
         self.feedback_ifc = self.robot_state_ifc.feedback
         prefix = '/motion_ifc/'

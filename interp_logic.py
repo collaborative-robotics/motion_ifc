@@ -31,9 +31,10 @@ class Interpolation(object):
     def get_interpolated_x(self, t):
             if not type(t) is np.array:
                 t = np.array(t)
+            # t = np.array(t)
             if t.size == 1:
-                if t < self._t0 or t > self._tf:
-                    raise Exception('Time should be between t0 and tf')
+                if not self._t0 <= t <= self._tf:
+                    raise Exception('Time {} should be between {} and {}'.format(t, self._t0, self._tf))
             pos = np.zeros([t.size, self._dimensions])
             for i in range(0, self._dimensions):
                 c = self._coefficients[:, i]
@@ -43,7 +44,7 @@ class Interpolation(object):
     def get_interpolated_dx(self, t):
             if not type(t) is np.array:
                 t = np.array(t)
-            t = np.array(t)
+            # t = np.array(t)
             if t.size == 1:
                 if t < self._t0 or t > self._tf:
                     raise Exception('Time should be between {} and {}'.format(self._t0, self._tf))
@@ -56,7 +57,7 @@ class Interpolation(object):
     def get_interpolated_ddx(self, t):
             if not type(t) is np.array:
                 t = np.array(t)
-            t = np.array(t)
+            # t = np.array(t)
             if t.size == 1:
                 if t < self._t0 or t > self._tf:
                     raise Exception('Time should be between t0 and tf')
@@ -65,6 +66,12 @@ class Interpolation(object):
                 c = self._coefficients[:, i]
                 acc[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
             return acc
+
+    def get_t0(self):
+        return self._t0
+
+    def get_tf(self):
+        return self._tf
 
     def compute_interpolation_params(self, x0, xf, dx0, dxf, ddx0, ddxf, t0, tf):
         if not type(x0) is np.array:
@@ -99,15 +106,19 @@ class Interpolation(object):
             self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
                                                  np.transpose(self._boundary_conditions[i, :]))
 
-    def plot_trajectory(self, n_steps=50):
+    def plot_trajectory(self, n_steps=50, t0=None, tf=None):
         if n_steps < 5:
             raise Exception('n_steps is very low, provide a value greater than 5')
         n = n_steps
-        self._t_array = np.linspace(self._t0, self._tf, n)
+        if t0 is None:
+            t0 = self._t0
+        if tf is None:
+            tf = self._tf
+        self._t_array = np.linspace(t0, tf, n)
 
         p, v, a = self.get_interpolated_x_dx_ddx(self._t_array)
 
-        plt.plot(self._t_array, p, 'o',
+        plt.plot(self._t_array, p, '-o',
                  self._t_array, v, '-',
                  self._t_array, a, '--')
         p_legend_str = [''] * self._dimensions

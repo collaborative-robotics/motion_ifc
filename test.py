@@ -1,4 +1,4 @@
-from motion_ifc import MotionIfc
+from main import MotionIfc
 
 
 obj = MotionIfc()

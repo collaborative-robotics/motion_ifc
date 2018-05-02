@@ -24,6 +24,9 @@ class CommunicationIfc(object):
     def is_active(self):
         return not self.watch_dog.is_wd_expired()
 
+    def get_data(self):
+        return self._data
+
     def get_last_received_time(self):
         return self.last_received_time
 
