@@ -1,3 +1,5 @@
+from interp_logic import Interpolation
+
 # Each sub-controller must provide a dict() of all the methods with the method
 # name as the key and the method handle as the value so that this Controller
 # class and append all the dict() items in a unified way
@@ -15,29 +17,32 @@ class Interpolate(object):
         self._methods_dict['interpolate_jv'] = self.interpolate_jv
         self._methods_dict['interpolate_jf'] = self.interpolate_jf
 
-    def interpolate_cp(self):
+        self._interpolater = Interpolation()
+
+
+    def interpolate_cp(self, cmd, state):
         print 'IMAPOTATO'
         pass
 
-    def interpolate_cr(self):
+    def interpolate_cr(self, cmd, state):
         pass
 
-    def interpolate_cv(self):
+    def interpolate_cv(self, cmd, state):
         pass
 
-    def interpolate_cf(self):
+    def interpolate_cf(self, cmd, state):
         pass
 
-    def interpolate_jp(self):
+    def interpolate_jp(self, cmd, state):
         pass
 
-    def interpolate_jr(self):
+    def interpolate_jr(self, cmd, state):
         pass
 
-    def interpolate_jv(self):
+    def interpolate_jv(self, cmd, state):
         pass
 
-    def interpolate_jf(self):
+    def interpolate_jf(self, cmd, state):
         pass
 
     def get_methods_dict(self):
