@@ -14,14 +14,14 @@ class CmdCommIfc(CommunicationIfc):
         super(CmdCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
         self.control_mode = interpret_mode_from_topic(topic_name)
         if self.control_mode[0] is ControlMode.Mode.interpolate:
-            self.wd_time_out = 2.0
+            time_out = 2.0
         elif self.control_mode[0] is ControlMode.Mode.move:
-            self.wd_time_out = 10.0
+            time_out = 10.0
         elif self.control_mode[0] is ControlMode.Mode.servo:
-            self.wd_time_out = 0.01
+            time_out = 0.01
         else:
             raise Exception('Failed to find the right mode from topic')
-        self.control_method = controller_ifc.get_method_by_name(self.get_crtk_name())
+        self.motion_controller_write = controller_ifc.get_method_by_name(self.get_crtk_name())
         # New we are connecting the state methods using the naming from the crtk_name of cmd
         # There is no crtk_name for relative 'r' feedback as of yet, so if the command is relative, always bind the
         # position 'p' state method
@@ -34,9 +34,8 @@ class CmdCommIfc(CommunicationIfc):
         if op_space_char is 'j':
             controller_char = 's'
         state_method_name = 'measured_' + op_space_char + controller_char
-        self.state_method = feedback_ifc.get_method_by_name(state_method_name)
-        self.watch_dog = WatchDog(self.wd_time_out)
-        self.sub = rospy.Subscriber(topic_name, data_type, self.message_cb, queue_size=queue_size)
+        self.robot_state_read = feedback_ifc.get_method_by_name(state_method_name)
+        self._watch_dog.set_timeout(time_out)
 
     def get_control_mode(self):
         return self.control_mode
@@ -92,4 +91,4 @@ class MotionCmdIfc(object):
 
     def clean(self):
         for ifc in self.comm_ifc_list:
-            ifc.sub.unregister()
+            ifc.disconnect()

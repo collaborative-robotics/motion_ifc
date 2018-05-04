@@ -8,12 +8,13 @@ class StateCommIfc(CommunicationIfc):
     def __init__(self, topic_name, data_type, robot_state_ifc, enable_wd=False, queue_size=10):
         super(StateCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
         self.state_update_method = robot_state_ifc.get_method_by_name(self.get_crtk_name())
+        self._last_received_time = rospy.Duration.from_sec(0.0)
 
     def message_cb(self, data):
         self._data = data
-        self.last_received_time = rospy.Time.now().to_sec()
-        if self.enable_wd:
-            self.watch_dog.acknowledge_wd()
+        self._last_received_time = rospy.Time.now().to_sec()
+        if self._enable_wd:
+            self._watch_dog.acknowledge_wd()
         self.state_update_method(data)
 
 # The methods in these classes are used to both set the data and get the data. If the input argument is not 'None', the
@@ -168,7 +169,7 @@ class RobotStateIfc(object):
 
     def clean(self):
         for ifc in self.comm_ifc_list:
-            ifc.sub.unregister()
+            ifc.disconnect()
 
 
 
