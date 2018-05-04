@@ -2,6 +2,7 @@ from interp_logic import Interpolation
 import rospy
 from threading import Thread
 from geometry_msgs.msg import TransformStamped
+from crkt_common import *
 
 
 # Each sub-controller must provide a dict() of all the methods with the method
@@ -12,7 +13,7 @@ from geometry_msgs.msg import TransformStamped
 class ControllerData:
     def __init__(self, cmd_robot_method):
         self.interpolater = Interpolation()
-        self._active = 0
+        self._active = False
         self.command_robot = cmd_robot_method
 
     def set_active(self):
@@ -26,11 +27,7 @@ class ControllerData:
 
     def xt(self, t):
         xt = self.interpolater.get_interpolated_x(t)
-        data = TransformStamped()
-        data.transform.translation.x = xt[0, 0]
-        data.transform.translation.y = xt[0, 1]
-        data.transform.translation.z = xt[0, 2]
-        return data
+        return np_array_to_transform_stamped(xt)
 
 
 class Interpolate(object):
