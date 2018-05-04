@@ -4,9 +4,9 @@ from geometry_msgs.msg import TransformStamped, TwistStamped, WrenchStamped
 import rospy
 
 
-class StateCommIfc(CommunicationIfc):
+class RobotStateCommIfc(CommunicationIfc):
     def __init__(self, topic_name, data_type, robot_state_ifc, enable_wd=False, queue_size=10):
-        super(StateCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
+        super(RobotStateCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
         self.state_update_method = robot_state_ifc.get_method_by_name(self.get_crtk_name())
         self._last_received_time = rospy.Duration.from_sec(0.0)
 
@@ -150,21 +150,23 @@ class Feedback(object):
 
 
 class RobotStateIfc(object):
-    def __init__(self):
+    def __init__(self, namespace, arm_name):
         self.feedback = Feedback()
-        prefix = '/motion_ifc/'
+        namespace = '/dvrk'
+        arm_name = '/MTMR/'
+        prefix = namespace + arm_name
         self.comm_ifc_list = [
-            StateCommIfc(prefix + 'measured_cp', TransformStamped, self.feedback, True, 10),
-            StateCommIfc(prefix + 'measured_cv', TwistStamped,     self.feedback, True, 10),
-            StateCommIfc(prefix + 'measured_cf', WrenchStamped,    self.feedback, True, 10),
-            StateCommIfc(prefix + 'measured_js', JointState,       self.feedback, True, 10),
-            StateCommIfc(prefix + 'goal_cp',     TransformStamped, self.feedback, True, 10),
-            StateCommIfc(prefix + 'goal_cv',     WrenchStamped,    self.feedback, True, 10),
-            StateCommIfc(prefix + 'goal_js',     JointState,       self.feedback, True, 10),
-            StateCommIfc(prefix + 'setpoint_cp', TransformStamped, self.feedback, True, 10),
-            StateCommIfc(prefix + 'setpoint_cv', TwistStamped,     self.feedback, True, 10),
-            StateCommIfc(prefix + 'setpoint_cf', WrenchStamped,    self.feedback, True, 10),
-            StateCommIfc(prefix + 'setpoint_js', JointState,       self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'measured_cp', TransformStamped, self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'measured_cv', TwistStamped,     self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'measured_cf', WrenchStamped,    self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'measured_js', JointState,       self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'goal_cp',     TransformStamped, self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'goal_cv',     WrenchStamped,    self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'goal_js',     JointState,       self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_cp', TransformStamped, self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_cv', TwistStamped,     self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_cf', WrenchStamped,    self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_js', JointState,       self.feedback, True, 10),
         ]
 
     def clean(self):

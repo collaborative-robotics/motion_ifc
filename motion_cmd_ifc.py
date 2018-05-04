@@ -6,12 +6,13 @@ from sensor_msgs.msg import JointState
 from crkt_common import *
 from controllers import Controllers
 from robot_state_ifc import RobotStateIfc
+from robot_cmd_ifc import RobotCmdIfc
 from communication_ifc import CommunicationIfc
 
 
-class CmdCommIfc(CommunicationIfc):
+class MotionCmdCommIfc(CommunicationIfc):
     def __init__(self, topic_name, data_type, controller_ifc, feedback_ifc, enable_wd=False, queue_size=10):
-        super(CmdCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
+        super(MotionCmdCommIfc, self).__init__(topic_name, data_type, enable_wd, queue_size)
         self.control_mode = interpret_mode_from_topic(topic_name)
         if self.control_mode[0] is ControlMode.Mode.interpolate:
             time_out = 2.0
@@ -43,31 +44,32 @@ class CmdCommIfc(CommunicationIfc):
 
 class MotionCmdIfc(object):
     def __init__(self):
-        self.controllers_ifc = Controllers(rospy.Time.now().to_sec())
-        self.robot_state_ifc = RobotStateIfc()
-        self.feedback_ifc = self.robot_state_ifc.feedback
+        robot_cmd_ifc = RobotCmdIfc(namespace='dvrk', arm_name='MTMR')
+        self.robot_state_ifc = RobotStateIfc(namespace='dvrk', arm_name='MTMR')
+        self.ctrl = Controllers(robot_cmd_ifc, rospy.Time.now().to_sec())
+        self.fb = self.robot_state_ifc.feedback
         prefix = '/motion_ifc/'
         self.comm_ifc_list = [
-            CmdCommIfc(prefix + 'interpolate_cp', TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'interpolate_cr', TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'interpolate_cv', TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'interpolate_cf', TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'interpolate_jp', JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'interpolate_jr', JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'interpolate_jv', JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'interpolate_jf', JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_cp',       TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_cr',       TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_cv',       TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_cf',       TransformStamped, self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_jp',       JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_jr',       JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_jv',       JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'servo_jf',       JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'move_cp',        JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'move_cr',        JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'move_jp',        JointState,       self.controllers_ifc, self.feedback_ifc, True, 10),
-            CmdCommIfc(prefix + 'move_jr',        JointState,       self.controllers_ifc, self.feedback_ifc, True, 10)
+            MotionCmdCommIfc(prefix + 'interpolate_cp', TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'interpolate_cr', TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'interpolate_cv', TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'interpolate_cf', TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'interpolate_jp', JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'interpolate_jr', JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'interpolate_jv', JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'interpolate_jf', JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_cp',       TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_cr',       TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_cv',       TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_cf',       TransformStamped, self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_jp',       JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_jr',       JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_jv',       JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'servo_jf',       JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'move_cp',        JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'move_cr',        JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'move_jp',        JointState,       self.ctrl, self.fb, True, 10),
+            MotionCmdCommIfc(prefix + 'move_jr',        JointState,       self.ctrl, self.fb, True, 10)
         ]
 
     # Poll through all the interfaces and check which ones are active, return a list
@@ -92,3 +94,4 @@ class MotionCmdIfc(object):
     def clean(self):
         for ifc in self.comm_ifc_list:
             ifc.disconnect()
+        self.robot_state_ifc.clean()

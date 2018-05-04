@@ -35,8 +35,10 @@ class CommunicationIfc(object):
         if not self._is_publisher:
             print 'WARN: This is an output interface, you cannot write data to it'
         else:
-            if not isinstance(data, self._data):
+            if not isinstance(data, type(self._data)):
                 print 'WARN: Mismatched data-types, ignoring'
+                print 'Given type {}'.format(type(data))
+                print 'Expected type {}'.format(type(self._data))
             else:
                 self._data = data
                 self._pub.publish(data)

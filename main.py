@@ -8,14 +8,12 @@ class MotionIfc(object):
         self._n_handle = rospy.init_node("motion_interface")
         self._rate = rospy.Rate(1)
         self._counter = 0
-        self.robot_cmd_ifc = MotionCmdIfc()
-        self.robot_state_ifc = RobotStateIfc()
+        self.motion_cmd_ifc = MotionCmdIfc()
 
     def run(self):
         while not rospy.is_shutdown():
-            active_ifcs_list = self.robot_cmd_ifc.get_active_ifcs()
-            last_active_ifc = self.robot_cmd_ifc.get_last_activated_ifc()
-            #print 'i: {}, Number of active interfaces: {}'.format(self._counter, active_ifcs_list.__len__())
+            active_ifcs_list = self.motion_cmd_ifc.get_active_ifcs()
+            last_active_ifc = self.motion_cmd_ifc.get_last_activated_ifc()
             if not last_active_ifc is None:
                 print 'Lastest active ifc: {}'.format(last_active_ifc.get_crtk_name())
             if active_ifcs_list.__len__() > 0:
@@ -24,5 +22,4 @@ class MotionIfc(object):
             self._counter = self._counter + 1
             self._rate.sleep()
 
-        self.robot_cmd_ifc.clean()
-        self.robot_state_ifc.clean()
+        self.motion_cmd_ifc.clean()

@@ -1,15 +1,19 @@
 from interp_logic import Interpolation
 import rospy
 from threading import Thread
+from geometry_msgs.msg import TransformStamped
+
+
 # Each sub-controller must provide a dict() of all the methods with the method
 # name as the key and the method handle as the value so that this Controller
 # class and append all the dict() items in a unified way
 
 
 class ControllerData:
-    def __init__(self):
+    def __init__(self, cmd_robot_method):
         self.interpolater = Interpolation()
         self._active = 0
+        self.command_robot = cmd_robot_method
 
     def set_active(self):
         self._active = True
@@ -20,13 +24,17 @@ class ControllerData:
     def set_idle(self):
         self._active = False
 
-    def command_robot(self, data):
-        print 'Command'
-        print data
+    def xt(self, t):
+        xt = self.interpolater.get_interpolated_x(t)
+        data = TransformStamped()
+        data.transform.translation.x = xt[0, 0]
+        data.transform.translation.y = xt[0, 1]
+        data.transform.translation.z = xt[0, 2]
+        return data
 
 
 class Interpolate(object):
-    def __init__(self, t_start):
+    def __init__(self, robot_cmd_ifc, t_start):
         self._t_start = t_start
         self._delta_t = 0.5
         self._methods_dict = dict()
@@ -39,14 +47,14 @@ class Interpolate(object):
         self._methods_dict['interpolate_jv'] = self.interpolate_jv
         self._methods_dict['interpolate_jf'] = self.interpolate_jf
 
-        self._cp_controller_data = ControllerData()
-        self._cr_controller_data = ControllerData()
-        self._cv_controller_data = ControllerData()
-        self._cf_controller_data = ControllerData()
-        self._jp_controller_data = ControllerData()
-        self._jr_controller_data = ControllerData()
-        self._jv_controller_data = ControllerData()
-        self._jf_controller_data = ControllerData()
+        self._cp_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cp'))
+        self._cr_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cp'))
+        self._cv_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cv'))
+        self._cf_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cf'))
+        self._jp_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jp'))
+        self._jr_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jp'))
+        self._jv_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jv'))
+        self._jf_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jf'))
 
         self._controller_data_list = [self._cp_controller_data,
                                       self._cr_controller_data,
@@ -106,7 +114,7 @@ class Interpolate(object):
                 if controller_data.is_active():
                     t = rospy.Time.now().to_sec() - self._t_start
                     while t < controller_data.interpolater.get_tf():
-                        data = controller_data.interpolater.get_interpolated_x(t)
+                        data = controller_data.xt(t)
                         controller_data.command_robot(data)
                         t = rospy.Time.now().to_sec() - self._t_start
                     controller_data.set_idle()
@@ -116,7 +124,7 @@ class Interpolate(object):
 
 
 class Servo(object):
-    def __init__(self, t_start):
+    def __init__(self, robot_cmd_ifc, t_start):
         self._methods_dict = dict()
         self._methods_dict['servo_cp'] = self.servo_cp
         self._methods_dict['servo_cr'] = self.servo_cr
@@ -156,7 +164,7 @@ class Servo(object):
 
 
 class Move(object):
-    def __init__(self, t_start):
+    def __init__(self, robot_cmd_ifc, t_start):
         self._methods_dict = dict()
         self._methods_dict['move_cp'] = self.move_cp
         self._methods_dict['move_cr'] = self.move_cr
@@ -180,8 +188,10 @@ class Move(object):
 
 
 class Controllers(object):
-    def __init__(self, t_start = 0.0):
-        self.controllers_list = [Interpolate(t_start), Servo(t_start), Move(t_start)]
+    def __init__(self, robot_cmd_ifc, t_start=0.0):
+        self.controllers_list = [Interpolate(robot_cmd_ifc, t_start),
+                                 Servo(robot_cmd_ifc, t_start),
+                                 Move(robot_cmd_ifc, t_start)]
         self._methods_dict = dict()
         for controller in self.controllers_list:
             self._methods_dict.update(controller.get_methods_dict())
