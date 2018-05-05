@@ -1,8 +1,9 @@
 from interp_logic import Interpolation
 import rospy
 from threading import Thread
-from geometry_msgs.msg import TransformStamped
 from crkt_common import *
+from robot_cmd_ifc import RobotCmdIfc
+from robot_state_ifc import RobotStateIfc
 
 
 # Each sub-controller must provide a dict() of all the methods with the method
@@ -11,10 +12,11 @@ from crkt_common import *
 
 
 class ControllerData:
-    def __init__(self, cmd_robot_method):
+    def __init__(self, cmd_robot_method, state_robot_method):
         self.interpolater = Interpolation()
         self._active = False
-        self.command_robot = cmd_robot_method
+        self.set_robot_command = cmd_robot_method
+        self.get_robot_state = state_robot_method
 
     def set_active(self):
         self._active = True
@@ -31,9 +33,9 @@ class ControllerData:
 
 
 class Interpolate(object):
-    def __init__(self, robot_cmd_ifc, t_start):
+    def __init__(self, r_cmd, r_state, t_start):
         self._t_start = t_start
-        self._delta_t = 0.5
+        self._delta_t = 5.0
         self._methods_dict = dict()
         self._methods_dict['interpolate_cp'] = self.interpolate_cp
         self._methods_dict['interpolate_cr'] = self.interpolate_cr
@@ -44,29 +46,30 @@ class Interpolate(object):
         self._methods_dict['interpolate_jv'] = self.interpolate_jv
         self._methods_dict['interpolate_jf'] = self.interpolate_jf
 
-        self._cp_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cp'))
-        self._cr_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cp'))
-        self._cv_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cv'))
-        self._cf_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_cf'))
-        self._jp_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jp'))
-        self._jr_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jp'))
-        self._jv_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jv'))
-        self._jf_controller_data = ControllerData(robot_cmd_ifc.get_method_by_name('servo_jf'))
+        self._cp_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cp'), r_state.get_method_by_name('measured_cp'))
+        self._cr_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cp'), r_state.get_method_by_name('measured_cp'))
+        self._cv_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cv'), r_state.get_method_by_name('measured_cv'))
+        self._cf_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cf'), r_state.get_method_by_name('measured_cf'))
+        self._jp_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jp'), r_state.get_method_by_name('measured_js'))
+        self._jr_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jp'), r_state.get_method_by_name('measured_js'))
+        self._jv_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jv'), r_state.get_method_by_name('measured_js'))
+        self._jf_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jf'), r_state.get_method_by_name('measured_js'))
 
-        self._controller_data_list = [self._cp_controller_data,
-                                      self._cr_controller_data,
-                                      self._cv_controller_data,
-                                      self._cf_controller_data,
-                                      self._jp_controller_data,
-                                      self._jr_controller_data,
-                                      self._jv_controller_data,
-                                      self._jf_controller_data]
+        self._controller_data_list = [self._cp_ctrl,
+                                      self._cr_ctrl,
+                                      self._cv_ctrl,
+                                      self._cf_ctrl,
+                                      self._jp_ctrl,
+                                      self._jr_ctrl,
+                                      self._jv_ctrl,
+                                      self._jf_ctrl]
 
         self._thread = Thread(target=self._execute)
         self._thread.start()
 
-    def interpolate_cp(self, cmd, state):
-        if state is not None and cmd is not None:
+    def interpolate_cp(self, cmd):
+        if cmd is not None:
+            state = self._cp_ctrl.get_robot_state()
             p0 = [state.transform.translation.x,
                   state.transform.translation.y,
                   state.transform.translation.z]
@@ -80,8 +83,8 @@ class Interpolate(object):
 
             t0 = rospy.Time.now().to_sec() - self._t_start
             tf = t0 + self._delta_t
-            self._cp_controller_data.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
-            self._cp_controller_data.set_active()
+            self._cp_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
+            self._cp_ctrl.set_active()
         pass
 
     def interpolate_cr(self, cmd, state):
@@ -112,7 +115,7 @@ class Interpolate(object):
                     t = rospy.Time.now().to_sec() - self._t_start
                     while t < controller_data.interpolater.get_tf():
                         data = controller_data.xt(t)
-                        controller_data.command_robot(data)
+                        controller_data.set_robot_command(data)
                         t = rospy.Time.now().to_sec() - self._t_start
                     controller_data.set_idle()
 
@@ -185,10 +188,12 @@ class Move(object):
 
 
 class Controllers(object):
-    def __init__(self, robot_cmd_ifc, t_start=0.0):
-        self.controllers_list = [Interpolate(robot_cmd_ifc, t_start),
-                                 Servo(robot_cmd_ifc, t_start),
-                                 Move(robot_cmd_ifc, t_start)]
+    def __init__(self, namespace, arm_name, t_start=0.0):
+        self._robot_cmd_ifc = RobotCmdIfc(namespace, arm_name)
+        self._robot_state_ifc = RobotStateIfc(namespace, arm_name)
+        self.controllers_list = [Interpolate(self._robot_cmd_ifc, self._robot_state_ifc, t_start),
+                                 Servo(self._robot_cmd_ifc, t_start),
+                                 Move(self._robot_cmd_ifc, t_start)]
         self._methods_dict = dict()
         for controller in self.controllers_list:
             self._methods_dict.update(controller.get_methods_dict())
@@ -196,4 +201,9 @@ class Controllers(object):
 
     def get_method_by_name(self, method_name):
         return self._methods_dict[method_name]
+
+    def disconnect(self):
+        self._robot_state_ifc.clean()
+        self._robot_cmd_ifc.clean()
+
 

@@ -1,5 +1,4 @@
 from motion_cmd_ifc import MotionCmdIfc
-from robot_state_ifc import RobotStateIfc
 import rospy
 
 
@@ -18,7 +17,7 @@ class MotionIfc(object):
                 print 'Lastest active ifc: {}'.format(last_active_ifc.get_crtk_name())
             if active_ifcs_list.__len__() > 0:
                 ifc = active_ifcs_list[0]
-                ifc.motion_controller_write(ifc.get_data(), ifc.robot_state_read())
+                ifc.motion_controller_write(ifc.get_data())
             self._counter = self._counter + 1
             self._rate.sleep()
 

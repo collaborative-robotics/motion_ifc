@@ -137,37 +137,31 @@ class SetPointState(object):
         return self._methods_dict
 
 
-class Feedback(object):
-    def __init__(self):
+class RobotStateIfc(object):
+    def __init__(self, namespace, arm_name):
         self.state_class_list = [MeasuredState(), GoalState(), SetPointState()]
         self._methods_dict = dict()
         for state_class in self.state_class_list:
             self._methods_dict.update(state_class.get_methods_dict())
-        pass
-
-    def get_method_by_name(self, method_name):
-        return self._methods_dict[method_name]
-
-
-class RobotStateIfc(object):
-    def __init__(self, namespace, arm_name):
-        self.feedback = Feedback()
         namespace = '/dvrk'
         arm_name = '/MTMR/'
         prefix = namespace + arm_name
         self.comm_ifc_list = [
-            RobotStateCommIfc(prefix + 'measured_cp', TransformStamped, self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'measured_cv', TwistStamped,     self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'measured_cf', WrenchStamped,    self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'measured_js', JointState,       self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'goal_cp',     TransformStamped, self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'goal_cv',     WrenchStamped,    self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'goal_js',     JointState,       self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'setpoint_cp', TransformStamped, self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'setpoint_cv', TwistStamped,     self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'setpoint_cf', WrenchStamped,    self.feedback, True, 10),
-            RobotStateCommIfc(prefix + 'setpoint_js', JointState,       self.feedback, True, 10),
+            RobotStateCommIfc(prefix + 'measured_cp', TransformStamped, self, True, 10),
+            RobotStateCommIfc(prefix + 'measured_cv', TwistStamped,     self, True, 10),
+            RobotStateCommIfc(prefix + 'measured_cf', WrenchStamped,    self, True, 10),
+            RobotStateCommIfc(prefix + 'measured_js', JointState,       self, True, 10),
+            RobotStateCommIfc(prefix + 'goal_cp',     TransformStamped, self, True, 10),
+            RobotStateCommIfc(prefix + 'goal_cv',     WrenchStamped,    self, True, 10),
+            RobotStateCommIfc(prefix + 'goal_js',     JointState,       self, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_cp', TransformStamped, self, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_cv', TwistStamped,     self, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_cf', WrenchStamped,    self, True, 10),
+            RobotStateCommIfc(prefix + 'setpoint_js', JointState,       self, True, 10),
         ]
+
+    def get_method_by_name(self, method_name):
+        return self._methods_dict[method_name]
 
     def clean(self):
         for ifc in self.comm_ifc_list:
