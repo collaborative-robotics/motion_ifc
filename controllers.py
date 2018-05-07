@@ -17,6 +17,9 @@ class ControllerData:
         self._active = False
         self.set_robot_command = cmd_robot_method
         self.get_robot_state = state_robot_method
+        self._dt = 1.0
+        self._dt_max = 5.0
+        self._last_call_time = 0.0
 
     def set_active(self):
         self._active = True
@@ -27,15 +30,25 @@ class ControllerData:
     def set_idle(self):
         self._active = False
 
+    def set_dt_max(self, dt_max):
+        if 1.0 < dt_max < 10.0:
+            self._dt_max = dt_max
+
     def xt(self, t):
         xt = self.interpolater.get_interpolated_x(t)
         return np_array_to_transform_stamped(xt)
+
+    def calculate_dt(self, cur_time):
+        dt = cur_time - self._last_call_time
+        self._last_call_time = cur_time
+        if 0 < dt <= self._dt_max:
+            self._dt = dt
+        return self._dt
 
 
 class Interpolate(object):
     def __init__(self, r_cmd, r_state, t_start):
         self._t_start = t_start
-        self._delta_t = 5.0
         self._methods_dict = dict()
         self._methods_dict['interpolate_cp'] = self.interpolate_cp
         self._methods_dict['interpolate_cr'] = self.interpolate_cr
@@ -77,8 +90,9 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            t0 = rospy.Time.now().to_sec() - self._t_start
-            tf = t0 + self._delta_t
+            cur_time = rospy.Time.now().to_sec()
+            t0 = cur_time - self._t_start
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cp_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
             self._cp_ctrl.set_active()
         pass
