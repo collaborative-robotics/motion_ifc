@@ -29,7 +29,11 @@ class CommunicationIfc(object):
         self._is_data_new = True
 
     def is_active(self):
-        return not self._watch_dog.is_expired()
+        if self._watch_dog.is_expired():
+            self._is_data_new = False
+            return False
+        else:
+            return True
 
     def get_data(self):
         if self._is_publisher:
