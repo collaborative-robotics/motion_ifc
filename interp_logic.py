@@ -91,7 +91,6 @@ class Interpolation(object):
 
         self._dimensions = x0.size
         dims = self._dimensions
-        print 'Number of Dimensions = {}'.format(dims)
 
         self._boundary_conditions = np.zeros([dims, 6])
         self._coefficients = np.zeros([6, dims])

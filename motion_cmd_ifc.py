@@ -16,8 +16,12 @@ class MotionCmdCommIfc(CommunicationIfc):
             time_out = 0.01
         else:
             raise Exception('Failed to find the right mode from topic')
-        self.motion_controller_write = controller_ifc.get_method_by_name(self.get_crtk_name())
+        self._motion_controller_write = controller_ifc.get_method_by_name(self.get_crtk_name())
         self._watch_dog.set_timeout(time_out)
+
+    def execute_controller(self):
+        if self.is_data_new():
+            self._motion_controller_write(self.get_data())
 
     def get_control_mode(self):
         return self.control_mode
