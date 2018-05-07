@@ -1,6 +1,9 @@
 import enum
 from geometry_msgs.msg import TransformStamped
+import geometry_msgs
 from sensor_msgs.msg import JointState
+import numpy as np
+from tf import transformations
 
 
 # Define the control Mode as a class for uniformity in the rest of the code
@@ -85,13 +88,11 @@ def np_array_to_transform_stamped(array):
     if array.size >= 3:
         data = TransformStamped()
         data.transform.translation.x = array[0, 0]
-        data.transform.translation.x = array[0, 1]
-        data.transform.translation.x = array[0, 2]
-        if array.size == 7:
-            data.transform.rotation.x = array[0, 3]
-            data.transform.rotation.y = array[0, 4]
-            data.transform.rotation.z = array[0, 5]
-            data.transform.rotation.w = array[0, 6]
+        data.transform.translation.y = array[0, 1]
+        data.transform.translation.z = array[0, 2]
+        if array.size == 6:
+            data.transform.rotation = geometry_msgs.msg.Quaternion(
+                *transformations.quaternion_from_euler(array[0, 3], array[0, 4], array[0, 5]))
         return data
 
 
@@ -114,6 +115,22 @@ def np_array_to_joint_state_effort(array):
     for i in range(0, array.size):
         data.effort.append(array[0, i])
     return data
+
+
+def transform_stamped_to_np_array(ts):
+    quat = [ts.transform.rotation.x,
+            ts.transform.rotation.y,
+            ts.transform.rotation.z,
+            ts.transform.rotation.w]
+
+    r, p, y = transformations.euler_from_quaternion(quat, axes='szyx')
+    array = np.array([ts.transform.translation.x,
+                      ts.transform.translation.y,
+                      ts.transform.translation.z,
+                      r,
+                      p,
+                      y])
+    return array
 
 
 

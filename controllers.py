@@ -68,18 +68,14 @@ class Interpolate(object):
         self._thread.start()
 
     def interpolate_cp(self, cmd):
-        if cmd is not None:
-            state = self._cp_ctrl.get_robot_state()
-            p0 = [state.transform.translation.x,
-                  state.transform.translation.y,
-                  state.transform.translation.z]
-            pf = [cmd.transform.translation.x,
-                  cmd.transform.translation.y,
-                  cmd.transform.translation.z]
-            v0 = [0, 0, 0]
-            vf = [0, 0, 0]
-            a0 = [0, 0, 0]
-            af = [0, 0, 0]
+        state = self._cp_ctrl.get_robot_state()
+        if cmd is not None and state is not None:
+            p0 = transform_stamped_to_np_array(state)
+            pf = transform_stamped_to_np_array(cmd)
+            v0 = [0, 0, 0, 0, 0, 0]
+            vf = [0, 0, 0, 0, 0, 0]
+            a0 = [0, 0, 0, 0, 0, 0]
+            af = [0, 0, 0, 0, 0, 0]
 
             t0 = rospy.Time.now().to_sec() - self._t_start
             tf = t0 + self._delta_t
