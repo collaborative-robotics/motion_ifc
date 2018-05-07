@@ -4,6 +4,7 @@ from threading import Thread
 from crkt_common import *
 from robot_cmd_ifc import RobotCmdIfc
 from robot_state_ifc import RobotStateIfc
+import tf_conversions
 
 
 # Each sub-controller must provide a dict() of all the methods with the method
@@ -97,25 +98,42 @@ class Interpolate(object):
             self._cp_ctrl.set_active()
         pass
 
-    def interpolate_cr(self, cmd, state):
+    def interpolate_cr(self, cmd):
+        state = self._cr_ctrl.get_robot_state()
+        if cmd is not None and state is not None:
+            # t_robot = transform_stamped_to_frame(state)
+            # t_relative = transform_stamped_to_frame(cmd)
+            cmd = transform_stamped_to_frame(state) * transform_stamped_to_frame(cmd)
+            p0 = transform_stamped_to_np_array(state)
+            pf = frame_to_np_array(cmd)
+            v0 = [0, 0, 0, 0, 0, 0]
+            vf = [0, 0, 0, 0, 0, 0]
+            a0 = [0, 0, 0, 0, 0, 0]
+            af = [0, 0, 0, 0, 0, 0]
+
+            cur_time = rospy.Time.now().to_sec()
+            t0 = cur_time - self._t_start
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
+            self._cr_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
+            self._cr_ctrl.set_active()
         pass
 
-    def interpolate_cv(self, cmd, state):
+    def interpolate_cv(self, cmd):
         pass
 
-    def interpolate_cf(self, cmd, state):
+    def interpolate_cf(self, cmd):
         pass
 
-    def interpolate_jp(self, cmd, state):
+    def interpolate_jp(self, cmd):
         pass
 
-    def interpolate_jr(self, cmd, state):
+    def interpolate_jr(self, cmd):
         pass
 
-    def interpolate_jv(self, cmd, state):
+    def interpolate_jv(self, cmd):
         pass
 
-    def interpolate_jf(self, cmd, state):
+    def interpolate_jf(self, cmd):
         pass
 
     def _execute(self):

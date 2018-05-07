@@ -4,6 +4,7 @@ import geometry_msgs
 from sensor_msgs.msg import JointState
 import numpy as np
 from tf import transformations
+from PyKDL import *
 
 
 # Define the control Mode as a class for uniformity in the rest of the code
@@ -118,12 +119,11 @@ def np_array_to_joint_state_effort(array):
 
 
 def transform_stamped_to_np_array(ts):
-    quat = [ts.transform.rotation.x,
-            ts.transform.rotation.y,
-            ts.transform.rotation.z,
-            ts.transform.rotation.w]
-
-    r, p, y = transformations.euler_from_quaternion(quat, axes='szyx')
+    rot = Rotation.Quaternion(ts.transform.rotation.x,
+                              ts.transform.rotation.y,
+                              ts.transform.rotation.z,
+                              ts.transform.rotation.w)
+    r, p, y = rot.GetRPY()
     array = np.array([ts.transform.translation.x,
                       ts.transform.translation.y,
                       ts.transform.translation.z,
@@ -133,4 +133,22 @@ def transform_stamped_to_np_array(ts):
     return array
 
 
+def transform_stamped_to_frame(ts):
+    return Frame(Rotation.Quaternion(ts.transform.rotation.x,
+                                     ts.transform.rotation.y,
+                                     ts.transform.rotation.z,
+                                     ts.transform.rotation.w),
+                 Vector(ts.transform.translation.x,
+                        ts.transform.translation.y,
+                        ts.transform.translation.z))
 
+
+def frame_to_np_array(frame):
+    r, p, y = frame.M.GetRPY()
+    array = np.array([frame.p[0],
+                      frame.p[1],
+                      frame.p[2],
+                      r,
+                      p,
+                      y])
+    return array
