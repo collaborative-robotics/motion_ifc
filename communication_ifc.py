@@ -56,15 +56,15 @@ class CommunicationIfc(object):
         self._crtk_name = interpret_crtk_name_from_topic(self._topic_name)
         return self._crtk_name
 
-    def get_mode_str(self):
+    def get_mode_as_str(self):
         crtk_name = self.get_crtk_name()
         return crtk_name.split('_')[0]
 
-    def get_opspace_char(self):
+    def get_opspace_as_str(self):
         crtk_name = self.get_crtk_name()
         return crtk_name.split('_')[1][0]
 
-    def get_controller_char(self):
+    def get_controller_as_str(self):
         crtk_name = self.get_crtk_name()
         return crtk_name.split('_')[1][1]
 
