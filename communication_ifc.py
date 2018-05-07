@@ -11,17 +11,22 @@ class CommunicationIfc(object):
         self._crtk_name = ''
         self._last_received_time = 0.0
         self._is_publisher = is_publisher
+        self._is_data_new = False
         self._watch_dog = WatchDog()
         if is_publisher:
             self._pub = rospy.Publisher(topic_name, data_type, queue_size=queue_size)
         else:
             self._sub = rospy.Subscriber(topic_name, data_type, self.message_cb, queue_size=queue_size)
 
+    def is_data_new(self):
+        return self._is_data_new
+
     def message_cb(self, data):
         self._data = data
         self._last_received_time = rospy.Time.now().to_sec()
         if self._enable_wd:
             self._watch_dog.acknowledge_wd()
+        self._is_data_new = True
 
     def is_active(self):
         return not self._watch_dog.is_expired()
@@ -29,6 +34,7 @@ class CommunicationIfc(object):
     def get_data(self):
         if self._is_publisher:
             print 'WARN: This is a publishing interface'
+        self._is_data_new = False
         return self._data
 
     def set_data(self, data):
