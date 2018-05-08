@@ -326,9 +326,41 @@ class Move(object):
         pass
 
     def move_jp(self, cmd):
+        state = self._jp_ctrl.get_robot_state()
+        if cmd is not None and state is not None:
+            j0 = state.position
+            jf = cmd.position
+            v0 = [0, 0, 0, 0, 0, 0]
+            vf = [0, 0, 0, 0, 0, 0]
+            a0 = [0, 0, 0, 0, 0, 0]
+            af = [0, 0, 0, 0, 0, 0]
+
+            cur_time = rospy.Time.now().to_sec()
+            t0 = cur_time - self._t_start
+            tf = t0 + self._jp_ctrl.calculate_dt(t0)
+            self._jp_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
+            self._jp_ctrl.set_active()
+            while self._jp_ctrl.is_active():
+                a = 0 # Wait/Block
         pass
 
     def move_jr(self, cmd):
+        state = self._jr_ctrl.get_robot_state()
+        if cmd is not None and state is not None:
+            j0 = np.array(state.position)
+            jf = j0 + np.array(cmd.position)
+            v0 = [0, 0, 0, 0, 0, 0]
+            vf = [0, 0, 0, 0, 0, 0]
+            a0 = [0, 0, 0, 0, 0, 0]
+            af = [0, 0, 0, 0, 0, 0]
+
+            cur_time = rospy.Time.now().to_sec()
+            t0 = cur_time - self._t_start
+            tf = t0 + self._jr_ctrl.calculate_dt(t0)
+            self._jr_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
+            self._jr_ctrl.set_active()
+            while self._jr_ctrl.is_active():
+                a = 0 # Wait/Block
         pass
 
     def _execute(self):
