@@ -14,6 +14,7 @@ class Interpolation(object):
 
         self._dimensions = 1
         self._t_array = []
+        self._busy = False
         pass
 
     def _compute_time_mat(self, t0, tf):
@@ -26,46 +27,58 @@ class Interpolation(object):
         return T_mat
 
     def get_interpolated_x_dx_ddx(self, t):
+        if self._busy:
+            while self._busy:
+                a = 0
         return self.get_interpolated_x(t), self.get_interpolated_dx(t), self.get_interpolated_ddx(t)
 
     def get_interpolated_x(self, t):
-            if not type(t) is np.array:
-                t = np.array(t)
-            # t = np.array(t)
-            if t.size == 1:
-                if not self._t0 <= t <= self._tf:
-                    raise Exception('Time {} should be between {} and {}'.format(t, self._t0, self._tf))
-            pos = np.zeros([t.size, self._dimensions])
-            for i in range(0, self._dimensions):
-                c = self._coefficients[:, i]
-                pos[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
-            return pos
+        if self._busy:
+            while self._busy:
+                a = 0
+        if not type(t) is np.array:
+            t = np.array(t)
+        # t = np.array(t)
+        if t.size == 1:
+            if not self._t0 <= t <= self._tf:
+                raise Exception('Time {} should be between {} and {}'.format(t, self._t0, self._tf))
+        pos = np.zeros([t.size, self._dimensions])
+        for i in range(0, self._dimensions):
+            c = self._coefficients[:, i]
+            pos[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
+        return pos
 
     def get_interpolated_dx(self, t):
-            if not type(t) is np.array:
-                t = np.array(t)
-            # t = np.array(t)
-            if t.size == 1:
-                if t < self._t0 or t > self._tf:
-                    raise Exception('Time should be between {} and {}'.format(self._t0, self._tf))
-            vel = np.zeros([t.size, self._dimensions])
-            for i in range(0, self._dimensions):
-                c = self._coefficients[:, i]
-                vel[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
-            return vel
+        if self._busy:
+            while self._busy:
+                a = 0
+        if not type(t) is np.array:
+            t = np.array(t)
+        # t = np.array(t)
+        if t.size == 1:
+            if t < self._t0 or t > self._tf:
+                raise Exception('Time should be between {} and {}'.format(self._t0, self._tf))
+        vel = np.zeros([t.size, self._dimensions])
+        for i in range(0, self._dimensions):
+            c = self._coefficients[:, i]
+            vel[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
+        return vel
 
     def get_interpolated_ddx(self, t):
-            if not type(t) is np.array:
-                t = np.array(t)
-            # t = np.array(t)
-            if t.size == 1:
-                if t < self._t0 or t > self._tf:
-                    raise Exception('Time should be between t0 and tf')
-            acc = np.zeros([t.size, self._dimensions])
-            for i in range(0, self._dimensions):
-                c = self._coefficients[:, i]
-                acc[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
-            return acc
+        if self._busy:
+            while self._busy:
+                a = 0
+        if not type(t) is np.array:
+            t = np.array(t)
+        # t = np.array(t)
+        if t.size == 1:
+            if t < self._t0 or t > self._tf:
+                raise Exception('Time should be between t0 and tf')
+        acc = np.zeros([t.size, self._dimensions])
+        for i in range(0, self._dimensions):
+            c = self._coefficients[:, i]
+            acc[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
+        return acc
 
     def get_t0(self):
         return self._t0
@@ -89,6 +102,7 @@ class Interpolation(object):
         if x0.size != xf.size or dx0.size != dxf.size or ddx0.size != ddxf.size:
             raise Exception('All arrays for initial and final P,V & A must be of same length')
 
+        self._busy = True
         self._dimensions = x0.size
         dims = self._dimensions
 
@@ -104,6 +118,7 @@ class Interpolation(object):
             self._T_mat[:, :, i] = self._compute_time_mat(t0, tf)
             self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
                                                  np.transpose(self._boundary_conditions[i, :]))
+        self._busy = False
 
     def plot_trajectory(self, n_steps=50, t0=None, tf=None):
         if n_steps < 5:
