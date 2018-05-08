@@ -144,7 +144,7 @@ class Interpolate(object):
 
             cur_time = rospy.Time.now().to_sec()
             t0 = cur_time - self._t_start
-            tf = t0 + self._cp_ctrl.calculate_dt(t0)
+            tf = t0 + self._cr_ctrl.calculate_dt(t0)
             self._cr_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
             self._cr_ctrl.set_active()
         pass
@@ -265,24 +265,82 @@ class Servo(object):
 
 
 class Move(object):
-    def __init__(self, robot_cmd_ifc, t_start):
+    def __init__(self, robot_cmd_ifc, robot_state_ifc, t_start):
+        self._t_start = t_start
         self._methods_dict = dict()
         self._methods_dict['move_cp'] = self.move_cp
         self._methods_dict['move_cr'] = self.move_cr
         self._methods_dict['move_jp'] = self.move_jp
         self._methods_dict['move_jr'] = self.move_jr
 
-    def move_cp(self):
+        self._cp_ctrl = ControllerData('move_cp', robot_cmd_ifc, robot_state_ifc)
+        self._cr_ctrl = ControllerData('move_cr', robot_cmd_ifc, robot_state_ifc)
+        self._jp_ctrl = ControllerData('move_jp', robot_cmd_ifc, robot_state_ifc)
+        self._jr_ctrl = ControllerData('move_jr', robot_cmd_ifc, robot_state_ifc)
+
+        self._controller_data_list = [self._cp_ctrl,
+                                      self._cr_ctrl,
+                                      self._jp_ctrl,
+                                      self._jr_ctrl]
+
+        self._thread = Thread(target=self._execute)
+        self._thread.start()
+
+    def move_cp(self, cmd):
+        state = self._cp_ctrl.get_robot_state()
+        if cmd is not None and state is not None:
+            p0 = transform_stamped_to_np_array(state)
+            pf = transform_stamped_to_np_array(cmd)
+            v0 = [0, 0, 0, 0, 0, 0]
+            vf = [0, 0, 0, 0, 0, 0]
+            a0 = [0, 0, 0, 0, 0, 0]
+            af = [0, 0, 0, 0, 0, 0]
+
+            cur_time = rospy.Time.now().to_sec()
+            t0 = cur_time - self._t_start
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
+            self._cp_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
+            self._cp_ctrl.set_active()
+            while self._cp_ctrl.is_active():
+                a = 0 # Wait/Block
         pass
 
-    def move_cr(self):
+    def move_cr(self, cmd):
+        state = self._cr_ctrl.get_robot_state()
+        if cmd is not None and state is not None:
+            cmd = transform_stamped_to_frame(state) * transform_stamped_to_frame(cmd)
+            p0 = transform_stamped_to_np_array(state)
+            pf = frame_to_np_array(cmd)
+            v0 = [0, 0, 0, 0, 0, 0]
+            vf = [0, 0, 0, 0, 0, 0]
+            a0 = [0, 0, 0, 0, 0, 0]
+            af = [0, 0, 0, 0, 0, 0]
+
+            cur_time = rospy.Time.now().to_sec()
+            t0 = cur_time - self._t_start
+            tf = t0 + self._cr_ctrl.calculate_dt(t0)
+            self._cr_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
+            self._cr_ctrl.set_active()
+            while self._cr_ctrl.is_active():
+                a = 0 # Wait/Block
         pass
 
-    def move_jp(self):
+    def move_jp(self, cmd):
         pass
 
-    def move_jr(self):
+    def move_jr(self, cmd):
         pass
+
+    def _execute(self):
+        while not rospy.is_shutdown():
+            for controller_data in self._controller_data_list:
+                if controller_data.is_active():
+                    t = rospy.Time.now().to_sec() - self._t_start
+                    while t < controller_data.interpolater.get_tf():
+                        data = controller_data.xt(t)
+                        controller_data.set_robot_command(data)
+                        t = rospy.Time.now().to_sec() - self._t_start
+                    controller_data.set_idle()
 
     def get_methods_dict(self):
         return self._methods_dict
@@ -294,7 +352,7 @@ class Controllers(object):
         self._robot_state_ifc = RobotStateIfc(namespace, arm_name)
         self.controllers_list = [Interpolate(self._robot_cmd_ifc, self._robot_state_ifc, t_start),
                                  Servo(self._robot_cmd_ifc, t_start),
-                                 Move(self._robot_cmd_ifc, t_start)]
+                                 Move(self._robot_cmd_ifc, self._robot_state_ifc, t_start)]
         self._methods_dict = dict()
         for controller in self.controllers_list:
             self._methods_dict.update(controller.get_methods_dict())

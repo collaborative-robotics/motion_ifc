@@ -50,8 +50,8 @@ class MotionCmdIfc(object):
             MotionCmdCommIfc(prefix + 'servo_jr',       JointState,       self.ctrl, True, 10),
             MotionCmdCommIfc(prefix + 'servo_jv',       JointState,       self.ctrl, True, 10),
             MotionCmdCommIfc(prefix + 'servo_jf',       JointState,       self.ctrl, True, 10),
-            MotionCmdCommIfc(prefix + 'move_cp',        JointState,       self.ctrl, True, 10),
-            MotionCmdCommIfc(prefix + 'move_cr',        JointState,       self.ctrl, True, 10),
+            MotionCmdCommIfc(prefix + 'move_cp',        TransformStamped, self.ctrl, True, 10),
+            MotionCmdCommIfc(prefix + 'move_cr',        TransformStamped, self.ctrl, True, 10),
             MotionCmdCommIfc(prefix + 'move_jp',        JointState,       self.ctrl, True, 10),
             MotionCmdCommIfc(prefix + 'move_jr',        JointState,       self.ctrl, True, 10)
         ]
