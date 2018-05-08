@@ -13,11 +13,42 @@ import tf_conversions
 
 
 class ControllerData:
-    def __init__(self, cmd_robot_method, state_robot_method):
+    def __init__(self, controller_name, robot_cmd_ifc, robot_state_ifc):
         self.interpolater = Interpolation()
         self._active = False
-        self.set_robot_command = cmd_robot_method
-        self.get_robot_state = state_robot_method
+        self._controller_name = controller_name
+        # New we are connecting the state methods using the naming from the crtk_name of cmd
+        # There is no crtk_name for relative 'r' feedback as of yet, so if the command is relative, always bind the
+        # position 'p' state method
+        # Additionally, there is not 'p', 'v', 'f' or 'r' for joint space feedback, we only have joint states,
+        # so if that's the command always bind to 's' for op_space
+        op_space_str = get_opspace_as_str(controller_name)
+        controller_str = get_controller_as_str(controller_name)
+        controller_feedback_str = controller_str
+
+        if op_space_str is 'j':
+            controller_feedback_str = 's'
+            if controller_str is 'p':
+                self._conversion_method = np_array_to_joint_state_pos
+            elif controller_str is 'v':
+                self._conversion_method = np_array_to_joint_state_vel
+            elif controller_str is 'f':
+                self._conversion_method = np_array_to_joint_state_effort
+            elif controller_str is 'r':
+                self._conversion_method = np_array_to_joint_state_pos
+                controller_str = 'p'
+            else:
+                raise Exception('DONTBEANONION')
+        elif op_space_str is 'c':
+            self._conversion_method = np_array_to_transform_stamped
+            if controller_str is 'r':
+                controller_str = 'p'
+                controller_feedback_str = 'p'
+
+        state_method_name = 'measured_' + op_space_str + controller_feedback_str
+        command_method_name = 'servo_' + op_space_str + controller_str
+        self.get_robot_state = robot_state_ifc.get_method_by_name(state_method_name)
+        self.set_robot_command = robot_cmd_ifc.get_method_by_name(command_method_name)
         self._dt = 1.0
         self._dt_max = 5.0
         self._last_call_time = 0.0
@@ -37,7 +68,7 @@ class ControllerData:
 
     def xt(self, t):
         xt = self.interpolater.get_interpolated_x(t)
-        return np_array_to_transform_stamped(xt)
+        return self._conversion_method(xt)
 
     def calculate_dt(self, cur_time):
         dt = cur_time - self._last_call_time
@@ -48,7 +79,7 @@ class ControllerData:
 
 
 class Interpolate(object):
-    def __init__(self, r_cmd, r_state, t_start):
+    def __init__(self, robot_cmd_ifc, robot_state_ifc, t_start):
         self._t_start = t_start
         self._methods_dict = dict()
         self._methods_dict['interpolate_cp'] = self.interpolate_cp
@@ -60,14 +91,14 @@ class Interpolate(object):
         self._methods_dict['interpolate_jv'] = self.interpolate_jv
         self._methods_dict['interpolate_jf'] = self.interpolate_jf
 
-        self._cp_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cp'), r_state.get_method_by_name('measured_cp'))
-        self._cr_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cp'), r_state.get_method_by_name('measured_cp'))
-        self._cv_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cv'), r_state.get_method_by_name('measured_cv'))
-        self._cf_ctrl = ControllerData(r_cmd.get_method_by_name('servo_cf'), r_state.get_method_by_name('measured_cf'))
-        self._jp_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jp'), r_state.get_method_by_name('measured_js'))
-        self._jr_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jp'), r_state.get_method_by_name('measured_js'))
-        self._jv_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jv'), r_state.get_method_by_name('measured_js'))
-        self._jf_ctrl = ControllerData(r_cmd.get_method_by_name('servo_jf'), r_state.get_method_by_name('measured_js'))
+        self._cp_ctrl = ControllerData('interpolate_cp', robot_cmd_ifc, robot_state_ifc)
+        self._cr_ctrl = ControllerData('interpolate_cr', robot_cmd_ifc, robot_state_ifc)
+        self._cv_ctrl = ControllerData('interpolate_cv', robot_cmd_ifc, robot_state_ifc)
+        self._cf_ctrl = ControllerData('interpolate_cf', robot_cmd_ifc, robot_state_ifc)
+        self._jp_ctrl = ControllerData('interpolate_jp', robot_cmd_ifc, robot_state_ifc)
+        self._jr_ctrl = ControllerData('interpolate_jr', robot_cmd_ifc, robot_state_ifc)
+        self._jv_ctrl = ControllerData('interpolate_jv', robot_cmd_ifc, robot_state_ifc)
+        self._jf_ctrl = ControllerData('interpolate_jf', robot_cmd_ifc, robot_state_ifc)
 
         self._controller_data_list = [self._cp_ctrl,
                                       self._cr_ctrl,
@@ -122,6 +153,20 @@ class Interpolate(object):
         pass
 
     def interpolate_cf(self, cmd):
+        state = self._cf_ctrl.get_robot_state()
+        if cmd is not None and state is not None:
+            f0 = transform_stamped_to_np_array(state)
+            ff = transform_stamped_to_np_array(cmd)
+            df0 = [0, 0, 0, 0, 0, 0]
+            dff = [0, 0, 0, 0, 0, 0]
+            ddf0 = [0, 0, 0, 0, 0, 0]
+            ddff = [0, 0, 0, 0, 0, 0]
+
+            cur_time = rospy.Time.now().to_sec()
+            t0 = cur_time - self._t_start
+            tf = t0 + self._cf_ctrl.calculate_dt(t0)
+            self._cf_ctrl.interpolater.compute_interpolation_params(f0, ff, df0, dff, ddf0, ddff, t0, tf)
+            self._cf_ctrl.set_active()
         pass
 
     def interpolate_jp(self, cmd):

@@ -85,6 +85,18 @@ def interpret_crtk_name_from_topic(topic_str):
     return crtk_name
 
 
+def get_mode_as_str(crtk_name):
+    return crtk_name.split('_')[0]
+
+
+def get_opspace_as_str(crtk_name):
+    return crtk_name.split('_')[1][0]
+
+
+def get_controller_as_str(crtk_name):
+    return crtk_name.split('_')[1][1]
+
+
 def np_array_to_transform_stamped(array):
     if array.size >= 3:
         data = TransformStamped()
@@ -133,16 +145,6 @@ def transform_stamped_to_np_array(ts):
     return array
 
 
-def transform_stamped_to_frame(ts):
-    return Frame(Rotation.Quaternion(ts.transform.rotation.x,
-                                     ts.transform.rotation.y,
-                                     ts.transform.rotation.z,
-                                     ts.transform.rotation.w),
-                 Vector(ts.transform.translation.x,
-                        ts.transform.translation.y,
-                        ts.transform.translation.z))
-
-
 def frame_to_np_array(frame):
     r, p, y = frame.M.GetRPY()
     array = np.array([frame.p[0],
@@ -152,3 +154,14 @@ def frame_to_np_array(frame):
                       p,
                       y])
     return array
+
+
+def transform_stamped_to_frame(ts):
+    return Frame(Rotation.Quaternion(ts.transform.rotation.x,
+                                     ts.transform.rotation.y,
+                                     ts.transform.rotation.z,
+                                     ts.transform.rotation.w),
+                 Vector(ts.transform.translation.x,
+                        ts.transform.translation.y,
+                        ts.transform.translation.z))
+
