@@ -28,9 +28,9 @@ class MotionCmdCommIfc(CommunicationIfc):
 
 
 class MotionCmdIfc(object):
-    def __init__(self):
-        namespace = '/dvrk'
-        arm_name = '/MTMR/'
+    def __init__(self, namespace, arm_name):
+        namespace = '/' + namespace
+        arm_name = '/' + arm_name + '/'
         self.ctrl = Controllers(namespace, arm_name, rospy.Time.now().to_sec())
         prefix = '/motion_ifc/'
         self.comm_ifc_list = [

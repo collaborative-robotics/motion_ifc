@@ -7,7 +7,7 @@ class MotionIfc(object):
         self._n_handle = rospy.init_node("motion_interface")
         self._rate = rospy.Rate(500)
         self._counter = 0
-        self.motion_cmd_ifc = MotionCmdIfc()
+        self.motion_cmd_ifc = MotionCmdIfc(namespace='dvrk', arm_name='MTMR')
 
     def run(self):
         while not rospy.is_shutdown():
