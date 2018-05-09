@@ -8,12 +8,15 @@ class Interpolation(object):
         self._t0 = 0.0
         self._tf = 0.0
 
-        self._coefficients = []
-        self._T_mat = []
-        self._boundary_conditions = []
+        self._coefficients = np.zeros([1, 1])
+        self._T_mat = np.zeros([1, 1, 1])
+        self._boundary_conditions = np.zeros([1, 1])
 
         self._dimensions = 1
         self._t_array = []
+        self._x = np.zeros([1, 1])
+        self._dx = np.zeros([1, 1])
+        self._ddx = np.zeros([1, 1])
         # Flag set and cleared when compute_interpolation_params is called
         self._computation_active = False
         # Flag set and cleared when interpolated data is being read
@@ -42,13 +45,16 @@ class Interpolation(object):
         if t.size == 1:
             if not self._t0 <= t <= self._tf:
                 raise Exception('Time {} should be between {} and {}'.format(t, self._t0, self._tf))
-        pos = np.zeros([t.size, self._dimensions])
+
+        if not self._x.shape[0] == t.size:
+            self._x = np.zeros([t.size, self._dimensions])
+
         self._read_active = True
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
-            pos[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
+            self._x[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
         self._read_active = False
-        return pos
+        return self._x
 
     def get_interpolated_dx(self, t):
         if self._computation_active:
@@ -60,13 +66,16 @@ class Interpolation(object):
         if t.size == 1:
             if t < self._t0 or t > self._tf:
                 raise Exception('Time should be between {} and {}'.format(self._t0, self._tf))
-        vel = np.zeros([t.size, self._dimensions])
+
+        if not self._dx.shape[0] == t.size:
+            self._dx = np.zeros([t.size, self._dimensions])
+
         self._read_active = True
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
-            vel[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
+            self._dx[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
         self._read_active = False
-        return vel
+        return self._dx
 
     def get_interpolated_ddx(self, t):
         if self._computation_active:
@@ -78,13 +87,16 @@ class Interpolation(object):
         if t.size == 1:
             if t < self._t0 or t > self._tf:
                 raise Exception('Time should be between t0 and tf')
-        acc = np.zeros([t.size, self._dimensions])
+
+        if not self._ddx.shape[0] == t.size:
+            self._ddx = np.zeros([t.size, self._dimensions])
+
         self._read_active = True
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
-            acc[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
+            self._ddx[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
         self._read_active = False
-        return acc
+        return self._ddx
 
     def get_t0(self):
         return self._t0
@@ -93,36 +105,41 @@ class Interpolation(object):
         return self._tf
 
     def compute_interpolation_params(self, x0, xf, dx0, dxf, ddx0, ddxf, t0, tf):
-        if not type(x0) is np.array:
+        if not isinstance(x0, np.ndarray):
             x0 = np.asarray(x0)
-        if not type(xf) is np.array:
+        if not isinstance(xf, np.ndarray):
             xf = np.asarray(xf)
-        if not type(dx0) is np.array:
+        if not isinstance(dx0, np.ndarray):
             dx0 = np.asarray(dx0)
-        if not type(dxf) is np.array:
+        if not isinstance(dxf, np.ndarray):
             dxf = np.asarray(dxf)
-        if not type(ddx0) is np.array:
+        if not isinstance(ddx0, np.ndarray):
             ddx0 = np.asarray(ddx0)
-        if not type(ddxf) is np.array:
+        if not isinstance(ddxf, np.ndarray):
             ddxf = np.asarray(ddxf)
-        if x0.size != xf.size or dx0.size != dxf.size or ddx0.size != ddxf.size:
+        if x0.size != xf.size != dx0.size != dxf.size != ddx0.size != ddxf.size:
             raise Exception('All arrays for initial and final P,V & A must be of same length')
 
         self._dimensions = x0.size
-        dims = self._dimensions
         if self._read_active is True:
             while self._read_active:
                 a = 0 # Wait
 
         self._computation_active = True
-        self._boundary_conditions = np.zeros([dims, 6])
-        self._coefficients = np.zeros([6, dims])
-        self._T_mat = np.zeros([6, 6, dims])
+        if not self._x.shape[1] == self._dimensions:
+            self._x = np.zeros([1, self._dimensions])
+            self._dx = np.zeros([1, self._dimensions])
+            self._ddx = np.zeros([1, self._dimensions])
+
+        if not self._boundary_conditions.shape[0] == self._dimensions:
+            self._boundary_conditions = np.zeros([self._dimensions, 6])
+            self._coefficients = np.zeros([6, self._dimensions])
+            self._T_mat = np.zeros([6, 6, self._dimensions])
 
         self._t0 = t0
         self._tf = tf
 
-        for i in range(0, dims):
+        for i in range(0, self._dimensions):
             self._boundary_conditions[i, :] = np.mat([x0[i], dx0[i], ddx0[i], xf[i], dxf[i], ddxf[i]])
             self._T_mat[:, :, i] = self._compute_time_mat(t0, tf)
             self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
