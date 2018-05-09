@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.linalg as la
 import matplotlib.pyplot as plt
+from threading import Lock
 
 
 class Interpolation(object):
@@ -17,10 +18,7 @@ class Interpolation(object):
         self._x = np.zeros([1, 1])
         self._dx = np.zeros([1, 1])
         self._ddx = np.zeros([1, 1])
-        # Flag set and cleared when compute_interpolation_params is called
-        self._computation_active = False
-        # Flag set and cleared when interpolated data is being read
-        self._read_active = False
+        self._lock = Lock()
         pass
 
     def _compute_time_mat(self, t0, tf):
@@ -36,9 +34,7 @@ class Interpolation(object):
         return self.get_interpolated_x(t), self.get_interpolated_dx(t), self.get_interpolated_ddx(t)
 
     def get_interpolated_x(self, t):
-        if self._computation_active:
-            while self._computation_active:
-                a = 0
+        self._lock.acquire()
         if not type(t) is np.array:
             t = np.array(t)
         # t = np.array(t)
@@ -49,17 +45,14 @@ class Interpolation(object):
         if not self._x.shape[0] == t.size:
             self._x = np.zeros([t.size, self._dimensions])
 
-        self._read_active = True
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
             self._x[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
-        self._read_active = False
+        self._lock.release()
         return self._x
 
     def get_interpolated_dx(self, t):
-        if self._computation_active:
-            while self._computation_active:
-                a = 0
+        self._lock.acquire()
         if not type(t) is np.array:
             t = np.array(t)
         # t = np.array(t)
@@ -70,17 +63,15 @@ class Interpolation(object):
         if not self._dx.shape[0] == t.size:
             self._dx = np.zeros([t.size, self._dimensions])
 
-        self._read_active = True
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
             self._dx[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
-        self._read_active = False
+        self._lock.release()
         return self._dx
 
     def get_interpolated_ddx(self, t):
-        if self._computation_active:
-            while self._computation_active:
-                a = 0
+        self._lock.acquire()
+
         if not type(t) is np.array:
             t = np.array(t)
         # t = np.array(t)
@@ -91,11 +82,10 @@ class Interpolation(object):
         if not self._ddx.shape[0] == t.size:
             self._ddx = np.zeros([t.size, self._dimensions])
 
-        self._read_active = True
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
             self._ddx[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
-        self._read_active = False
+        self._lock.release()
         return self._ddx
 
     def get_t0(self):
@@ -105,6 +95,7 @@ class Interpolation(object):
         return self._tf
 
     def compute_interpolation_params(self, x0, xf, dx0, dxf, ddx0, ddxf, t0, tf):
+        self._lock.acquire()
         if not isinstance(x0, np.ndarray):
             x0 = np.asarray(x0)
         if not isinstance(xf, np.ndarray):
@@ -121,11 +112,7 @@ class Interpolation(object):
             raise Exception('All arrays for initial and final P,V & A must be of same length')
 
         self._dimensions = x0.size
-        if self._read_active is True:
-            while self._read_active:
-                a = 0 # Wait
 
-        self._computation_active = True
         if not self._x.shape[1] == self._dimensions:
             self._x = np.zeros([1, self._dimensions])
             self._dx = np.zeros([1, self._dimensions])
@@ -144,7 +131,7 @@ class Interpolation(object):
             self._T_mat[:, :, i] = self._compute_time_mat(t0, tf)
             self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
                                                  np.transpose(self._boundary_conditions[i, :]))
-        self._computation_active = False
+        self._lock.release()
 
     def plot_trajectory(self, n_steps=50, t0=None, tf=None):
         if n_steps < 5:
