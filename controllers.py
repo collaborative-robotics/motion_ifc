@@ -4,8 +4,9 @@ from threading import Thread
 from crkt_common import *
 from robot_cmd_ifc import RobotCmdIfc
 from robot_state_ifc import RobotStateIfc
-import tf_conversions
-
+from threading import Lock
+from std_msgs.msg import Float32
+import time
 
 # Each sub-controller must provide a dict() of all the methods with the method
 # name as the key and the method handle as the value so that this Controller
@@ -17,7 +18,9 @@ class ControllerData:
         self._t_offset = 0.0
         self.interpolater = Interpolation()
         self._active = False
+        self._lock = Lock()
         self._controller_name = controller_name
+
         # New we are connecting the state methods using the naming from the crtk_name of cmd
         # There is no crtk_name for relative 'r' feedback as of yet, so if the command is relative, always bind the
         # position 'p' state method
@@ -74,7 +77,7 @@ class ControllerData:
     def calculate_dt(self, cur_time):
         dt = cur_time - self._last_call_time
         self._last_call_time = cur_time
-        if 0 < dt <= self._dt_max:
+        if 0.0 < dt <= self._dt_max:
             self._dt = dt
         return self._dt
 
@@ -119,6 +122,10 @@ class Interpolate(object):
         self._thread = Thread(target=self._execute)
         self._thread.start()
 
+        self.rate = rospy.Rate(250)
+        self.t_pub = rospy.Publisher('/motion_ifc/t', Float32, queue_size=10)
+        self.t_offset_pub = rospy.Publisher('/motion_ifc/t_offset', Float32, queue_size=10)
+
     def interpolate_cp(self, cmd, blocking=False):
         state = self._cp_ctrl.get_robot_state()
         if cmd is not None and state is not None:
@@ -129,7 +136,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = 0.0
             tf = t0 + self._cp_ctrl.calculate_dt(cur_time)
             self._cp_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
@@ -152,7 +159,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = 0.0
             tf = t0 + self._cr_ctrl.calculate_dt(cur_time)
             self._cr_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
@@ -175,7 +182,7 @@ class Interpolate(object):
             ddf0 = [0, 0, 0, 0, 0, 0]
             ddff = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = 0.0
             tf = t0 + self._cf_ctrl.calculate_dt(cur_time)
             self._cf_ctrl.interpolater.compute_interpolation_params(f0, ff, df0, dff, ddf0, ddff, t0, tf)
@@ -195,7 +202,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = 0.0
             tf = t0 + self._jp_ctrl.calculate_dt(cur_time)
             self._jp_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
@@ -215,7 +222,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = 0.0
             tf = t0 + self._jr_ctrl.calculate_dt(cur_time)
             self._jr_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
@@ -235,11 +242,14 @@ class Interpolate(object):
         while not rospy.is_shutdown():
             for controller_data in self._controller_data_list:
                 if controller_data.is_active():
-                    t = rospy.Time.now().to_sec() - controller_data.get_t_offset()
+                    t = time.time() - controller_data.get_t_offset()
                     while controller_data.interpolater.get_t0() <= t <= controller_data.interpolater.get_tf():
+                        self.t_pub.publish(t)
+                        self.t_offset_pub.publish(controller_data.get_t_offset())
                         data = controller_data.xt(t)
                         controller_data.set_robot_command(data)
-                        t = rospy.Time.now().to_sec() - controller_data.get_t_offset()
+                        t = time.time() - controller_data.get_t_offset()
+                        self.rate.sleep()
                     controller_data.set_idle()
 
     def get_methods_dict(self):
