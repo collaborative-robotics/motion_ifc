@@ -19,6 +19,8 @@ class Interpolation(object):
         self._dx = np.zeros([1, 1])
         self._ddx = np.zeros([1, 1])
         self._lock = Lock()
+        # Define a custom margin of error for t0
+        self._t0_moe = 0.01
         pass
 
     def _compute_time_mat(self, t0, tf):
@@ -39,12 +41,17 @@ class Interpolation(object):
             t = np.array(t)
         # t = np.array(t)
         if t.size == 1:
-            if not self._t0 <= t <= self._tf:
+            if not self._t0 - self._t0_moe <= t <= self._tf:
                 raise Exception('Time {} should be between {} and {}'.format(t, self._t0, self._tf))
+            elif self._t0 - self._t0_moe <= t < self._t0:
+                print 'Warning, t: {} < t0: {} but within Margin of Error: {}'.format(t, self._t0, self._t0_moe)
+                t = np.array(self._t0)
 
         if not self._x.shape[0] == t.size:
             self._x = np.zeros([t.size, self._dimensions])
 
+        # Since all interpolation is done before 0.0 and tf, we adjust t accordingly by subtracting self._t0
+        t = t - self._t0
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
             self._x[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
@@ -57,12 +64,17 @@ class Interpolation(object):
             t = np.array(t)
         # t = np.array(t)
         if t.size == 1:
-            if t < self._t0 or t > self._tf:
-                raise Exception('Time should be between {} and {}'.format(self._t0, self._tf))
+            if not self._t0 - self._t0_moe <= t <= self._tf:
+                raise Exception('Time {} should be between {} and {}'.format(t, self._t0, self._tf))
+            elif self._t0 - self._t0_moe <= t < self._t0:
+                print 'Warning, t: {} < t0: {} but within Margin of Error: {}'.format(t, self._t0, self._t0_moe)
+                t = np.array(self._t0)
 
         if not self._dx.shape[0] == t.size:
             self._dx = np.zeros([t.size, self._dimensions])
 
+        # Since all interpolation is done before 0.0 and tf, we adjust t accordingly by subtracting self._t0
+        t = t - self._t0
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
             self._dx[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
@@ -76,12 +88,17 @@ class Interpolation(object):
             t = np.array(t)
         # t = np.array(t)
         if t.size == 1:
-            if t < self._t0 or t > self._tf:
-                raise Exception('Time should be between t0 and tf')
+            if not self._t0 - self._t0_moe <= t <= self._tf:
+                raise Exception('Time {} should be between {} and {}'.format(t, self._t0, self._tf))
+            elif self._t0 - self._t0_moe <= t < self._t0:
+                print 'Warning, t: {} < t0: {} but within Margin of Error: {}'.format(t, self._t0, self._t0_moe)
+                t = np.array(self._t0)
 
         if not self._ddx.shape[0] == t.size:
             self._ddx = np.zeros([t.size, self._dimensions])
 
+        # Since all interpolation is done before 0.0 and tf, we adjust t accordingly by subtracting self._t0
+        t = t - self._t0
         for i in range(0, self._dimensions):
             c = self._coefficients[:, i]
             self._ddx[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
@@ -126,9 +143,14 @@ class Interpolation(object):
         self._t0 = t0
         self._tf = tf
 
+        t0_adjusted = 0.0
+        tf_adjusted = tf - t0
+        if tf_adjusted <= 0:
+            raise Exception('tf: {} cannot be less than t0: {}'.format(tf, t0))
+
         for i in range(0, self._dimensions):
             self._boundary_conditions[i, :] = np.mat([x0[i], dx0[i], ddx0[i], xf[i], dxf[i], ddxf[i]])
-            self._T_mat[:, :, i] = self._compute_time_mat(t0, tf)
+            self._T_mat[:, :, i] = self._compute_time_mat(t0_adjusted, tf_adjusted)
             self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
                                                  np.transpose(self._boundary_conditions[i, :]))
         self._lock.release()

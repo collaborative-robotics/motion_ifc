@@ -130,8 +130,8 @@ class Interpolate(object):
             af = [0, 0, 0, 0, 0, 0]
 
             cur_time = rospy.Time.now().to_sec()
-            t0 = 0.0
-            tf = t0 + self._cp_ctrl.calculate_dt(cur_time)
+            t0 = cur_time
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cp_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
             self._cp_ctrl.set_active()
             if blocking is True:
@@ -153,8 +153,8 @@ class Interpolate(object):
             af = [0, 0, 0, 0, 0, 0]
 
             cur_time = rospy.Time.now().to_sec()
-            t0 = 0.0
-            tf = t0 + self._cr_ctrl.calculate_dt(cur_time)
+            t0 = cur_time
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cr_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
             self._cr_ctrl.set_active()
             if blocking is True:
@@ -176,8 +176,8 @@ class Interpolate(object):
             ddff = [0, 0, 0, 0, 0, 0]
 
             cur_time = rospy.Time.now().to_sec()
-            t0 = 0.0
-            tf = t0 + self._cf_ctrl.calculate_dt(cur_time)
+            t0 = cur_time
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cf_ctrl.interpolater.compute_interpolation_params(f0, ff, df0, dff, ddf0, ddff, t0, tf)
             self._cf_ctrl.set_active()
             if blocking is True:
@@ -196,8 +196,8 @@ class Interpolate(object):
             af = [0, 0, 0, 0, 0, 0]
 
             cur_time = rospy.Time.now().to_sec()
-            t0 = 0.0
-            tf = t0 + self._jp_ctrl.calculate_dt(cur_time)
+            t0 = cur_time
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._jp_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
             self._jp_ctrl.set_active()
             if blocking is True:
@@ -216,8 +216,8 @@ class Interpolate(object):
             af = [0, 0, 0, 0, 0, 0]
 
             cur_time = rospy.Time.now().to_sec()
-            t0 = 0.0
-            tf = t0 + self._jr_ctrl.calculate_dt(cur_time)
+            t0 = cur_time
+            tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._jr_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
             self._jr_ctrl.set_active()
             if blocking is True:
@@ -235,11 +235,11 @@ class Interpolate(object):
         while not rospy.is_shutdown():
             for controller_data in self._controller_data_list:
                 if controller_data.is_active():
-                    t = rospy.Time.now().to_sec() - controller_data.get_t_offset()
+                    t = rospy.Time.now().to_sec()
                     while controller_data.interpolater.get_t0() <= t <= controller_data.interpolater.get_tf():
                         data = controller_data.xt(t)
                         controller_data.set_robot_command(data)
-                        t = rospy.Time.now().to_sec() - controller_data.get_t_offset()
+                        t = rospy.Time.now().to_sec()
                     controller_data.set_idle()
 
     def get_methods_dict(self):
