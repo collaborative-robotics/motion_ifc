@@ -1,10 +1,10 @@
 from interp_logic import Interpolation
-import rospy
 from threading import Thread
+import rospy
 from crkt_common import *
 from robot_cmd_ifc import RobotCmdIfc
 from robot_state_ifc import RobotStateIfc
-import tf_conversions
+import time
 
 
 # Each sub-controller must provide a dict() of all the methods with the method
@@ -129,7 +129,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = cur_time
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cp_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
@@ -152,7 +152,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = cur_time
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cr_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
@@ -175,7 +175,7 @@ class Interpolate(object):
             ddf0 = [0, 0, 0, 0, 0, 0]
             ddff = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = cur_time
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cf_ctrl.interpolater.compute_interpolation_params(f0, ff, df0, dff, ddf0, ddff, t0, tf)
@@ -195,7 +195,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = cur_time
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._jp_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
@@ -215,7 +215,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = rospy.Time.now().to_sec()
+            cur_time = time.time()
             t0 = cur_time
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._jr_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
@@ -235,11 +235,11 @@ class Interpolate(object):
         while not rospy.is_shutdown():
             for controller_data in self._controller_data_list:
                 if controller_data.is_active():
-                    t = rospy.Time.now().to_sec()
+                    t = time.time()
                     while controller_data.interpolater.get_t0() <= t <= controller_data.interpolater.get_tf():
                         data = controller_data.xt(t)
                         controller_data.set_robot_command(data)
-                        t = rospy.Time.now().to_sec()
+                        t = time.time()
                     controller_data.set_idle()
 
     def get_methods_dict(self):
