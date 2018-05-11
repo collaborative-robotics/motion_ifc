@@ -129,8 +129,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = time.time()
-            t0 = cur_time
+            t0 = time.time()
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cp_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
             self._cp_ctrl.set_active()
@@ -152,8 +151,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = time.time()
-            t0 = cur_time
+            t0 = time.time()
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cr_ctrl.interpolater.compute_interpolation_params(p0, pf, v0, vf, a0, af, t0, tf)
             self._cr_ctrl.set_active()
@@ -175,8 +173,7 @@ class Interpolate(object):
             ddf0 = [0, 0, 0, 0, 0, 0]
             ddff = [0, 0, 0, 0, 0, 0]
 
-            cur_time = time.time()
-            t0 = cur_time
+            t0 = time.time()
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._cf_ctrl.interpolater.compute_interpolation_params(f0, ff, df0, dff, ddf0, ddff, t0, tf)
             self._cf_ctrl.set_active()
@@ -195,8 +192,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = time.time()
-            t0 = cur_time
+            t0 = time.time()
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._jp_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
             self._jp_ctrl.set_active()
@@ -215,8 +211,7 @@ class Interpolate(object):
             a0 = [0, 0, 0, 0, 0, 0]
             af = [0, 0, 0, 0, 0, 0]
 
-            cur_time = time.time()
-            t0 = cur_time
+            t0 = time.time()
             tf = t0 + self._cp_ctrl.calculate_dt(t0)
             self._jr_ctrl.interpolater.compute_interpolation_params(j0, jf, v0, vf, a0, af, t0, tf)
             self._jr_ctrl.set_active()
