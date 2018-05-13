@@ -19,6 +19,8 @@ public:
                                       vector<double> dxf, vector<double> ddxf, double t0, double tf);
 
     MatrixXd get_interpolated_x(double t);
+    MatrixXd get_interpolated_dx(double t);
+    MatrixXd get_interpolated_ddx(double t);
 
 private:
     MatrixXd compute_t_mat(double t0 , double tf);
@@ -91,6 +93,30 @@ MatrixXd InterpolationLogic::get_interpolated_x(double t){
     return X;
 }
 
+MatrixXd InterpolationLogic::get_interpolated_dx(double t){
+    VectorXd X(BoundaryConditions.cols());
+    MatrixXd T(6,1);
+    T << 0, 1, 2*t,   3*pow(t, 2),    4*pow(t, 3),    5*pow(t, 4);
+    if (Debug){
+        std::cout << "Size of T \n" << T.rows() << T.cols() << std::endl;
+        std::cout << "Size of C \n" << Coefficients.rows() << Coefficients.cols() << std::endl;
+    }
+    X = Coefficients.transpose() * T;
+    return X;
+}
+
+MatrixXd InterpolationLogic::get_interpolated_ddx(double t){
+    VectorXd X(BoundaryConditions.cols());
+    MatrixXd T(6,1);
+    T << 0, 1, 2,   6*t,    12*pow(t, 2),    20*pow(t, 3);
+    if (Debug){
+        std::cout << "Size of T \n" << T.rows() << T.cols() << std::endl;
+        std::cout << "Size of C \n" << Coefficients.rows() << Coefficients.cols() << std::endl;
+    }
+    X = Coefficients.transpose() * T;
+    return X;
+}
+
 int main() {
     std::cout << "Testing Interpolation Logic using Eigen \n" << std::endl;
     InterpolationLogic obj;
@@ -110,11 +136,14 @@ int main() {
     ddxf << 0.0, 0.0, 0.0;
 
     obj.compute_interpolation_params(x0 ,dx0, ddx0, xf, dxf, ddxf, 0.0, 10.0);
-    MatrixXd x;
+    MatrixXd p, v, a;
     double t = 0.0;
     for (int i = 0 ; i < 100 ; i++){
-        x = obj.get_interpolated_x(t);
-        std::cout << "x: \n" << x << "\n at t: " << t << std::endl;
+        p = obj.get_interpolated_x(t);
+        v = obj.get_interpolated_dx(t);
+        a = obj.get_interpolated_ddx(t);
+        std::cout << "x: \n" << p << "\nv: \n" << v << "\na: \n" << a << "\n at t: " << t << std::endl;
+        std::cout << "--------------------------------------------\n";
         t = t+0.1;
         usleep(100000);
     }
