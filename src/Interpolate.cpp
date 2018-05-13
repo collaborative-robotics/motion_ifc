@@ -1,6 +1,7 @@
 #include <iostream>
 #include <eigen3/Eigen/Dense>
 #include <cmath>
+#include <vector>
 
 
 using namespace Eigen;
@@ -12,18 +13,16 @@ class InterpolationLogic{
 public:
     InterpolationLogic();
     ~InterpolationLogic();
-    MatrixXd compute_t_mat(double t0 , double tf);
-    void compute_interpolation_params(VectorXd x0,
-                                      VectorXd dx0,
-                                      VectorXd ddx0,
-                                      VectorXd xf,
-                                      VectorXd dxf,
-                                      VectorXd ddxf,
-                                      double t0,
-                                      double tf);
+    void compute_interpolation_params(VectorXd x0, VectorXd dx0, VectorXd ddx0, VectorXd xf, VectorXd dxf, VectorXd ddxf, double t0, double tf);
+    void compute_interpolation_params(double x0, double dx0, double ddx0, double xf, double dxf, double ddxf, double t0, double tf);
+    void compute_interpolation_params(vector<double> x0, vector<double> dx0, vector<double> ddx0, vector<double> xf,
+                                      vector<double> dxf, vector<double> ddxf, double t0, double tf);
+
     MatrixXd get_interpolated_x(double t);
 
 private:
+    MatrixXd compute_t_mat(double t0 , double tf);
+
     MatrixXd Tmat;
     MatrixXd BoundaryConditions;
     MatrixXd Coefficients;
@@ -95,7 +94,7 @@ MatrixXd InterpolationLogic::get_interpolated_x(double t){
 int main() {
     std::cout << "Testing Interpolation Logic using Eigen \n" << std::endl;
     InterpolationLogic obj;
-    VectorXd x0, dx0, ddx0, xf, dxf, ddxf;
+    RowVectorXd x0, dx0, ddx0, xf, dxf, ddxf;
       x0.resize(3);
      dx0.resize(3);
     ddx0.resize(3);
@@ -106,7 +105,7 @@ int main() {
       x0 << 0.0, 0.0, 0.0;
      dx0 << 0.0, 0.0, 0.0;
     ddx0 << 0.0, 0.0, 0.0;
-      xf << 1.0, 1.0, 1.0;
+      xf << 1.0, 5.0, -.5;
      dxf << 0.0, 0.0, 0.0;
     ddxf << 0.0, 0.0, 0.0;
 
