@@ -58,19 +58,23 @@ void InterpolationLogic::compute_interpolation_params(VectorXd x0,
                                                       VectorXd ddxf,
                                                       double t0,
                                                       double tf){
-    if (BoundaryConditions.cols() != x0.cols()){
-        BoundaryConditions.resize(6, x0.cols());
+    if (BoundaryConditions.cols() != x0.rows()){
+        BoundaryConditions.resize(6, x0.rows());
         Coefficients.resize(x0.cols(), 6);
     }
-    BoundaryConditions << x0,
-                         dx0,
-                        ddx0,
-                          xf,
-                         dxf,
-                        ddxf;
+
+    BoundaryConditions << x0.transpose(),
+                         dx0.transpose(),
+                        ddx0.transpose(),
+                          xf.transpose(),
+                         dxf.transpose(),
+                        ddxf.transpose();
+
     compute_t_mat(t0, tf);
     Coefficients = Tmat.inverse() * BoundaryConditions;
     if (Debug){
+        std::cout << "Size of x0 \n" << x0.rows() << x0.cols() << std::endl;
+        std::cout << "B \n" << BoundaryConditions << std::endl;
         std::cout << "Size of B \n" << BoundaryConditions.rows() << BoundaryConditions.cols() << std::endl;
         std::cout << "C \n" << Coefficients << std::endl;
     }
@@ -92,26 +96,26 @@ int main() {
     std::cout << "Testing Interpolation Logic using Eigen \n" << std::endl;
     InterpolationLogic obj;
     VectorXd x0, dx0, ddx0, xf, dxf, ddxf;
-    x0.resize(1);
-    dx0.resize(1);
-    ddx0.resize(1);
-    xf.resize(1);
-    dxf.resize(1);
-    ddxf.resize(1);
+      x0.resize(3);
+     dx0.resize(3);
+    ddx0.resize(3);
+      xf.resize(3);
+     dxf.resize(3);
+    ddxf.resize(3);
 
-    x0 << 0.0;
-    dx0 << 0.0;
-    ddx0 << 0.0;
-    xf << 1.0;
-    dxf << 0.0;
-    ddxf << 0.0;
+      x0 << 0.0, 0.0, 0.0;
+     dx0 << 0.0, 0.0, 0.0;
+    ddx0 << 0.0, 0.0, 0.0;
+      xf << 1.0, 1.0, 1.0;
+     dxf << 0.0, 0.0, 0.0;
+    ddxf << 0.0, 0.0, 0.0;
 
     obj.compute_interpolation_params(x0 ,dx0, ddx0, xf, dxf, ddxf, 0.0, 10.0);
     MatrixXd x;
     double t = 0.0;
     for (int i = 0 ; i < 100 ; i++){
         x = obj.get_interpolated_x(t);
-        std::cout << "x: " << x << " at t: " << t << std::endl;
+        std::cout << "x: \n" << x << "\n at t: " << t << std::endl;
         t = t+0.1;
         usleep(100000);
     }
