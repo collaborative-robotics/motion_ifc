@@ -51,7 +51,7 @@ p = interp.get_interpolated_x(t)
 v = interp.get_interpolated_dx(t)
 a = interp.get_interpolated_ddx(t)
 
-plt.plot(t, p, '.')
+plt.plot(t, p.transpose(), '.')
 plt.legend(['pos'], loc='best')
 plt.show()
 
@@ -61,6 +61,6 @@ t = np.linspace(5.0,9.0, 30)
 p = interp.get_interpolated_x(t)
 
 # Here is the plotted result
-plt.plot(t, p, '.')
+plt.plot(t, p.transpose(), '.')
 plt.legend(['pos'], loc='best')
 plt.show()

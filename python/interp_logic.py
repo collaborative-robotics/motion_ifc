@@ -10,8 +10,8 @@ class Interpolation(object):
         self._tf = 0.0
 
         self._coefficients = np.zeros([6, 1])
-        self._T_mat = np.zeros([6, 6, 1])
-        self._boundary_conditions = np.zeros([1, 6])
+        self._T_mat = np.zeros([6, 6])
+        self._boundary_conditions = np.zeros([6, 1])
 
         self._dimensions = 1
         self._t_array = []
@@ -52,9 +52,8 @@ class Interpolation(object):
 
         # Since all interpolation is done before 0.0 and tf, we adjust t accordingly by subtracting self._t0
         t = t - self._t0
-        for i in range(0, self._dimensions):
-            c = self._coefficients[:, i]
-            self._x[:, i] = c[0] + c[1] * t + c[2] * (t**2) + c[3] * (t**3) + c[4] * (t**4) + c[5] * (t**5)
+        t_mat = np.column_stack((t**0, t**1, t**2, t**3, t**4, t**5))
+        self._x = np.matmul(self._coefficients.transpose(), t_mat.transpose())
         self._lock.release()
         return self._x
 
@@ -75,9 +74,8 @@ class Interpolation(object):
 
         # Since all interpolation is done before 0.0 and tf, we adjust t accordingly by subtracting self._t0
         t = t - self._t0
-        for i in range(0, self._dimensions):
-            c = self._coefficients[:, i]
-            self._dx[:, i] = c[1] + 2 * c[2] * t + 3 * c[3] * (t**2) + 4 * c[4] * (t**3) + 5 * c[5] * (t**4)
+        t_mat = np.column_stack((0 * t**0, 1 * t**0, 2 * t**1, 3 * t**2, 4 * t**3, 5 * t**4))
+        self._dx = np.matmul(self._coefficients.transpose(), t_mat.transpose())
         self._lock.release()
         return self._dx
 
@@ -98,9 +96,8 @@ class Interpolation(object):
 
         # Since all interpolation is done before 0.0 and tf, we adjust t accordingly by subtracting self._t0
         t = t - self._t0
-        for i in range(0, self._dimensions):
-            c = self._coefficients[:, i]
-            self._ddx[:, i] = 2 * c[2] + 6 * c[3] * t + 12 * c[4] * (t**2) + 20 * c[5] * (t**3)
+        t_mat = np.column_stack((0 * t**0, 0 * t**0, 2 * t**0, 6 * t**1, 12 * t**2, 20 * t**3))
+        self._ddx = np.matmul(self._coefficients.transpose(), t_mat.transpose())
         self._lock.release()
         return self._ddx
 
@@ -129,15 +126,14 @@ class Interpolation(object):
 
         self._dimensions = x0.size
 
-        if not self._x.shape[1] == self._dimensions:
-            self._x = np.zeros([1, self._dimensions])
-            self._dx = np.zeros([1, self._dimensions])
-            self._ddx = np.zeros([1, self._dimensions])
+        if not self._x.shape[0] == self._dimensions:
+            self._x = np.zeros([self._dimensions, 1])
+            self._dx = np.zeros([self._dimensions, 1])
+            self._ddx = np.zeros([self._dimensions, 1])
 
-        if not self._boundary_conditions.shape[0] == self._dimensions:
-            self._boundary_conditions = np.zeros([self._dimensions, 6])
+        if not self._boundary_conditions.shape[1] == self._dimensions:
+            self._boundary_conditions = np.zeros([6, self._dimensions])
             self._coefficients = np.zeros([6, self._dimensions])
-            self._T_mat = np.zeros([6, 6, self._dimensions])
 
         self._t0 = t0
         self._tf = tf
@@ -147,11 +143,9 @@ class Interpolation(object):
         if tf_adjusted <= 0:
             raise Exception('tf: {} cannot be less than t0: {}'.format(tf, t0))
 
-        for i in range(0, self._dimensions):
-            self._boundary_conditions[i, :] = np.mat([x0[i], dx0[i], ddx0[i], xf[i], dxf[i], ddxf[i]])
-            self._T_mat[:, :, i] = self._compute_time_mat(t0_adjusted, tf_adjusted)
-            self._coefficients[:, i] = np.matmul(np.linalg.inv(self._T_mat[:, :, i]),
-                                                 np.transpose(self._boundary_conditions[i, :]))
+        self._T_mat = self._compute_time_mat(t0_adjusted, tf_adjusted)
+        self._boundary_conditions = np.mat([x0, dx0, ddx0, xf, dxf, ddxf])
+        self._coefficients = np.matmul(np.linalg.inv(self._T_mat), self._boundary_conditions)
         self._lock.release()
 
     def plot_trajectory(self, n_steps=50, t0=None, tf=None):
@@ -166,9 +160,9 @@ class Interpolation(object):
 
         p, v, a = self.get_interpolated_x_dx_ddx(self._t_array)
 
-        plt.plot(self._t_array, p, '-o',
-                 self._t_array, v, '-',
-                 self._t_array, a, '--')
+        plt.plot(self._t_array, p.transpose(), '-o',
+                 self._t_array, v.transpose(), '-',
+                 self._t_array, a.transpose(), '--')
         p_legend_str = [''] * self._dimensions
         v_legend_str = [''] * self._dimensions
         a_legend_str = [''] * self._dimensions

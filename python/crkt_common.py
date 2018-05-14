@@ -100,33 +100,33 @@ def get_controller_as_str(crtk_name):
 def np_array_to_transform_stamped(array):
     if array.size >= 3:
         data = TransformStamped()
-        data.transform.translation.x = array[0, 0]
-        data.transform.translation.y = array[0, 1]
-        data.transform.translation.z = array[0, 2]
+        data.transform.translation.x = array[0]
+        data.transform.translation.y = array[1]
+        data.transform.translation.z = array[2]
         if array.size == 6:
             data.transform.rotation = geometry_msgs.msg.Quaternion(
-                *transformations.quaternion_from_euler(array[0, 3], array[0, 4], array[0, 5]))
+                *transformations.quaternion_from_euler(array[3], array[4], array[5]))
         return data
 
 
 def np_array_to_joint_state_pos(array):
     data = JointState()
     for i in range(0, array.size):
-        data.position.append(array[0, i])
+        data.position.append(array[i])
     return data
 
 
 def np_array_to_joint_state_vel(array):
     data = JointState()
     for i in range(0, array.size):
-        data.velocity.append(array[0, i])
+        data.velocity.append(array[i])
     return data
 
 
 def np_array_to_joint_state_effort(array):
     data = JointState()
     for i in range(0, array.size):
-        data.effort.append(array[0, i])
+        data.effort.append(array[i])
     return data
 
 
