@@ -20,12 +20,17 @@ include_directories(
 )
 
 set (HDR_FILES include/${PROJECT_NAME}/Interpolate.h
-               include/${PROJECT_NAME}/Controllers.h)
+               include/${PROJECT_NAME}/Controllers.h
+               include/${PROJECT_NAME}/DataConversion.h)
 
 set (SRC_FILES src/Interpolate.cpp
-               src/Controllers.cpp)
+               src/Controllers.cpp
+               src/DataConversion.cpp)
 add_executable(${PROJECT_NAME}_node ${SRC_FILES} ${HDR_FILES})
+add_executable(${PROJECT_NAME}_conversion_test src/ConversionTest.cpp)
 
  target_link_libraries(${PROJECT_NAME}_node
-   ${catkin_LIBRARIES}
- )
+     ${catkin_LIBRARIES})
+ target_link_libraries(${PROJECT_NAME}_conversion_test
+    ${catkin_LIBRARIES})
+
