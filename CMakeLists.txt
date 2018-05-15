@@ -21,16 +21,21 @@ include_directories(
 
 set (HDR_FILES include/${PROJECT_NAME}/Interpolate.h
                include/${PROJECT_NAME}/Controllers.h
-               include/${PROJECT_NAME}/DataConversion.h)
+               include/${PROJECT_NAME}/DataConversion.h
+               include/${PROJECT_NAME}/crtkCommon.h
+               include/${PROJECT_NAME}/FcnHandle.h)
 
 set (SRC_FILES src/Interpolate.cpp
                src/Controllers.cpp
                src/DataConversion.cpp)
 add_executable(${PROJECT_NAME}_node ${SRC_FILES} ${HDR_FILES})
-add_executable(${PROJECT_NAME}_conversion_test src/ConversionTest.cpp)
+add_executable(conversion_test src/ConversionTest.cpp)
+add_executable(fcn_handle_test src/FcnHandleTest.cpp)
 
  target_link_libraries(${PROJECT_NAME}_node
      ${catkin_LIBRARIES})
- target_link_libraries(${PROJECT_NAME}_conversion_test
+ target_link_libraries(conversion_test
     ${catkin_LIBRARIES})
+target_link_libraries(fcn_handle_test
+   ${catkin_LIBRARIES})
 

@@ -2,9 +2,8 @@
 #define DATA_CONVERSION_H
 
 #include <eigen3/Eigen/Dense>
-#include <geometry_msgs/TransformStamped.h>
-#include <sensor_msgs/JointState.h>
 #include <tf_conversions/tf_kdl.h>
+#include <motion_ifc/crtkCommon.h>
 
 using namespace Eigen;
 
@@ -29,7 +28,7 @@ DataConversion::DataConversion(){
 }
 
 template<>
-void DataConversion::serialize<sensor_msgs::JointState>(sensor_msgs::JointState &data){
+void DataConversion::serialize<sensor_msgs::JointState>(_jp_data_type &data){
     x.resize(data.position.size());
     for (int i = 0 ; i < data.position.size(); i++){
         x[i] = data.position[i];
@@ -37,7 +36,7 @@ void DataConversion::serialize<sensor_msgs::JointState>(sensor_msgs::JointState 
 }
 
 template<>
-void DataConversion::serialize<geometry_msgs::TransformStamped>(geometry_msgs::TransformStamped &data){
+void DataConversion::serialize<geometry_msgs::TransformStamped>(_cp_data_type &data){
     tf::Quaternion quat;
     tf::Matrix3x3 mat;
     tf::quaternionMsgToTF(data.transform.rotation, quat);
@@ -54,7 +53,7 @@ void DataConversion::serialize<geometry_msgs::TransformStamped>(geometry_msgs::T
 }
 
 template<>
-void DataConversion::deserialize<sensor_msgs::JointState>(sensor_msgs::JointState *data){
+void DataConversion::deserialize<sensor_msgs::JointState>(_jp_data_type *data){
     data->position.resize(x.rows());
     for (int i = 0 ; i < x.rows(); i++){
         data->position[i] = x[i];
@@ -62,7 +61,7 @@ void DataConversion::deserialize<sensor_msgs::JointState>(sensor_msgs::JointStat
 }
 
 template<>
-void DataConversion::deserialize<geometry_msgs::TransformStamped>(geometry_msgs::TransformStamped *data){
+void DataConversion::deserialize<geometry_msgs::TransformStamped>(_cp_data_type *data){
     data->transform.translation.x = x[0];
     data->transform.translation.y = x[1];
     data->transform.translation.z = x[2];
