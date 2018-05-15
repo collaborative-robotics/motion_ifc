@@ -1,7 +1,11 @@
+#ifndef FCN_HANDLE_H
+#define FCN_HANDLE_H
+
 class FcnHandleBase{
 public:
     FcnHandleBase(){}
     void set();
+    void operator()(void);
 };
 
 template<typename D>
@@ -16,7 +20,8 @@ public:
         _is_set = true;
     }
 
-    void set(D &data){
+    void operator()(D&data){
+        std::cout << "IMAPOTATO" << std::endl;
         fcn_handle(data);
     }
 
@@ -24,3 +29,6 @@ public:
     double idx;
     bool _is_set = false;
 };
+
+
+#endif

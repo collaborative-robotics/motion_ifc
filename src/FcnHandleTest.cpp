@@ -8,7 +8,7 @@ int main(){
     fcn = (FcnHandle<_cp_data_type> *)intObj.method_map["interpolate_cp"];
     _cp_data_type data;
     data.transform.translation.x = 5.0;
-    fcn->set(data);
+    (*fcn)(data);
 
     return 0;
 }
