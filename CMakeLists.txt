@@ -19,13 +19,13 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-set (HDR_FILES include/${PROJECT_NAME}/Interpolate.h
+set (HDR_FILES include/${PROJECT_NAME}/Trajectory.h
                include/${PROJECT_NAME}/Controllers.h
                include/${PROJECT_NAME}/DataConversion.h
                include/${PROJECT_NAME}/crtkCommon.h
                include/${PROJECT_NAME}/FcnHandle.h)
 
-set (SRC_FILES src/Interpolate.cpp
+set (SRC_FILES src/Trajectory.cpp
                src/Controllers.cpp
                src/DataConversion.cpp)
 add_executable(${PROJECT_NAME}_node ${SRC_FILES} ${HDR_FILES})

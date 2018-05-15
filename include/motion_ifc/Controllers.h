@@ -4,7 +4,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <motion_ifc/DataConversion.h>
-#include <motion_ifc/Interpolate.h>
+#include <motion_ifc/Trajectory.h>
 #include <motion_ifc/FcnHandle.h>
 
 using namespace Eigen;

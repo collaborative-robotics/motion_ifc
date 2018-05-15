@@ -21,8 +21,6 @@ public:
 private:
 };
 
-
-//template <typename T>
 DataConversion::DataConversion(){
 
 }

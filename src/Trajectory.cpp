@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-#include "motion_ifc/Interpolate.h"
+#include "motion_ifc/Trajectory.h"
 #include <eigen3/Eigen/Dense>
 
 using namespace Eigen;
@@ -8,17 +8,17 @@ using namespace std;
 
 #define Debug 0
 
-InterpolationLogic::InterpolationLogic() {
+Trajectory::Trajectory() {
     Tmat.resize(6,6);
     BoundaryConditions.resize(6,1);
     Coefficients.resize(1,6);
 }
 
-InterpolationLogic::~InterpolationLogic() {
+Trajectory::~Trajectory() {
 //    delete Tmat;
 }
 
-MatrixXd InterpolationLogic::compute_t_mat(double t0, double tf){
+MatrixXd Trajectory::compute_t_mat(double t0, double tf){
 
     Tmat << 1, t0, pow(t0, 2),   pow(t0, 3),    pow(t0, 4),    pow(t0, 5),
             0,  1,       2*t0, 3*pow(t0, 2),  4*pow(t0, 3),  5*pow(t0, 4),
@@ -29,7 +29,7 @@ MatrixXd InterpolationLogic::compute_t_mat(double t0, double tf){
     return Tmat;
 }
 
-void InterpolationLogic::compute_interpolation_params(VectorXd x0,
+void Trajectory::compute_interpolation_params(VectorXd x0,
                                                       VectorXd dx0,
                                                       VectorXd ddx0,
                                                       VectorXd xf,
@@ -59,7 +59,7 @@ void InterpolationLogic::compute_interpolation_params(VectorXd x0,
     }
 }
 
-MatrixXd InterpolationLogic::get_interpolated_x(double t){
+MatrixXd Trajectory::get_interpolated_x(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
     T << 1, t, pow(t, 2),   pow(t, 3),    pow(t, 4),    pow(t, 5);
@@ -71,7 +71,7 @@ MatrixXd InterpolationLogic::get_interpolated_x(double t){
     return X;
 }
 
-MatrixXd InterpolationLogic::get_interpolated_dx(double t){
+MatrixXd Trajectory::get_interpolated_dx(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
     T << 0, 1, 2*t,   3*pow(t, 2),    4*pow(t, 3),    5*pow(t, 4);
@@ -83,7 +83,7 @@ MatrixXd InterpolationLogic::get_interpolated_dx(double t){
     return X;
 }
 
-MatrixXd InterpolationLogic::get_interpolated_ddx(double t){
+MatrixXd Trajectory::get_interpolated_ddx(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
     T << 0, 1, 2,   6*t,    12*pow(t, 2),    20*pow(t, 3);
@@ -97,7 +97,7 @@ MatrixXd InterpolationLogic::get_interpolated_ddx(double t){
 
 int main() {
     std::cout << "Testing Interpolation Logic using Eigen \n" << std::endl;
-    InterpolationLogic obj;
+    Trajectory obj;
     RowVectorXd x0, dx0, ddx0, xf, dxf, ddxf;
       x0.resize(3);
      dx0.resize(3);

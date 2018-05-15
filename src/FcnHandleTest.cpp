@@ -1,7 +1,6 @@
 #include <motion_ifc/Controllers.h>
 
 
-
 int main(){
     Interpolate intObj;
     FcnHandle<_cp_data_type> * fcn;
