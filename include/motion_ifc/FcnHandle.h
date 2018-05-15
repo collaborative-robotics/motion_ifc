@@ -12,6 +12,10 @@ template<typename D>
 class FcnHandle: public FcnHandleBase{
 public:
     FcnHandle():_is_set(false){}
+    template<typename C>
+    FcnHandle(void (C::*conversion_fcn)(D&), C *obj):_is_set(false){
+        fcn_handle = boost::bind(conversion_fcn, obj, _1);
+    }
     ~FcnHandle(){}
 
     template<typename C>
@@ -27,7 +31,7 @@ public:
 
     boost::function<void (D&)> fcn_handle;
     double idx;
-    bool _is_set = false;
+    bool _is_set;
 };
 
 

@@ -13,7 +13,8 @@ class Interpolate: public DataConversion{
 public:
     Interpolate();
     ~Interpolate(){
-        delete temp;
+//        delete temp;
+        delete method_map["interpolate_cp"];
     }
     void interpolate_cp(_cp_data_type &data);
     void interpolate_cr(_cr_data_type &data);
@@ -26,18 +27,19 @@ public:
     void interpolate_jf(_jf_data_type &data);
 
     std::map<std::string, FcnHandleBase*> method_map;
-    FcnHandle<_cp_data_type>* temp;
+//    FcnHandle<_cp_data_type>* temp;
 
 };
 
 Interpolate::Interpolate(){
-    temp = new FcnHandle<_cp_data_type>;
-    temp->assign_fcn(&Interpolate::interpolate_cp, this);
-    method_map["interpolate_cp"] = temp;
+//    temp = new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this);
+//    temp->assign_fcn(&Interpolate::interpolate_cp, this);
+//    method_map["interpolate_cp"] = temp;
+    method_map["interpolate_cp"] = new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this);
 }
 
 void Interpolate::interpolate_cp(_cp_data_type &data){
-    std::cout << "The val of x is: " << data.transform.translation.x << std::endl;
+    std::cout << "Passed Transform is: \n" << data.transform.translation << std::endl;
 }
 
 class Move{
