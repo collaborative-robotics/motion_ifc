@@ -9,6 +9,8 @@
 
 using namespace Eigen;
 
+typedef std::map<std::string, FcnHandleBase*> _method_map_type;
+
 class Interpolate: public DataConversion{
 public:
     Interpolate();
@@ -37,10 +39,14 @@ public:
         *fcn = (FcnHandle<D> *)method_map[method_name];
     }
 
+    _method_map_type* get_method_names_map(){
+        return &method_map;
+    }
+
 
 private:
-    std::map<std::string, FcnHandleBase*> method_map;
-    std::map<std::string, FcnHandleBase*>::iterator _method_iterator;
+    _method_map_type method_map;
+    _method_map_type::iterator _method_iterator;
 };
 
 Interpolate::Interpolate(){
@@ -97,7 +103,51 @@ public:
 
     void move_jp(_jp_data_type &data);
     void move_jr(_jr_data_type &data);
+
+    template<typename D>
+    FcnHandle<D>* get_method_by_name(std::string method_name){
+        return (FcnHandle<D> *)method_map[method_name];
+    }
+
+    template<typename D>
+    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
+        *fcn = (FcnHandle<D> *)method_map[method_name];
+    }
+
+    _method_map_type* get_method_names_map(){
+        return &method_map;
+    }
+
+
+private:
+    _method_map_type method_map;
+    _method_map_type::iterator _method_iterator;
 };
+
+Move::Move(){
+    method_map["move_cp"] = new FcnHandle<_cp_data_type>(&Move::move_cp, this);
+    method_map["move_cr"] = new FcnHandle<_cr_data_type>(&Move::move_cr, this);
+    method_map["move_jp"] = new FcnHandle<_jp_data_type>(&Move::move_jp, this);
+    method_map["move_jr"] = new FcnHandle<_jr_data_type>(&Move::move_jr, this);
+}
+
+void Move::move_cp(_cp_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    std::cout << "Passed Transform is: \n" << data.transform.translation << std::endl;
+}
+
+void Move::move_cr(_cr_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Move::move_jp(_jp_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Move::move_jr(_jr_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
 
 class Servo{
 public:
@@ -111,14 +161,101 @@ public:
     void servo_jr(_jr_data_type &data);
     void servo_jv(_jv_data_type &data);
     void servo_jf(_jf_data_type &data);
+
+    template<typename D>
+    FcnHandle<D>* get_method_by_name(std::string method_name){
+        return (FcnHandle<D> *)method_map[method_name];
+    }
+
+    template<typename D>
+    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
+        *fcn = (FcnHandle<D> *)method_map[method_name];
+    }
+
+    _method_map_type* get_method_names_map(){
+        return &method_map;
+    }
+
+
+private:
+    _method_map_type method_map;
+    _method_map_type::iterator _method_iterator;
 };
+
+Servo::Servo(){
+    method_map["servo_cp"] = new FcnHandle<_cp_data_type>(&Servo::servo_cp, this);
+    method_map["servo_cr"] = new FcnHandle<_cr_data_type>(&Servo::servo_cr, this);
+    method_map["servo_cv"] = new FcnHandle<_cv_data_type>(&Servo::servo_cv, this);
+    method_map["servo_cf"] = new FcnHandle<_cf_data_type>(&Servo::servo_cf, this);
+
+    method_map["servo_jp"] = new FcnHandle<_jp_data_type>(&Servo::servo_jp, this);
+    method_map["servo_jr"] = new FcnHandle<_jr_data_type>(&Servo::servo_jr, this);
+    method_map["servo_jv"] = new FcnHandle<_jv_data_type>(&Servo::servo_jv, this);
+    method_map["servo_jf"] = new FcnHandle<_jf_data_type>(&Servo::servo_jf, this);
+}
+
+void Servo::servo_cp(_cp_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    std::cout << "Passed Transform is: \n" << data.transform.translation << std::endl;
+}
+
+void Servo::servo_cr(_cr_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Servo::servo_cv(_cv_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Servo::servo_cf(_cf_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Servo::servo_jp(_jp_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Servo::servo_jr(_jr_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Servo::servo_jv(_jv_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
+void Servo::servo_jf(_jf_data_type &data){
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+}
+
 
 class Controllers: public Interpolate, Move, Servo{
 public:
     Controllers();
 
+    template<typename D>
+    FcnHandle<D>* get_method_by_name(std::string method_name){
+        return (FcnHandle<D> *)method_map[method_name];
+    }
+
+    template<typename D>
+    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
+        *fcn = (FcnHandle<D> *)method_map[method_name];
+    }
+
 private:
+    _method_map_type method_map;
 };
+
+Controllers::Controllers(){
+    std::cout << "Size " << method_map.size() << std::endl;
+    _method_map_type* temp_map;
+    temp_map = Interpolate::get_method_names_map();
+    method_map.insert(temp_map->begin(), temp_map->end());
+    temp_map = Move::get_method_names_map();
+    method_map.insert(temp_map->begin(), temp_map->end());
+    temp_map = Servo::get_method_names_map();
+    method_map.insert(temp_map->begin(), temp_map->end());
+}
 
 
 #endif // CONTROLLERS_H

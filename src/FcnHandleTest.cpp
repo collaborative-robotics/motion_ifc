@@ -2,7 +2,7 @@
 
 
 int main(){
-    Interpolate controller;
+    Controllers controller;
     FcnHandle<_cp_data_type> * fcn_cp = controller.get_method_by_name<_cp_data_type>("interpolate_cp");
     FcnHandle<_cr_data_type> * fcn_cr = controller.get_method_by_name<_cp_data_type>("interpolate_cr");
     FcnHandle<_cv_data_type> * fcn_cv = controller.get_method_by_name<_cp_data_type>("interpolate_cv");
@@ -30,6 +30,10 @@ int main(){
     std::cout << "Passing the same handle to separate fcn \n";
     (*fcnBase)(cp_data);
     controller.get_method_by_name<_cr_data_type>("interpolate_cr", &fcnBase);
+    (*fcnBase)(cp_data);
+    controller.get_method_by_name<_cp_data_type>("move_cr", &fcnBase);
+    (*fcnBase)(cp_data);
+    controller.get_method_by_name<_cf_data_type>("servo_cf", &fcnBase);
     (*fcnBase)(cp_data);
 
     return 0;
