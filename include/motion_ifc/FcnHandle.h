@@ -28,7 +28,6 @@ public:
     }
 
     void operator()(D& data){
-        std::cout << "IMAPOTATO" << std::endl;
         fcn_handle(data);
     }
 

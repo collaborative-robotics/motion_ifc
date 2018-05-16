@@ -39,6 +39,19 @@ public:
         *fcn = (FcnHandle<D> *)method_map[method_name];
     }
 
+    void get_method_by_name_auto_specialized(std::string method_name, FcnHandleBase** fcn){
+        std::vector<std::string> x = split_str(method_name, '_');
+        char op_space = x[1][0];
+        if (op_space == 'c'){
+            std::cout << "Cartesian Space Specified" << std::endl;
+            *fcn = (FcnHandle<_cp_data_type> *)method_map[method_name];
+        }
+        else if (op_space == 'j'){
+            std::cout << "Joint Space Specified" << std::endl;
+            *fcn = (FcnHandle<_jp_data_type> *)method_map[method_name];
+        }
+    }
+
     _method_map_type* get_method_names_map(){
         return &method_map;
     }
@@ -80,7 +93,6 @@ void Interpolate::interpolate_cf(_cf_data_type &data){
 }
 
 void Interpolate::interpolate_jp(_jp_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
     std::cout << "Called: " << __FUNCTION__ << std::endl;
     serialize(data);
     cout << "Passed Data is \n" << x << std::endl;

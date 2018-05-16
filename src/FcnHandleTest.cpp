@@ -1,5 +1,5 @@
 #include <motion_ifc/Controllers.h>
-
+#include <motion_ifc/crtkCommon.h>
 
 int main(){
     Controllers controller;
@@ -41,6 +41,13 @@ int main(){
     (*fcnBase)(cp_data);
     controller.get_method_by_name<_cf_data_type>("servo_cf", &fcnBase);
     (*fcnBase)(cp_data);
+
+    FcnHandleBase* fcnAuto;
+    Interpolate interpController;
+    interpController.get_method_by_name_auto_specialized("interpolate_cp", &fcnAuto);
+    (*fcnAuto)(cp_data);
+    interpController.get_method_by_name_auto_specialized("interpolate_jp", &fcnAuto);
+    (*fcnAuto)(jp_data);
 
     return 0;
 }
