@@ -63,7 +63,8 @@ Interpolate::Interpolate(){
 
 void Interpolate::interpolate_cp(_cp_data_type &data){
     std::cout << "Called: " << __FUNCTION__ << std::endl;
-    std::cout << "Passed Transform is: \n" << data.transform.translation << std::endl;
+    serialize(data);
+    cout << "Passed Data is \n" << x << std::endl;
 }
 
 void Interpolate::interpolate_cr(_cr_data_type &data){
@@ -80,6 +81,9 @@ void Interpolate::interpolate_cf(_cf_data_type &data){
 
 void Interpolate::interpolate_jp(_jp_data_type &data){
     std::cout << "Called: " << __FUNCTION__ << std::endl;
+    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    serialize(data);
+    cout << "Passed Data is \n" << x << std::endl;
 }
 
 void Interpolate::interpolate_jr(_jr_data_type &data){
@@ -133,7 +137,6 @@ Move::Move(){
 
 void Move::move_cp(_cp_data_type &data){
     std::cout << "Called: " << __FUNCTION__ << std::endl;
-    std::cout << "Passed Transform is: \n" << data.transform.translation << std::endl;
 }
 
 void Move::move_cr(_cr_data_type &data){
@@ -196,7 +199,6 @@ Servo::Servo(){
 
 void Servo::servo_cp(_cp_data_type &data){
     std::cout << "Called: " << __FUNCTION__ << std::endl;
-    std::cout << "Passed Transform is: \n" << data.transform.translation << std::endl;
 }
 
 void Servo::servo_cr(_cr_data_type &data){

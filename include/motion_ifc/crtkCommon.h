@@ -1,6 +1,8 @@
 #ifndef CRTK_COMMON_H
 #define CRTK_COMMON_H
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
 
 typedef geometry_msgs::TransformStamped _cp_data_type;

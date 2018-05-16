@@ -14,7 +14,14 @@ int main(){
 
     _cp_data_type cp_data;
     _jp_data_type jp_data;
-    cp_data.transform.translation.x = 5.0;
+    DataConversion conversionClass;
+    conversionClass.x.resize(6);
+    conversionClass.x << 10, 2, -30, 90, 45, 33.33;
+    conversionClass.deserialize(&cp_data);
+    conversionClass.x.resize(3);
+    conversionClass.x << 0.0, 1.1, 2.2;
+    conversionClass.deserialize(&jp_data);
+
     (*fcn_cp)(cp_data);
     (*fcn_cr)(cp_data);
     (*fcn_cv)(cp_data);
@@ -27,7 +34,6 @@ int main(){
 
     FcnHandleBase* fcnBase;
     controller.get_method_by_name<_cp_data_type>("interpolate_cp", &fcnBase);
-    std::cout << "Passing the same handle to separate fcn \n";
     (*fcnBase)(cp_data);
     controller.get_method_by_name<_cr_data_type>("interpolate_cr", &fcnBase);
     (*fcnBase)(cp_data);
