@@ -27,9 +27,16 @@ public:
     void interpolate_jv(_jv_data_type &data);
     void interpolate_jf(_jf_data_type &data);
 
-    FcnHandleBase* get_method_by_name(std::string method_name){
-        return method_map[method_name];
+    template<typename D>
+    FcnHandle<D>* get_method_by_name(std::string method_name){
+        return (FcnHandle<D> *)method_map[method_name];
     }
+
+    template<typename D>
+    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
+        *fcn = (FcnHandle<D> *)method_map[method_name];
+    }
+
 
 private:
     std::map<std::string, FcnHandleBase*> method_map;

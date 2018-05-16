@@ -2,15 +2,15 @@
 
 
 int main(){
-    Interpolate intObj;
-    FcnHandle<_cp_data_type> * fcn_cp = (FcnHandle<_cp_data_type> *)intObj.get_method_by_name("interpolate_cp");
-    FcnHandle<_cr_data_type> * fcn_cr = (FcnHandle<_cp_data_type> *)intObj.get_method_by_name("interpolate_cr");
-    FcnHandle<_cv_data_type> * fcn_cv = (FcnHandle<_cp_data_type> *)intObj.get_method_by_name("interpolate_cv");
-    FcnHandle<_cf_data_type> * fcn_cf = (FcnHandle<_cp_data_type> *)intObj.get_method_by_name("interpolate_cf");
-    FcnHandle<_jp_data_type> * fcn_jp = (FcnHandle<_jp_data_type> *)intObj.get_method_by_name("interpolate_jp");
-    FcnHandle<_jr_data_type> * fcn_jr = (FcnHandle<_jr_data_type> *)intObj.get_method_by_name("interpolate_jr");
-    FcnHandle<_jv_data_type> * fcn_jv = (FcnHandle<_jv_data_type> *)intObj.get_method_by_name("interpolate_jv");
-    FcnHandle<_jf_data_type> * fcn_jf = (FcnHandle<_jf_data_type> *)intObj.get_method_by_name("interpolate_jf");
+    Interpolate controller;
+    FcnHandle<_cp_data_type> * fcn_cp = controller.get_method_by_name<_cp_data_type>("interpolate_cp");
+    FcnHandle<_cr_data_type> * fcn_cr = controller.get_method_by_name<_cp_data_type>("interpolate_cr");
+    FcnHandle<_cv_data_type> * fcn_cv = controller.get_method_by_name<_cp_data_type>("interpolate_cv");
+    FcnHandle<_cf_data_type> * fcn_cf = controller.get_method_by_name<_cp_data_type>("interpolate_cf");
+    FcnHandle<_jp_data_type> * fcn_jp = controller.get_method_by_name<_jp_data_type>("interpolate_jp");
+    FcnHandle<_jr_data_type> * fcn_jr = controller.get_method_by_name<_jr_data_type>("interpolate_jr");
+    FcnHandle<_jv_data_type> * fcn_jv = controller.get_method_by_name<_jv_data_type>("interpolate_jv");
+    FcnHandle<_jf_data_type> * fcn_jf = controller.get_method_by_name<_jf_data_type>("interpolate_jf");
 
     _cp_data_type cp_data;
     _jp_data_type jp_data;
@@ -25,5 +25,13 @@ int main(){
     (*fcn_jf)(jp_data);
 
 
+    FcnHandleBase* fcnBase;
+    controller.get_method_by_name<_cp_data_type>("interpolate_cp", &fcnBase);
+    std::cout << "Passing the same handle to separate fcn \n";
+    (*fcnBase)(cp_data);
+    controller.get_method_by_name<_cr_data_type>("interpolate_cr", &fcnBase);
+    (*fcnBase)(cp_data);
+
     return 0;
 }
+

@@ -1,11 +1,14 @@
 #ifndef FCN_HANDLE_H
 #define FCN_HANDLE_H
+#include <motion_ifc/crtkCommon.h>
 
 class FcnHandleBase{
 public:
     FcnHandleBase(){}
     void set();
-    void operator()(void);
+    virtual void operator()(void){}
+    virtual void operator()(_cp_data_type&){}
+    virtual void operator()(_jp_data_type&){}
 };
 
 template<typename D>
@@ -30,7 +33,6 @@ public:
     }
 
     boost::function<void (D&)> fcn_handle;
-    double idx;
     bool _is_set;
 };
 
