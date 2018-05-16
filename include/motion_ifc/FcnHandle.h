@@ -5,7 +5,6 @@
 class FcnHandleBase{
 public:
     FcnHandleBase(){}
-    void set();
     virtual void operator()(void){}
     virtual void operator()(_cp_data_type&){}
     virtual void operator()(_jp_data_type&){}

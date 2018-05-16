@@ -29,26 +29,42 @@ public:
     void interpolate_jv(_jv_data_type &data);
     void interpolate_jf(_jf_data_type &data);
 
-    template<typename D>
-    FcnHandle<D>* get_method_by_name(std::string method_name){
-        return (FcnHandle<D> *)method_map[method_name];
-    }
-
-    template<typename D>
-    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
-        *fcn = (FcnHandle<D> *)method_map[method_name];
-    }
-
-    void get_method_by_name_auto_specialized(std::string method_name, FcnHandleBase** fcn){
+    FcnHandleBase* get_method_by_name(std::string method_name){
         std::vector<std::string> x = split_str(method_name, '_');
         char op_space = x[1][0];
+        char controller = x[1][1];
+
         if (op_space == 'c'){
-            std::cout << "Cartesian Space Specified" << std::endl;
-            *fcn = (FcnHandle<_cp_data_type> *)method_map[method_name];
+            switch (controller){
+            case 'p':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cp_data_type> *)method_map[method_name];
+            case 'r':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cr_data_type> *)method_map[method_name];
+            case 'v':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cv_data_type> *)method_map[method_name];
+            case 'f':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cf_data_type> *)method_map[method_name];
+            }
         }
         else if (op_space == 'j'){
-            std::cout << "Joint Space Specified" << std::endl;
-            *fcn = (FcnHandle<_jp_data_type> *)method_map[method_name];
+            switch (controller){
+            case 'p':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jp_data_type> *)method_map[method_name];
+            case 'r':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jr_data_type> *)method_map[method_name];
+            case 'v':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jv_data_type> *)method_map[method_name];
+            case 'f':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jf_data_type> *)method_map[method_name];
+            }
         }
     }
 
@@ -120,14 +136,31 @@ public:
     void move_jp(_jp_data_type &data);
     void move_jr(_jr_data_type &data);
 
-    template<typename D>
-    FcnHandle<D>* get_method_by_name(std::string method_name){
-        return (FcnHandle<D> *)method_map[method_name];
-    }
+    FcnHandleBase* get_method_by_name(std::string method_name){
+        std::vector<std::string> x = split_str(method_name, '_');
+        char op_space = x[1][0];
+        char controller = x[1][1];
 
-    template<typename D>
-    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
-        *fcn = (FcnHandle<D> *)method_map[method_name];
+        if (op_space == 'c'){
+            switch (controller){
+            case 'p':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cp_data_type> *)method_map[method_name];
+            case 'r':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cp_data_type> *)method_map[method_name];
+            }
+        }
+        else if (op_space == 'j'){
+            switch (controller){
+            case 'p':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jp_data_type> *)method_map[method_name];
+            case 'r':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jr_data_type> *)method_map[method_name];
+            }
+        }
     }
 
     _method_map_type* get_method_names_map(){
@@ -177,14 +210,43 @@ public:
     void servo_jv(_jv_data_type &data);
     void servo_jf(_jf_data_type &data);
 
-    template<typename D>
-    FcnHandle<D>* get_method_by_name(std::string method_name){
-        return (FcnHandle<D> *)method_map[method_name];
-    }
+    FcnHandleBase* get_method_by_name(std::string method_name){
+        std::vector<std::string> x = split_str(method_name, '_');
+        char op_space = x[1][0];
+        char controller = x[1][1];
 
-    template<typename D>
-    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
-        *fcn = (FcnHandle<D> *)method_map[method_name];
+        if (op_space == 'c'){
+            switch (controller){
+            case 'p':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cp_data_type> *)method_map[method_name];
+            case 'r':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cr_data_type> *)method_map[method_name];
+            case 'v':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cv_data_type> *)method_map[method_name];
+            case 'f':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_cf_data_type> *)method_map[method_name];
+            }
+        }
+        else if (op_space == 'j'){
+            switch (controller){
+            case 'p':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jp_data_type> *)method_map[method_name];
+            case 'r':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jr_data_type> *)method_map[method_name];
+            case 'v':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jv_data_type> *)method_map[method_name];
+            case 'f':
+                std::cout << x[1] <<" Specified" << std::endl;
+                return (FcnHandle<_jf_data_type> *)method_map[method_name];
+            }
+        }
     }
 
     _method_map_type* get_method_names_map(){
@@ -246,29 +308,27 @@ class Controllers: public Interpolate, Move, Servo{
 public:
     Controllers();
 
-    template<typename D>
-    FcnHandle<D>* get_method_by_name(std::string method_name){
-        return (FcnHandle<D> *)method_map[method_name];
-    }
+    FcnHandleBase* get_method_by_name(std::string method_name){
+        std::vector<std::string> x = split_str(method_name, '_');
+        std::string mode = x[0];
+        char op_space = x[1][0];
+        char controller = x[1][1];
 
-    template<typename D>
-    void get_method_by_name(std::string method_name, FcnHandleBase** fcn){
-        *fcn = (FcnHandle<D> *)method_map[method_name];
+        if (mode.compare("interpolate") == 0){
+            return Interpolate::get_method_by_name(method_name);
+        }
+        if (mode.compare("move") == 0){
+            return Move::get_method_by_name(method_name);
+        }
+        if (mode.compare("servo") == 0){
+            return Servo::get_method_by_name(method_name);
+        }
     }
 
 private:
-    _method_map_type method_map;
 };
 
 Controllers::Controllers(){
-    std::cout << "Size " << method_map.size() << std::endl;
-    _method_map_type* temp_map;
-    temp_map = Interpolate::get_method_names_map();
-    method_map.insert(temp_map->begin(), temp_map->end());
-    temp_map = Move::get_method_names_map();
-    method_map.insert(temp_map->begin(), temp_map->end());
-    temp_map = Servo::get_method_names_map();
-    method_map.insert(temp_map->begin(), temp_map->end());
 }
 
 
