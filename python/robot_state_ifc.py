@@ -143,8 +143,6 @@ class RobotStateIfc(object):
         self._methods_dict = dict()
         for state_class in self.state_class_list:
             self._methods_dict.update(state_class.get_methods_dict())
-        namespace = '/dvrk'
-        arm_name = '/MTMR/'
         prefix = namespace + arm_name
         self.comm_ifc_list = [
             RobotStateCommIfc(prefix + 'measured_cp', TransformStamped, self, True, 10),

@@ -12,8 +12,6 @@ class RobotCmdCommIfc(CommunicationIfc):
 
 class RobotCmdIfc(object):
     def __init__(self, namespace, arm_name):
-        namespace = '/dvrk'
-        arm_name = '/MTMR/'
         prefix = namespace + arm_name
         self.comm_ifc_list = [
             RobotCmdCommIfc(prefix + 'servo_cp', TransformStamped, True, 10),
