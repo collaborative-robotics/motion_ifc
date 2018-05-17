@@ -5,9 +5,9 @@
 class FcnHandleBase{
 public:
     FcnHandleBase(){}
-    virtual void operator()(void){}
-    virtual void operator()(_cp_data_type&){}
-    virtual void operator()(_jp_data_type&){}
+    inline virtual void operator()(void){}
+    inline virtual void operator()(_cp_data_type&){}
+    inline virtual void operator()(_jp_data_type&){}
 };
 
 template<typename D>
@@ -26,7 +26,7 @@ public:
         _is_set = true;
     }
 
-    void operator()(D& data){
+    inline void operator()(D& data){
         fcn_handle(data);
     }
 

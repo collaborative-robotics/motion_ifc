@@ -22,6 +22,10 @@ include_directories(
 set (HDR_FILES include/${PROJECT_NAME}/Trajectory.h
                include/${PROJECT_NAME}/Controllers.h
                include/${PROJECT_NAME}/DataConversion.h
+               include/${PROJECT_NAME}/Communication.h
+               include/${PROJECT_NAME}/MotionCmdIfc.h
+               include/${PROJECT_NAME}/RobotCmdIfc.h
+               include/${PROJECT_NAME}/RobotStateIfc.h
                include/${PROJECT_NAME}/crtkCommon.h
                include/${PROJECT_NAME}/FcnHandle.h)
 
@@ -31,6 +35,7 @@ set (SRC_FILES src/Trajectory.cpp
 add_executable(${PROJECT_NAME}_node ${SRC_FILES} ${HDR_FILES})
 add_executable(conversion_test src/ConversionTest.cpp)
 add_executable(fcn_handle_test src/FcnHandleTest.cpp)
+add_executable(communication_test src/CommunicationTest.cpp include/${PROJECT_NAME}/Communication.h)
 
  target_link_libraries(${PROJECT_NAME}_node
      ${catkin_LIBRARIES})
@@ -38,4 +43,5 @@ add_executable(fcn_handle_test src/FcnHandleTest.cpp)
     ${catkin_LIBRARIES})
 target_link_libraries(fcn_handle_test
    ${catkin_LIBRARIES})
-
+target_link_libraries(communication_test
+   ${catkin_LIBRARIES})

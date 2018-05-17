@@ -1,4 +1,0 @@
-#ifndef MOTOINCMDIFC_H
-#define MOTOINCMDIFC_H
-
-#endif // MOTOINCMDIFC_H

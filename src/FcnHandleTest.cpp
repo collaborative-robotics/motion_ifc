@@ -18,7 +18,7 @@ int main(){
     // specialized based on the crtk grammar
 
     // For Interpolate Sub-conroller
-    FcnHandleBase* method_handle;
+    boost::shared_ptr<FcnHandleBase> method_handle;
     Interpolate interpController;
     method_handle = interpController.get_method_by_name("interpolate_cp");
     (*method_handle)(cp_data);
@@ -43,28 +43,28 @@ int main(){
 
     // And we can get and subcontroller method from the controller class as well
     Controllers controller;
-    FcnHandleBase * interpolate_cp = controller.get_method_by_name("interpolate_cp");
-    FcnHandleBase * interpolate_cr = controller.get_method_by_name("interpolate_cr");
-    FcnHandleBase * interpolate_cv = controller.get_method_by_name("interpolate_cv");
-    FcnHandleBase * interpolate_cf = controller.get_method_by_name("interpolate_cf");
-    FcnHandleBase * interpolate_jp = controller.get_method_by_name("interpolate_jp");
-    FcnHandleBase * interpolate_jr = controller.get_method_by_name("interpolate_jr");
-    FcnHandleBase * interpolate_jv = controller.get_method_by_name("interpolate_jv");
-    FcnHandleBase * interpolate_jf = controller.get_method_by_name("interpolate_jf");
+    boost::shared_ptr<FcnHandleBase> interpolate_cp = controller.get_method_by_name("interpolate_cp");
+    boost::shared_ptr<FcnHandleBase> interpolate_cr = controller.get_method_by_name("interpolate_cr");
+    boost::shared_ptr<FcnHandleBase> interpolate_cv = controller.get_method_by_name("interpolate_cv");
+    boost::shared_ptr<FcnHandleBase> interpolate_cf = controller.get_method_by_name("interpolate_cf");
+    boost::shared_ptr<FcnHandleBase> interpolate_jp = controller.get_method_by_name("interpolate_jp");
+    boost::shared_ptr<FcnHandleBase> interpolate_jr = controller.get_method_by_name("interpolate_jr");
+    boost::shared_ptr<FcnHandleBase> interpolate_jv = controller.get_method_by_name("interpolate_jv");
+    boost::shared_ptr<FcnHandleBase> interpolate_jf = controller.get_method_by_name("interpolate_jf");
 
-    FcnHandleBase * servo_cp = controller.get_method_by_name("servo_cp");
-    FcnHandleBase * servo_cr = controller.get_method_by_name("servo_cr");
-    FcnHandleBase * servo_cv = controller.get_method_by_name("servo_cv");
-    FcnHandleBase * servo_cf = controller.get_method_by_name("servo_cf");
-    FcnHandleBase * servo_jp = controller.get_method_by_name("servo_jp");
-    FcnHandleBase * servo_jr = controller.get_method_by_name("servo_jr");
-    FcnHandleBase * servo_jv = controller.get_method_by_name("servo_jv");
-    FcnHandleBase * servo_jf = controller.get_method_by_name("servo_jf");
+    boost::shared_ptr<FcnHandleBase> servo_cp = controller.get_method_by_name("servo_cp");
+    boost::shared_ptr<FcnHandleBase> servo_cr = controller.get_method_by_name("servo_cr");
+    boost::shared_ptr<FcnHandleBase> servo_cv = controller.get_method_by_name("servo_cv");
+    boost::shared_ptr<FcnHandleBase> servo_cf = controller.get_method_by_name("servo_cf");
+    boost::shared_ptr<FcnHandleBase> servo_jp = controller.get_method_by_name("servo_jp");
+    boost::shared_ptr<FcnHandleBase> servo_jr = controller.get_method_by_name("servo_jr");
+    boost::shared_ptr<FcnHandleBase> servo_jv = controller.get_method_by_name("servo_jv");
+    boost::shared_ptr<FcnHandleBase> servo_jf = controller.get_method_by_name("servo_jf");
 
-    FcnHandleBase * move_cp = controller.get_method_by_name("move_cp");
-    FcnHandleBase * move_cr = controller.get_method_by_name("move_cr");
-    FcnHandleBase * move_jp = controller.get_method_by_name("move_jp");
-    FcnHandleBase * move_jr = controller.get_method_by_name("move_jr");
+    boost::shared_ptr<FcnHandleBase> move_cp = controller.get_method_by_name("move_cp");
+    boost::shared_ptr<FcnHandleBase> move_cr = controller.get_method_by_name("move_cr");
+    boost::shared_ptr<FcnHandleBase> move_jp = controller.get_method_by_name("move_jp");
+    boost::shared_ptr<FcnHandleBase> move_jr = controller.get_method_by_name("move_jr");
 
     (*interpolate_cp)(cp_data);
     (*interpolate_cr)(cp_data);

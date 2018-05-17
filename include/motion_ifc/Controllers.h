@@ -9,15 +9,12 @@
 
 using namespace Eigen;
 
-typedef std::map<std::string, FcnHandleBase*> _method_map_type;
+typedef std::map<std::string, boost::shared_ptr<FcnHandleBase> > _method_map_type;
 
 class Interpolate: public DataConversion{
 public:
     Interpolate();
     ~Interpolate(){
-        for (_method_iterator = method_map.begin(); _method_iterator != method_map.end() ; _method_iterator++){
-            delete _method_iterator->second;
-        }
     }
     void interpolate_cp(_cp_data_type &data);
     void interpolate_cr(_cr_data_type &data);
@@ -29,43 +26,8 @@ public:
     void interpolate_jv(_jv_data_type &data);
     void interpolate_jf(_jf_data_type &data);
 
-    FcnHandleBase* get_method_by_name(std::string method_name){
-        std::vector<std::string> x = split_str(method_name, '_');
-        char op_space = x[1][0];
-        char controller = x[1][1];
-
-        if (op_space == 'c'){
-            switch (controller){
-            case 'p':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cp_data_type> *)method_map[method_name];
-            case 'r':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cr_data_type> *)method_map[method_name];
-            case 'v':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cv_data_type> *)method_map[method_name];
-            case 'f':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cf_data_type> *)method_map[method_name];
-            }
-        }
-        else if (op_space == 'j'){
-            switch (controller){
-            case 'p':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jp_data_type> *)method_map[method_name];
-            case 'r':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jr_data_type> *)method_map[method_name];
-            case 'v':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jv_data_type> *)method_map[method_name];
-            case 'f':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jf_data_type> *)method_map[method_name];
-            }
-        }
+    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
+        return method_map[method_name];
     }
 
     _method_map_type* get_method_names_map(){
@@ -79,15 +41,15 @@ private:
 };
 
 Interpolate::Interpolate(){
-    method_map["interpolate_cp"] = new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this);
-    method_map["interpolate_cr"] = new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this);
-    method_map["interpolate_cv"] = new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this);
-    method_map["interpolate_cf"] = new FcnHandle<_cf_data_type>(&Interpolate::interpolate_cf, this);
+    method_map["interpolate_cp"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this));
+    method_map["interpolate_cr"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this));
+    method_map["interpolate_cv"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this));
+    method_map["interpolate_cf"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cf_data_type>(&Interpolate::interpolate_cf, this));
 
-    method_map["interpolate_jp"] = new FcnHandle<_jp_data_type>(&Interpolate::interpolate_jp, this);
-    method_map["interpolate_jr"] = new FcnHandle<_jr_data_type>(&Interpolate::interpolate_jr, this);
-    method_map["interpolate_jv"] = new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this);
-    method_map["interpolate_jf"] = new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this);
+    method_map["interpolate_jp"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jp_data_type>(&Interpolate::interpolate_jp, this));
+    method_map["interpolate_jr"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jr_data_type>(&Interpolate::interpolate_jr, this));
+    method_map["interpolate_jv"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this));
+    method_map["interpolate_jf"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this));
 }
 
 void Interpolate::interpolate_cp(_cp_data_type &data){
@@ -136,31 +98,8 @@ public:
     void move_jp(_jp_data_type &data);
     void move_jr(_jr_data_type &data);
 
-    FcnHandleBase* get_method_by_name(std::string method_name){
-        std::vector<std::string> x = split_str(method_name, '_');
-        char op_space = x[1][0];
-        char controller = x[1][1];
-
-        if (op_space == 'c'){
-            switch (controller){
-            case 'p':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cp_data_type> *)method_map[method_name];
-            case 'r':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cp_data_type> *)method_map[method_name];
-            }
-        }
-        else if (op_space == 'j'){
-            switch (controller){
-            case 'p':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jp_data_type> *)method_map[method_name];
-            case 'r':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jr_data_type> *)method_map[method_name];
-            }
-        }
+    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
+        return method_map[method_name];
     }
 
     _method_map_type* get_method_names_map(){
@@ -174,10 +113,10 @@ private:
 };
 
 Move::Move(){
-    method_map["move_cp"] = new FcnHandle<_cp_data_type>(&Move::move_cp, this);
-    method_map["move_cr"] = new FcnHandle<_cr_data_type>(&Move::move_cr, this);
-    method_map["move_jp"] = new FcnHandle<_jp_data_type>(&Move::move_jp, this);
-    method_map["move_jr"] = new FcnHandle<_jr_data_type>(&Move::move_jr, this);
+    method_map["move_cp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cp_data_type>(&Move::move_cp, this));
+    method_map["move_cr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cr_data_type>(&Move::move_cr, this));
+    method_map["move_jp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jp_data_type>(&Move::move_jp, this));
+    method_map["move_jr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jr_data_type>(&Move::move_jr, this));
 }
 
 void Move::move_cp(_cp_data_type &data){
@@ -210,43 +149,8 @@ public:
     void servo_jv(_jv_data_type &data);
     void servo_jf(_jf_data_type &data);
 
-    FcnHandleBase* get_method_by_name(std::string method_name){
-        std::vector<std::string> x = split_str(method_name, '_');
-        char op_space = x[1][0];
-        char controller = x[1][1];
-
-        if (op_space == 'c'){
-            switch (controller){
-            case 'p':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cp_data_type> *)method_map[method_name];
-            case 'r':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cr_data_type> *)method_map[method_name];
-            case 'v':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cv_data_type> *)method_map[method_name];
-            case 'f':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_cf_data_type> *)method_map[method_name];
-            }
-        }
-        else if (op_space == 'j'){
-            switch (controller){
-            case 'p':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jp_data_type> *)method_map[method_name];
-            case 'r':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jr_data_type> *)method_map[method_name];
-            case 'v':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jv_data_type> *)method_map[method_name];
-            case 'f':
-                std::cout << x[1] <<" Specified" << std::endl;
-                return (FcnHandle<_jf_data_type> *)method_map[method_name];
-            }
-        }
+    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
+        return method_map[method_name];
     }
 
     _method_map_type* get_method_names_map(){
@@ -260,15 +164,14 @@ private:
 };
 
 Servo::Servo(){
-    method_map["servo_cp"] = new FcnHandle<_cp_data_type>(&Servo::servo_cp, this);
-    method_map["servo_cr"] = new FcnHandle<_cr_data_type>(&Servo::servo_cr, this);
-    method_map["servo_cv"] = new FcnHandle<_cv_data_type>(&Servo::servo_cv, this);
-    method_map["servo_cf"] = new FcnHandle<_cf_data_type>(&Servo::servo_cf, this);
-
-    method_map["servo_jp"] = new FcnHandle<_jp_data_type>(&Servo::servo_jp, this);
-    method_map["servo_jr"] = new FcnHandle<_jr_data_type>(&Servo::servo_jr, this);
-    method_map["servo_jv"] = new FcnHandle<_jv_data_type>(&Servo::servo_jv, this);
-    method_map["servo_jf"] = new FcnHandle<_jf_data_type>(&Servo::servo_jf, this);
+    method_map["servo_cp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cp_data_type>(&Servo::servo_cp, this));
+    method_map["servo_cr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cr_data_type>(&Servo::servo_cr, this));
+    method_map["servo_cv"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cv_data_type>(&Servo::servo_cv, this));
+    method_map["servo_cf"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cf_data_type>(&Servo::servo_cf, this));
+    method_map["servo_jp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jp_data_type>(&Servo::servo_jp, this));
+    method_map["servo_jr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jr_data_type>(&Servo::servo_jr, this));
+    method_map["servo_jv"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jv_data_type>(&Servo::servo_jv, this));
+    method_map["servo_jf"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jf_data_type>(&Servo::servo_jf, this));
 }
 
 void Servo::servo_cp(_cp_data_type &data){
@@ -308,7 +211,7 @@ class Controllers: public Interpolate, Move, Servo{
 public:
     Controllers();
 
-    FcnHandleBase* get_method_by_name(std::string method_name){
+    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
         std::vector<std::string> x = split_str(method_name, '_');
         std::string mode = x[0];
         char op_space = x[1][0];
