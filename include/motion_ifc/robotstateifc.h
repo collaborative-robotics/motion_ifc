@@ -1,0 +1,4 @@
+#ifndef ROBOTSTATEIFC_H
+#define ROBOTSTATEIFC_H
+
+#endif // ROBOTSTATEIFC_H

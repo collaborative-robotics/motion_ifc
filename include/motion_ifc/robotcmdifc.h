@@ -1,0 +1,4 @@
+#ifndef ROBOTCMDIFC_H
+#define ROBOTCMDIFC_H
+
+#endif // ROBOTCMDIFC_H

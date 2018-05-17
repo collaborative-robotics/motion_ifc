@@ -1,6 +1,13 @@
 # motion_ifc
 This code provides a proto-type implemention of a mid-level controller, implemented using crtk_api.
 This underlying code uses the command-pattern and binds each topic to a methods with a similar name. 
+
+## HOW TO RUN:
+Just run **test.py** to run the motion_ifc
+
+You can set the robot namespace and arm name in **main.py**
+
+To test the interpolation, just run **test_interpolation.py**
 ## State-Command Structure
 Some things to consider while browsing this code:
 1. The user commands the **motion_ifc** using rostopics. This is handled by **moition_cmd_ifc**. Hence user commands are 
