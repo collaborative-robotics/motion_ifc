@@ -34,4 +34,110 @@ void CommunicationBase::init(){
     node.reset(new ros::NodeHandle);
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+
+template <typename D>
+class Communication: public CommunicationBase{
+public:
+    Communication(string topic_name, bool is_publisher=false);
+    virtual void set_data(D&);
+    virtual void get_data(D&);
+    void cb(const boost::shared_ptr<D const> &data);
+
+private:
+    bool is_publisher;
+    D cb_data;
+};
+
+template <typename D>
+Communication<D>::Communication(string topic_name, bool is_publisher){
+    is_publisher = is_publisher;
+    if (is_publisher){
+        pub = CommunicationBase::node->advertise<D>(topic_name, 10);
+    }
+    else{
+        sub = CommunicationBase::node->subscribe(topic_name, 10, &Communication<D>::cb, this);
+    }
+}
+
+template <typename D>
+void Communication<D>::cb(const boost::shared_ptr<const D> &data){
+    std::cout << "Data Received at " << ros::Time::now().toSec() << std::endl ;
+    cb_data = *data;
+}
+
+template<typename D>
+void Communication<D>::get_data(D &data){
+    data = cb_data;
+}
+
+template<typename D>
+void Communication<D>::set_data(D& data){
+    pub.publish(data);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+class CommunicationIfc{
+public:
+    CommunicationIfc(){
+
+    }
+    boost::shared_ptr<CommunicationBase> create_communication_interface(std::string interface_name, bool is_publisher);
+};
+
+boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_interface(std::string interface_name, bool is_publisher){
+    std::vector<std::string> x = split_str(interface_name, '/');
+    std::vector<std::string> crtk_str = split_str(x.back(), '_');
+    char op_space = crtk_str[1][0];
+    char controller = crtk_str[1][1];
+
+    std::cout << interface_name << std::endl;
+
+    boost::shared_ptr<CommunicationBase> commIfc;
+    if (op_space == 'c'){
+        switch (controller){
+        case 'p':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cp_data_type>(interface_name, is_publisher));
+            break;
+        case 'r':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cr_data_type>(interface_name, is_publisher));
+            break;
+        case 'v':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cv_data_type>(interface_name, is_publisher));
+            break;
+        case 'f':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cf_data_type>(interface_name, is_publisher));
+            break;
+        default:
+            throw "The specified format isn't understood";
+        }
+    }
+    else if (op_space == 'j'){
+        switch (controller){
+        case 'p':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jp_data_type>(interface_name, is_publisher));
+            break;
+        case 's':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_js_data_type>(interface_name, is_publisher));
+            break;
+        case 'r':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jr_data_type>(interface_name, is_publisher));
+            break;
+        case 'v':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jv_data_type>(interface_name, is_publisher));
+            break;
+        case 'f':
+            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jf_data_type>(interface_name, is_publisher));
+            break;
+        default:
+            throw "The specified format isn't understood";
+        }
+
+    }
+    std::cout << interface_name << std::endl;
+    return commIfc;
+}
+
 #endif

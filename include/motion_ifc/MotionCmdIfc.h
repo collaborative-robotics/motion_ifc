@@ -3,65 +3,48 @@
 
 #include <motion_ifc/Communication.h>
 
-template <typename D>
-class MotionCommunicatonIfc: public CommunicationBase{
-public:
-    MotionCommunicatonIfc(string topic_name, bool is_publisher=false);
-    virtual void set_data(D&){}
-    virtual void get_data(D&);
-    void cb(const boost::shared_ptr<D const> &data);
-
-private:
-    D cb_data;
-};
-
-template <typename D>
-MotionCommunicatonIfc<D>::MotionCommunicatonIfc(string topic_name, bool is_publisher){
-    if (is_publisher){
-        pub = CommunicationBase::node->advertise<D>(topic_name, 10);
-    }
-    else{
-        sub = CommunicationBase::node->subscribe(topic_name, 10, &MotionCommunicatonIfc<D>::cb, this);
-    }
-}
-
-template <typename D>
-void MotionCommunicatonIfc<D>::cb(const boost::shared_ptr<const D> &data){
-    std::cout << "Data Received at " << ros::Time::now().toSec() << std::endl ;
-    cb_data = *data;
-}
-
-template<typename D>
-void MotionCommunicatonIfc<D>::get_data(D &data){
-    data = cb_data;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////
+typedef boost::shared_ptr<CommunicationBase> motionIfc;
 
 class MotionCmdIfc{
 public:
-    MotionCmdIfc(){
+    MotionCmdIfc();
 
-    }
-    boost::shared_ptr<CommunicationBase> create_communication_interface(std::string interface_name);
+    motionIfc interpolte_cp_ifc;
+    motionIfc interpolte_cr_ifc;
+    motionIfc interpolte_cv_ifc;
+    motionIfc interpolte_cf_ifc;
+
+    motionIfc interpolte_jp_ifc;
+    motionIfc interpolte_jr_ifc;
+    motionIfc interpolte_jv_ifc;
+    motionIfc interpolte_jf_ifc;
+
+    motionIfc move_cp_ifc;
+    motionIfc move_cr_ifc;
+
+    motionIfc move_jp_ifc;
+    motionIfc move_jr_ifc;
+
+
+private:
+    CommunicationIfc commIfc;
 };
 
-boost::shared_ptr<CommunicationBase> MotionCmdIfc::create_communication_interface(std::string interface_name){
-    std::vector<std::string> x = split_str(interface_name, '/');
-    std::vector<std::string> crtk_str = split_str(x.back(), '_');
-    char op_space = crtk_str[1][0];
-    char controller = crtk_str[1][1];
+MotionCmdIfc::MotionCmdIfc(){
+    interpolte_cp_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cp", false);
+    interpolte_cr_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cr", false);
+    interpolte_cv_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cv", false);
+    interpolte_cf_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cf", false);
 
-    if (op_space == 'c'){
-        boost::shared_ptr<CommunicationBase> commIfc(new MotionCommunicatonIfc<_cp_data_type>(interface_name));
-        return commIfc;
-    }
-    else if (op_space == 'j'){
-        boost::shared_ptr<CommunicationBase> commIfc(new MotionCommunicatonIfc<_jp_data_type>(interface_name));
-        return commIfc;
+    interpolte_jp_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jp", false);
+    interpolte_jr_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jr", false);
+    interpolte_jv_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jv", false);
+    interpolte_jf_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jf", false);
 
-    }
+    move_cp_ifc       = commIfc.create_communication_interface("/motion_ifc/move_cp", false);
+    move_cr_ifc       = commIfc.create_communication_interface("/motion_ifc/move_cr", false);
+    move_jp_ifc       = commIfc.create_communication_interface("/motion_ifc/move_jp", false);
+    move_jr_ifc       = commIfc.create_communication_interface("/motion_ifc/move_jr", false);
 }
 
 #endif

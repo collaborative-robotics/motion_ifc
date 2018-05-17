@@ -15,6 +15,7 @@ typedef geometry_msgs::TransformStamped _cv_data_type;
 typedef geometry_msgs::TransformStamped _cf_data_type;
 
 typedef sensor_msgs::JointState _jp_data_type;
+typedef sensor_msgs::JointState _js_data_type;
 typedef sensor_msgs::JointState _jr_data_type;
 typedef sensor_msgs::JointState _jv_data_type;
 typedef sensor_msgs::JointState _jf_data_type;
