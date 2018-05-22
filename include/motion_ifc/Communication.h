@@ -1,12 +1,16 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
+
 #include <motion_ifc/crtkCommon.h>
 #include <ros/ros.h>
 #include <motion_ifc/FcnHandle.h>
-#include <motion_ifc/Controllers.h>
 #include <memory>
 
+using namespace std;
+class CommunicationIfc;
+
 class CommunicationBase{
+
 public:
     CommunicationBase(){init();}
     static void init();
@@ -95,20 +99,20 @@ boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_inte
 
     std::cout << interface_name << std::endl;
 
-    boost::shared_ptr<CommunicationBase> commIfc;
+    boost::shared_ptr<CommunicationBase> commBase;
     if (op_space == 'c'){
         switch (controller){
         case 'p':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cp_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cp_data_type>(interface_name, is_publisher));
             break;
         case 'r':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cr_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cr_data_type>(interface_name, is_publisher));
             break;
         case 'v':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cv_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cv_data_type>(interface_name, is_publisher));
             break;
         case 'f':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_cf_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cf_data_type>(interface_name, is_publisher));
             break;
         default:
             throw "The specified format isn't understood";
@@ -117,19 +121,19 @@ boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_inte
     else if (op_space == 'j'){
         switch (controller){
         case 'p':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jp_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jp_data_type>(interface_name, is_publisher));
             break;
         case 's':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_js_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_js_data_type>(interface_name, is_publisher));
             break;
         case 'r':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jr_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jr_data_type>(interface_name, is_publisher));
             break;
         case 'v':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jv_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jv_data_type>(interface_name, is_publisher));
             break;
         case 'f':
-            commIfc = boost::shared_ptr<CommunicationBase>(new Communication<_jf_data_type>(interface_name, is_publisher));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jf_data_type>(interface_name, is_publisher));
             break;
         default:
             throw "The specified format isn't understood";
@@ -137,7 +141,8 @@ boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_inte
 
     }
     std::cout << interface_name << std::endl;
-    return commIfc;
+    return commBase;
 }
+
 
 #endif

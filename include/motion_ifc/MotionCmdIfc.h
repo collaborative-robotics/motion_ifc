@@ -3,27 +3,25 @@
 
 #include <motion_ifc/Communication.h>
 
-typedef boost::shared_ptr<CommunicationBase> motionIfc;
-
 class MotionCmdIfc{
 public:
     MotionCmdIfc();
 
-    motionIfc interpolte_cp_ifc;
-    motionIfc interpolte_cr_ifc;
-    motionIfc interpolte_cv_ifc;
-    motionIfc interpolte_cf_ifc;
+    comBasePtr interpolte_cp_ifc;
+    comBasePtr interpolte_cr_ifc;
+    comBasePtr interpolte_cv_ifc;
+    comBasePtr interpolte_cf_ifc;
 
-    motionIfc interpolte_jp_ifc;
-    motionIfc interpolte_jr_ifc;
-    motionIfc interpolte_jv_ifc;
-    motionIfc interpolte_jf_ifc;
+    comBasePtr interpolte_jp_ifc;
+    comBasePtr interpolte_jr_ifc;
+    comBasePtr interpolte_jv_ifc;
+    comBasePtr interpolte_jf_ifc;
 
-    motionIfc move_cp_ifc;
-    motionIfc move_cr_ifc;
+    comBasePtr move_cp_ifc;
+    comBasePtr move_cr_ifc;
 
-    motionIfc move_jp_ifc;
-    motionIfc move_jr_ifc;
+    comBasePtr move_jp_ifc;
+    comBasePtr move_jr_ifc;
 
 
 private:

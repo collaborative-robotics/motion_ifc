@@ -34,6 +34,14 @@ void DataConversion::serialize<sensor_msgs::JointState>(sensor_msgs::JointState 
 }
 
 template<>
+void DataConversion::serialize<std::vector<double> >(std::vector<double> &data){
+    x.resize(data.size());
+    for (int i = 0 ; i < data.size(); i++){
+        x[i] = data[i];
+    }
+}
+
+template<>
 void DataConversion::serialize<geometry_msgs::TransformStamped>(geometry_msgs::TransformStamped &data){
     tf::Quaternion quat;
     tf::Matrix3x3 mat;
@@ -89,6 +97,14 @@ void DataConversion::deserialize<sensor_msgs::JointState>(sensor_msgs::JointStat
     data->position.resize(x.rows());
     for (int i = 0 ; i < x.rows(); i++){
         data->position[i] = x[i];
+    }
+}
+
+template<>
+void DataConversion::deserialize<std::vector<double> >(std::vector<double> *data){
+    data->resize(x.rows());
+    for (int i = 0 ; i < x.rows(); i++){
+        data->at(i) = x[i];
     }
 }
 

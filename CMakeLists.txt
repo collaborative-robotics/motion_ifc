@@ -29,9 +29,10 @@ set (HDR_FILES include/${PROJECT_NAME}/Trajectory.h
                include/${PROJECT_NAME}/crtkCommon.h
                include/${PROJECT_NAME}/FcnHandle.h)
 
-set (SRC_FILES src/Trajectory.cpp
-               src/Controllers.cpp
-               src/DataConversion.cpp)
+set (SRC_FILES src/Controllers.cpp
+               src/DataConversion.cpp
+               src/TrajectoryTest.cpp)
+
 add_executable(${PROJECT_NAME}_node ${SRC_FILES} ${HDR_FILES})
 add_executable(conversion_test src/ConversionTest.cpp)
 add_executable(fcn_handle_test src/FcnHandleTest.cpp)
@@ -41,7 +42,7 @@ add_executable(communication_test src/CommunicationTest.cpp include/${PROJECT_NA
      ${catkin_LIBRARIES})
  target_link_libraries(conversion_test
     ${catkin_LIBRARIES})
-target_link_libraries(fcn_handle_test
-   ${catkin_LIBRARIES})
-target_link_libraries(communication_test
-   ${catkin_LIBRARIES})
+ target_link_libraries(fcn_handle_test
+    ${catkin_LIBRARIES})
+ target_link_libraries(communication_test
+    ${catkin_LIBRARIES})
