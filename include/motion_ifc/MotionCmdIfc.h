@@ -2,47 +2,65 @@
 #define MOTIONCMDIFC_H
 
 #include <motion_ifc/Communication.h>
+#include <motion_ifc/Controllers.h>
 
+//////////
+/// \brief The MotionCmdIfc class
+///
 class MotionCmdIfc{
 public:
     MotionCmdIfc();
 
-    comBasePtr interpolte_cp_ifc;
-    comBasePtr interpolte_cr_ifc;
-    comBasePtr interpolte_cv_ifc;
-    comBasePtr interpolte_cf_ifc;
+    CommBasePtr interpolate_cp_ifc;
+    CommBasePtr interpolate_cr_ifc;
+    CommBasePtr interpolate_cv_ifc;
+    CommBasePtr interpolate_cf_ifc;
 
-    comBasePtr interpolte_jp_ifc;
-    comBasePtr interpolte_jr_ifc;
-    comBasePtr interpolte_jv_ifc;
-    comBasePtr interpolte_jf_ifc;
+    CommBasePtr interpolate_jp_ifc;
+    CommBasePtr interpolate_jr_ifc;
+    CommBasePtr interpolate_jv_ifc;
+    CommBasePtr interpolate_jf_ifc;
 
-    comBasePtr move_cp_ifc;
-    comBasePtr move_cr_ifc;
+    CommBasePtr move_cp_ifc;
+    CommBasePtr move_cr_ifc;
 
-    comBasePtr move_jp_ifc;
-    comBasePtr move_jr_ifc;
+    CommBasePtr move_jp_ifc;
+    CommBasePtr move_jr_ifc;
+
+    void create_motion_command_interface(std::string topic_name, CommBasePtr& comBase);
 
 
 private:
     CommunicationIfc commIfc;
+    Controllers controller_ifc;
 };
 
+
+/////////
+/// \brief MotionCmdIfc::MotionCmdIfc
+///
 MotionCmdIfc::MotionCmdIfc(){
-    interpolte_cp_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cp", false);
-    interpolte_cr_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cr", false);
-    interpolte_cv_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cv", false);
-    interpolte_cf_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_cf", false);
+    create_motion_command_interface("/motion_ifc/interpolate_cp", interpolate_cp_ifc);
+    create_motion_command_interface("/motion_ifc/interpolate_cr", interpolate_cr_ifc);
+    create_motion_command_interface("/motion_ifc/interpolate_cv", interpolate_cv_ifc);
+    create_motion_command_interface("/motion_ifc/interpolate_cf", interpolate_cf_ifc);
 
-    interpolte_jp_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jp", false);
-    interpolte_jr_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jr", false);
-    interpolte_jv_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jv", false);
-    interpolte_jf_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jf", false);
+    create_motion_command_interface("/motion_ifc/interpolate_jp", interpolate_jp_ifc);
+    create_motion_command_interface("/motion_ifc/interpolate_jr", interpolate_jr_ifc);
+    create_motion_command_interface("/motion_ifc/interpolate_jv", interpolate_jv_ifc);
+    create_motion_command_interface("/motion_ifc/interpolate_jf", interpolate_jf_ifc);
 
-    move_cp_ifc       = commIfc.create_communication_interface("/motion_ifc/move_cp", false);
-    move_cr_ifc       = commIfc.create_communication_interface("/motion_ifc/move_cr", false);
-    move_jp_ifc       = commIfc.create_communication_interface("/motion_ifc/move_jp", false);
-    move_jr_ifc       = commIfc.create_communication_interface("/motion_ifc/move_jr", false);
+    create_motion_command_interface("/motion_ifc/move_cp", move_cp_ifc);
+    create_motion_command_interface("/motion_ifc/move_cr", move_cr_ifc);
+    create_motion_command_interface("/motion_ifc/move_jp", move_jp_ifc);
+    create_motion_command_interface("/motion_ifc/move_jr", move_jr_ifc);
+
+}
+
+void MotionCmdIfc::create_motion_command_interface(string topic_name, CommBasePtr& comBase){
+    comBase = commIfc.create_communication_interface(topic_name, INCOMING);
+    std::vector<std::string> x = split_str(topic_name, '/');
+    comBase->command_method = controller_ifc.get_method_by_name(x.back());
 }
 
 #endif

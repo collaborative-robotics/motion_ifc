@@ -3,8 +3,6 @@
 
 #include <motion_ifc/Communication.h>
 
-typedef std::map<std::string, boost::shared_ptr<FcnHandleBase> > _method_map_type;
-
 //class Measured{
 //    Measured();
 //    _cp_data_type measured_cp();
@@ -41,15 +39,17 @@ typedef std::map<std::string, boost::shared_ptr<FcnHandleBase> > _method_map_typ
 //    _jf_data_type goal_jf();
 //};
 
-
+/////////////////
+/// \brief The RobotStateIfc class
+///
 class RobotStateIfc{
 public:
     RobotStateIfc();
 
-    comBasePtr measured_cp_ifc;
-    comBasePtr measured_cv_ifc;
-    comBasePtr measured_cf_ifc;
-    comBasePtr measured_js_ifc;
+    CommBasePtr measured_cp_ifc;
+    CommBasePtr measured_cv_ifc;
+    CommBasePtr measured_cf_ifc;
+    CommBasePtr measured_js_ifc;
 
     inline _cp_data_type measured_cp(){measured_cp_ifc->get_data(measured_cp_data); return measured_cp_data;}
     inline _cv_data_type measured_cv(){measured_cp_ifc->get_data(measured_cv_data); return measured_cv_data;}
@@ -107,10 +107,10 @@ private:
 };
 
 RobotStateIfc::RobotStateIfc(){
-    measured_cp_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cp", false);
-    measured_cv_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cv", false);
-    measured_cf_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cf", false);
-    measured_js_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_js", false);
+    measured_cp_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cp", INCOMING);
+    measured_cv_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cv", INCOMING);
+    measured_cf_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cf", INCOMING);
+    measured_js_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_js", INCOMING);
 
     method_map["measured_cp"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cp_data_type>(&CommunicationBase::get_data, measured_cp_ifc.get()));
     method_map["measured_cv"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cv_data_type>(&CommunicationBase::get_data, measured_cv_ifc.get()));

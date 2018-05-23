@@ -5,8 +5,8 @@
 
 int main(){
     CommunicationIfc commIfc;
-    comBasePtr interpolte_cp_ifc = commIfc.create_communication_interface("/motion_ifc/servo_cp", true);
-    comBasePtr interpolte_jp_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jp", false);
+    CommBasePtr interpolte_cp_ifc = commIfc.create_communication_interface("/motion_ifc/servo_cp", OUTGOING);
+    CommBasePtr interpolte_jp_ifc = commIfc.create_communication_interface("/motion_ifc/interpolate_jp", INCOMING);
 
     _cp_data_type cp_data;
     _jp_data_type jp_data;

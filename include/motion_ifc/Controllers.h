@@ -11,18 +11,14 @@
 #include <boost/thread.hpp>
 
 using namespace Eigen;
-
-typedef std::map<std::string, boost::shared_ptr<FcnHandleBase> > _method_map_type;
-typedef boost::shared_ptr<RobotCmdIfc> RobotCmdIfcPtr;
-typedef boost::shared_ptr<RobotStateIfc> RobotStateIfcPtr;
-typedef const boost::shared_ptr<RobotCmdIfc> RobotCmdIfcConstPtr;
-typedef const boost::shared_ptr<RobotStateIfc> RobotStateIfcConstPtr;
-
+////////
+/// \brief The ControllerDataBase struct
+///
 struct ControllerDataBase: public DataConversion{
 public:
     ControllerDataBase(){}
-    boost::shared_ptr<FcnHandleBase> robot_cmd_method;
-    boost::shared_ptr<FcnHandleBase> robot_state_method;
+    FcnHandleBasePtr robot_cmd_method;
+    FcnHandleBasePtr robot_state_method;
     Trajectory interpolater;
 
     bool active;
@@ -34,8 +30,9 @@ public:
     virtual void cmd_robot(double t){}
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/////
+///
+///
 template <typename D, typename S>
 struct ControllerData: public ControllerDataBase{
     ControllerData(std::string interface_name);
@@ -54,7 +51,7 @@ ControllerData<D, S>::ControllerData(std::string interface_name){
     active = false;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////
 /// \brief CtrlrBasePtr
 ///
 typedef boost::shared_ptr<ControllerDataBase> CtrlrBasePtr;
@@ -134,8 +131,9 @@ CtrlrBasePtr ControllerDataIfc::create_controller_data_ifc(string interface_name
 
 
 
-/////////////////////////////////////////////////////////////////
-
+///////
+/// \brief The Interpolate class
+///
 class Interpolate{
 public:
     Interpolate(RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc);
@@ -152,7 +150,7 @@ public:
     void interpolate_jf(_jf_data_type &data);
 
 
-    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
+    FcnHandleBasePtr get_method_by_name(std::string method_name){
         return method_map[method_name];
     }
 
@@ -182,15 +180,15 @@ private:
 };
 
 Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStateIfc){
-    method_map["interpolate_cp"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this));
-    method_map["interpolate_cr"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this));
-    method_map["interpolate_cv"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this));
-    method_map["interpolate_cf"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cf_data_type>(&Interpolate::interpolate_cf, this));
+    method_map["interpolate_cp"] = FcnHandleBasePtr( new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this));
+    method_map["interpolate_cr"] = FcnHandleBasePtr( new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this));
+    method_map["interpolate_cv"] = FcnHandleBasePtr( new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this));
+    method_map["interpolate_cf"] = FcnHandleBasePtr( new FcnHandle<_cf_data_type>(&Interpolate::interpolate_cf, this));
 
-    method_map["interpolate_jp"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jp_data_type>(&Interpolate::interpolate_jp, this));
-    method_map["interpolate_jr"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jr_data_type>(&Interpolate::interpolate_jr, this));
-    method_map["interpolate_jv"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this));
-    method_map["interpolate_jf"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this));
+    method_map["interpolate_jp"] = FcnHandleBasePtr( new FcnHandle<_jp_data_type>(&Interpolate::interpolate_jp, this));
+    method_map["interpolate_jr"] = FcnHandleBasePtr( new FcnHandle<_jr_data_type>(&Interpolate::interpolate_jr, this));
+    method_map["interpolate_jv"] = FcnHandleBasePtr( new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this));
+    method_map["interpolate_jf"] = FcnHandleBasePtr( new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this));
 
     cpCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cp", rCmdIfc, rStateIfc);
     crCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cr", rCmdIfc, rStateIfc);
@@ -269,6 +267,10 @@ void Interpolate::execute(){
 }
 
 
+
+////////
+/// \brief The Move class
+///
 class Move{
 public:
     Move();
@@ -278,7 +280,7 @@ public:
     void move_jp(_jp_data_type &data);
     void move_jr(_jr_data_type &data);
 
-    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
+    FcnHandleBasePtr get_method_by_name(std::string method_name){
         return method_map[method_name];
     }
 
@@ -293,10 +295,10 @@ private:
 };
 
 Move::Move(){
-    method_map["move_cp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cp_data_type>(&Move::move_cp, this));
-    method_map["move_cr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cr_data_type>(&Move::move_cr, this));
-    method_map["move_jp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jp_data_type>(&Move::move_jp, this));
-    method_map["move_jr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jr_data_type>(&Move::move_jr, this));
+    method_map["move_cp"] = FcnHandleBasePtr(new FcnHandle<_cp_data_type>(&Move::move_cp, this));
+    method_map["move_cr"] = FcnHandleBasePtr(new FcnHandle<_cr_data_type>(&Move::move_cr, this));
+    method_map["move_jp"] = FcnHandleBasePtr(new FcnHandle<_jp_data_type>(&Move::move_jp, this));
+    method_map["move_jr"] = FcnHandleBasePtr(new FcnHandle<_jr_data_type>(&Move::move_jr, this));
 }
 
 void Move::move_cp(_cp_data_type &data){
@@ -315,7 +317,9 @@ void Move::move_jr(_jr_data_type &data){
     std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
-
+/////////////////
+/// \brief The Servo class
+///
 class Servo{
 public:
     Servo();
@@ -329,7 +333,7 @@ public:
     void servo_jv(_jv_data_type &data);
     void servo_jf(_jf_data_type &data);
 
-    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
+    FcnHandleBasePtr get_method_by_name(std::string method_name){
         return method_map[method_name];
     }
 
@@ -344,14 +348,14 @@ private:
 };
 
 Servo::Servo(){
-    method_map["servo_cp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cp_data_type>(&Servo::servo_cp, this));
-    method_map["servo_cr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cr_data_type>(&Servo::servo_cr, this));
-    method_map["servo_cv"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cv_data_type>(&Servo::servo_cv, this));
-    method_map["servo_cf"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_cf_data_type>(&Servo::servo_cf, this));
-    method_map["servo_jp"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jp_data_type>(&Servo::servo_jp, this));
-    method_map["servo_jr"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jr_data_type>(&Servo::servo_jr, this));
-    method_map["servo_jv"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jv_data_type>(&Servo::servo_jv, this));
-    method_map["servo_jf"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jf_data_type>(&Servo::servo_jf, this));
+    method_map["servo_cp"] = FcnHandleBasePtr(new FcnHandle<_cp_data_type>(&Servo::servo_cp, this));
+    method_map["servo_cr"] = FcnHandleBasePtr(new FcnHandle<_cr_data_type>(&Servo::servo_cr, this));
+    method_map["servo_cv"] = FcnHandleBasePtr(new FcnHandle<_cv_data_type>(&Servo::servo_cv, this));
+    method_map["servo_cf"] = FcnHandleBasePtr(new FcnHandle<_cf_data_type>(&Servo::servo_cf, this));
+    method_map["servo_jp"] = FcnHandleBasePtr(new FcnHandle<_jp_data_type>(&Servo::servo_jp, this));
+    method_map["servo_jr"] = FcnHandleBasePtr(new FcnHandle<_jr_data_type>(&Servo::servo_jr, this));
+    method_map["servo_jv"] = FcnHandleBasePtr(new FcnHandle<_jv_data_type>(&Servo::servo_jv, this));
+    method_map["servo_jf"] = FcnHandleBasePtr(new FcnHandle<_jf_data_type>(&Servo::servo_jf, this));
 }
 
 void Servo::servo_cp(_cp_data_type &data){
@@ -387,6 +391,9 @@ void Servo::servo_jf(_jf_data_type &data){
 }
 
 
+//////////
+/// \brief The Controllers class
+///
 class Controllers{
 public:
     Controllers();
@@ -396,7 +403,7 @@ public:
     boost::shared_ptr<Move> moveCtrl;
     boost::shared_ptr<Servo> servoCtrl;
 
-    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
+    FcnHandleBasePtr get_method_by_name(std::string method_name){
         std::vector<std::string> x = split_str(method_name, '_');
         std::string mode = x[0];
         char op_space = x[1][0];

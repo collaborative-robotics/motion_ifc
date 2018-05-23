@@ -2,6 +2,10 @@
 #define FCN_HANDLE_H
 #include <motion_ifc/crtkCommon.h>
 
+
+/////////
+/// \brief The FcnHandleBase class
+///
 class FcnHandleBase{
 public:
     FcnHandleBase(){}

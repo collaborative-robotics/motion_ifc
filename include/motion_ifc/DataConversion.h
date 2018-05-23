@@ -7,10 +7,18 @@
 
 using namespace Eigen;
 
+////
+/// \brief The LinearizedPVA struct
+///
 struct LinearizedPVA{
     VectorXd x, dx, ddx;
 };
 
+
+
+///////////
+/// \brief The DataConversion class
+///
 class DataConversion{
 public:
     DataConversion();
@@ -49,6 +57,7 @@ public:
 private:
     LinearizedPVA pva;
 };
+
 
 DataConversion::DataConversion(){
 

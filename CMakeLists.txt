@@ -27,25 +27,18 @@ set (HDR_FILES include/${PROJECT_NAME}/Trajectory.h
                include/${PROJECT_NAME}/RobotCmdIfc.h
                include/${PROJECT_NAME}/RobotStateIfc.h
                include/${PROJECT_NAME}/crtkCommon.h
-               include/${PROJECT_NAME}/FcnHandle.h)
+               include/${PROJECT_NAME}/FcnHandle.h
+               include/${PROJECT_NAME}/WatchDog.h)
 
 set (SRC_FILES src/Controllers.cpp
-               src/DataConversion.cpp
-               src/TrajectoryTest.cpp)
+               src/DataConversion.cpp)
 
-add_executable(${PROJECT_NAME}_node ${SRC_FILES} ${HDR_FILES})
-add_executable(conversion_test src/ConversionTest.cpp)
-add_executable(fcn_handle_test src/FcnHandleTest.cpp)
-add_executable(communication_test src/CommunicationTest.cpp include/${PROJECT_NAME}/Communication.h)
-add_executable(controller_test src/ControllerTest.cpp include/${PROJECT_NAME}/Controllers.h)
+add_library(${PROJECT_NAME} ${SRC_FILES} ${HDR_FILES})
+target_link_libraries(${PROJECT_NAME}
+    ${catkin_LIBRARIES})
 
- target_link_libraries(${PROJECT_NAME}_node
-     ${catkin_LIBRARIES})
- target_link_libraries(conversion_test
-    ${catkin_LIBRARIES})
- target_link_libraries(fcn_handle_test
-    ${catkin_LIBRARIES})
- target_link_libraries(communication_test
-    ${catkin_LIBRARIES})
- target_link_libraries(controller_test
-    ${catkin_LIBRARIES})
+foreach(TESTS Conversion FcnHandle Communication Controller Trajectory)
+    add_executable(${TESTS}_test tests/${TESTS}Test.cpp)
+    target_link_libraries(${TESTS}_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+endforeach()
+

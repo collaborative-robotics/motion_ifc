@@ -10,6 +10,10 @@
 using namespace Eigen;
 using namespace std;
 
+
+/////////
+/// \brief The Trajectory class
+///
 class Trajectory{
 public:
     Trajectory();
