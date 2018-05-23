@@ -37,6 +37,7 @@ add_executable(${PROJECT_NAME}_node ${SRC_FILES} ${HDR_FILES})
 add_executable(conversion_test src/ConversionTest.cpp)
 add_executable(fcn_handle_test src/FcnHandleTest.cpp)
 add_executable(communication_test src/CommunicationTest.cpp include/${PROJECT_NAME}/Communication.h)
+add_executable(controller_test src/ControllerTest.cpp include/${PROJECT_NAME}/Controllers.h)
 
  target_link_libraries(${PROJECT_NAME}_node
      ${catkin_LIBRARIES})
@@ -45,4 +46,6 @@ add_executable(communication_test src/CommunicationTest.cpp include/${PROJECT_NA
  target_link_libraries(fcn_handle_test
     ${catkin_LIBRARIES})
  target_link_libraries(communication_test
+    ${catkin_LIBRARIES})
+ target_link_libraries(controller_test
     ${catkin_LIBRARIES})

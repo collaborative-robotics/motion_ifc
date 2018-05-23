@@ -19,19 +19,11 @@ int main(){
         interpolte_cp_ifc->get_data(cp_data);
         interpolte_cp_ifc->set_data(cp_data);
         dataConverter.serialize(cp_data);
-//        std::cout << dataConverter.x << std::endl;
+        std::cout << dataConverter.get_x() << std::endl;
         interpolte_jp_ifc->get_data(jp_data);
         dataConverter.serialize(jp_data);
-//        std::cout << dataConverter.x << std::endl;
+        std::cout << dataConverter.get_x() << std::endl;
     }
-//    MotionCmdIfc motionCmd;
-//    RobotCmdIfc robotCmd;
-//    RobotStateIfc robotState;
-
-//     while (ros::ok()){
-//         ros::spinOnce();
-//         usleep(100000);
-//     }
 
     return 0;
 }

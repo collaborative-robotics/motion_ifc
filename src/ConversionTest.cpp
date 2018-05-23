@@ -21,9 +21,9 @@ int main() {
     t_stamped.transform.rotation.y = 0.0;
     t_stamped.transform.rotation.z = 0.0;
     t_stamped.transform.rotation.w = 1.0;
-    dataConversion.serialize(t_stamped);
+    LinearizedPVA data = *dataConversion.serialize(t_stamped);
 
-    std::cout << "Transform Data: \n" << dataConversion.x << std::endl;
+    std::cout << "Transform Data: \n" << data.x << std::endl;
 
     geometry_msgs::TransformStamped read_t_stamped;
     dataConversion.deserialize(&read_t_stamped);
@@ -36,9 +36,9 @@ int main() {
     joint_state.position[0] = 5.2;
     joint_state.position[1] = 4.2;
     joint_state.position[2] = -9.2;
-    dataConversion.serialize(joint_state);
+    data = *dataConversion.serialize(joint_state);
 
-    std::cout << "Sensor Data: \n" << dataConversion.x << std::endl;
+    std::cout << "Sensor Data: \n" << data.x << std::endl;
 
     sensor_msgs::JointState read_joint_state;
     dataConversion.deserialize(&read_joint_state);

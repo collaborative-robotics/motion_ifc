@@ -8,10 +8,15 @@
 #include <motion_ifc/FcnHandle.h>
 #include <motion_ifc/RobotCmdIfc.h>
 #include <motion_ifc/RobotStateIfc.h>
+#include <boost/thread.hpp>
 
 using namespace Eigen;
 
 typedef std::map<std::string, boost::shared_ptr<FcnHandleBase> > _method_map_type;
+typedef boost::shared_ptr<RobotCmdIfc> RobotCmdIfcPtr;
+typedef boost::shared_ptr<RobotStateIfc> RobotStateIfcPtr;
+typedef const boost::shared_ptr<RobotCmdIfc> RobotCmdIfcConstPtr;
+typedef const boost::shared_ptr<RobotStateIfc> RobotStateIfcConstPtr;
 
 struct ControllerDataBase: public DataConversion{
 public:
@@ -29,21 +34,38 @@ public:
     virtual void cmd_robot(double t){}
 };
 
-template <typename D>
-struct ControllerData: public ControllerDataBase{
-    ControllerData(std::string interface_name, RobotCmdIfc &rCmdIfc, RobotStateIfc &rStateIfc);
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    D data;
+template <typename D, typename S>
+struct ControllerData: public ControllerDataBase{
+    ControllerData(std::string interface_name);
+
+    D cmd_data;
+    S state_data;
     virtual void cmd_robot(double t){
         interpolater.get_interpolated_x(t);
-        deserialize(&data);
-        (*robot_cmd_method)(data);
+        deserialize(&state_data);
+        (*robot_cmd_method)(state_data);
     }
 };
 
-template <typename D>
-ControllerData<D>::ControllerData(std::string interface_name, RobotCmdIfc &rCmdIfc, RobotStateIfc &rStateIfc){
+template <typename D, typename S>
+ControllerData<D, S>::ControllerData(std::string interface_name){
     active = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \brief CtrlrBasePtr
+///
+typedef boost::shared_ptr<ControllerDataBase> CtrlrBasePtr;
+
+class ControllerDataIfc{
+public:
+    ControllerDataIfc(){}
+    CtrlrBasePtr create_controller_data_ifc(string interface_name, RobotCmdIfcConstPtr rCmdIfcPtr, RobotStateIfcConstPtr rStateIfc);
+};
+
+CtrlrBasePtr ControllerDataIfc::create_controller_data_ifc(string interface_name, RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc){
     std::vector<std::string> x = split_str(interface_name, '/');
     std::vector<std::string> crtk_str = split_str(x.back(), '_');
     char op_space = crtk_str[1][0];
@@ -52,36 +74,71 @@ ControllerData<D>::ControllerData(std::string interface_name, RobotCmdIfc &rCmdI
     char cmd_controller = controller;
     char state_controller = controller;
 
+    CtrlrBasePtr ctrlrBase;
     if (op_space == 'c'){
         switch (controller){
+        case 'p':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cp_data_type,  _cp_data_type>(interface_name));
+            break;
         case 'r':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cr_data_type,  _cr_data_type>(interface_name));
             cmd_controller = 'p';
             state_controller = 'p';
             break;
+        case 'v':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cv_data_type,  _cv_data_type>(interface_name));
+            break;
+        case 'f':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cf_data_type,  _cf_data_type>(interface_name));
+            break;
+        default:
+            throw "The specified format isn't understood";
         }
     }
     else if (op_space == 'j'){
         state_controller = 's';
         switch (controller){
+        case 'p':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jp_data_type,  _js_data_type>(interface_name));
+            break;
+        case 's':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jp_data_type,  _js_data_type>(interface_name));
+            break;
         case 'r':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jr_data_type,  _js_data_type>(interface_name));
             cmd_controller = 'p';
             break;
+        case 'v':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jv_data_type,  _js_data_type>(interface_name));
+            break;
+        case 'f':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jf_data_type,  _js_data_type>(interface_name));
+            break;
+        default:
+            throw "The specified format isn't understood";
         }
-    }
-    std::string robot_state_search_str = "measured_" + op_space + state_controller;
-    std::string robot_cmd_search_str = "servo_" + op_space + cmd_controller;
 
-    robot_cmd_method = rCmdIfc.get_method_by_name(robot_cmd_search_str);
-    robot_state_method = rStateIfc.get_method_by_name(robot_state_search_str);
+    }
+    std::string robot_state_search_str = "measured_";
+    robot_state_search_str += op_space;
+    robot_state_search_str += state_controller;
+    std::string robot_cmd_search_str = "servo_";
+    robot_cmd_search_str += op_space;
+    robot_cmd_search_str += cmd_controller;
+
+    ctrlrBase->robot_cmd_method = rCmdIfc->get_method_by_name(robot_cmd_search_str);
+    ctrlrBase->robot_state_method = rStateIfc->get_method_by_name(robot_state_search_str);
+
+    return ctrlrBase;
 }
 
-typedef boost::shared_ptr<ControllerDataBase> CtrlrBasePtr;
+
 
 /////////////////////////////////////////////////////////////////
 
 class Interpolate{
 public:
-    Interpolate(RobotCmdIfc &rCmdIfc,RobotStateIfc &rStateIfc);
+    Interpolate(RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc);
     ~Interpolate(){
     }
     void interpolate_cp(_cp_data_type &data);
@@ -114,14 +171,17 @@ private:
     CtrlrBasePtr jvCtrl;
     CtrlrBasePtr jfCtrl;
 
+    ControllerDataIfc ctrlrIfc;
+
     void execute();
+    boost::thread execTh;
     vector<CtrlrBasePtr> vCtrlrs;
 
     _method_map_type method_map;
     _method_map_type::iterator _method_iterator;
 };
 
-Interpolate::Interpolate(RobotCmdIfc &rCmdIfc,RobotStateIfc &rStateIfc){
+Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStateIfc){
     method_map["interpolate_cp"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this));
     method_map["interpolate_cr"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this));
     method_map["interpolate_cv"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this));
@@ -132,30 +192,35 @@ Interpolate::Interpolate(RobotCmdIfc &rCmdIfc,RobotStateIfc &rStateIfc){
     method_map["interpolate_jv"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this));
     method_map["interpolate_jf"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this));
 
-    cpCtrl = CtrlrBasePtr(new ControllerData<_cp_data_type>("interpolate_cp", rCmdIfc, rStateIfc));
-    crCtrl = CtrlrBasePtr(new ControllerData<_cr_data_type>("interpolate_cr", rCmdIfc, rStateIfc));
-    cvCtrl = CtrlrBasePtr(new ControllerData<_cv_data_type>("interpolate_cv", rCmdIfc, rStateIfc));
-    cfCtrl = CtrlrBasePtr(new ControllerData<_cf_data_type>("interpolate_cf", rCmdIfc, rStateIfc));
-    jpCtrl = CtrlrBasePtr(new ControllerData<_jp_data_type>("interpolate_jp", rCmdIfc, rStateIfc));
-    jrCtrl = CtrlrBasePtr(new ControllerData<_jr_data_type>("interpolate_jr", rCmdIfc, rStateIfc));
-    jvCtrl = CtrlrBasePtr(new ControllerData<_jv_data_type>("interpolate_jv", rCmdIfc, rStateIfc));
-    jfCtrl = CtrlrBasePtr(new ControllerData<_jf_data_type>("interpolate_jf", rCmdIfc, rStateIfc));
+    cpCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cp", rCmdIfc, rStateIfc);
+    crCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cr", rCmdIfc, rStateIfc);
+    cvCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cv", rCmdIfc, rStateIfc);
+    cfCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cf", rCmdIfc, rStateIfc);
+    jpCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jp", rCmdIfc, rStateIfc);
+    jrCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jr", rCmdIfc, rStateIfc);
+    jvCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jv", rCmdIfc, rStateIfc);
+    jfCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jf", rCmdIfc, rStateIfc);
+
+    execTh = boost::thread(boost::bind(&Interpolate::execute, this));
 }
 
 void Interpolate::interpolate_cp(_cp_data_type &data){
     std::cout << "Called: " << __FUNCTION__ << std::endl;
-    cpCtrl->serialize(data);
+    _cp_data_type robot_state;
+    (*cpCtrl->robot_state_method)(robot_state);
     double t0 = time(NULL);
     double tf = t0 + 1.0;
-    cpCtrl->interpolater.compute_interpolation_params(cpCtrl->x,
-                                                      cpCtrl->x,
-                                                      cpCtrl->x,
-                                                      cpCtrl->x,
-                                                      cpCtrl->x,
-                                                      cpCtrl->x,
+    LinearizedPVA d0 = *cpCtrl->serialize(robot_state);
+    LinearizedPVA df = *cpCtrl->serialize(data);
+    cpCtrl->interpolater.compute_interpolation_params(d0.x,
+                                                      df.x,
+                                                      d0.dx,
+                                                      df.dx,
+                                                      d0.ddx,
+                                                      df.ddx,
                                                       t0,
                                                       tf);
-    cout << "Passed Data is \n" << cpCtrl->x << std::endl;
+    cout << "Passed Data is \n" << df.x << std::endl;
 }
 
 void Interpolate::interpolate_cr(_cr_data_type &data){
@@ -172,8 +237,8 @@ void Interpolate::interpolate_cf(_cf_data_type &data){
 
 void Interpolate::interpolate_jp(_jp_data_type &data){
     std::cout << "Called: " << __FUNCTION__ << std::endl;
-    jpCtrl->serialize(data);
-    cout << "Passed Data is \n" << jpCtrl->x << std::endl;
+    LinearizedPVA df = *jpCtrl->serialize(data);
+    cout << "Passed Data is \n" << df.x << std::endl;
 }
 
 void Interpolate::interpolate_jr(_jr_data_type &data){
@@ -322,9 +387,14 @@ void Servo::servo_jf(_jf_data_type &data){
 }
 
 
-class Controllers: public Interpolate, Move, Servo{
+class Controllers{
 public:
-    Controllers(RobotCmdIfc &rCmdIfc, RobotStateIfc &rStateIfc);
+    Controllers();
+    RobotCmdIfcPtr rCmdIfc;
+    RobotStateIfcPtr rStateIfc;
+    boost::shared_ptr<Interpolate> interpolateCtrl;
+    boost::shared_ptr<Move> moveCtrl;
+    boost::shared_ptr<Servo> servoCtrl;
 
     boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
         std::vector<std::string> x = split_str(method_name, '_');
@@ -333,20 +403,25 @@ public:
         char controller = x[1][1];
 
         if (mode.compare("interpolate") == 0){
-            return Interpolate::get_method_by_name(method_name);
+            return interpolateCtrl->get_method_by_name(method_name);
         }
         if (mode.compare("move") == 0){
-            return Move::get_method_by_name(method_name);
+            return moveCtrl->get_method_by_name(method_name);
         }
         if (mode.compare("servo") == 0){
-            return Servo::get_method_by_name(method_name);
+            return servoCtrl->get_method_by_name(method_name);
         }
     }
 
 private:
 };
 
-Controllers::Controllers(RobotCmdIfc &rCmdIfc, RobotStateIfc &rStateIfc): Interpolate(rCmdIfc, rStateIfc){
+Controllers::Controllers(){
+    rCmdIfc = RobotCmdIfcPtr(new RobotCmdIfc());
+    rStateIfc = RobotStateIfcPtr(new RobotStateIfc());
+    interpolateCtrl = boost::shared_ptr<Interpolate>(new Interpolate(rCmdIfc, rStateIfc));
+    moveCtrl = boost::shared_ptr<Move>(new Move);
+    servoCtrl = boost::shared_ptr<Servo>(new Servo);
 }
 
 
