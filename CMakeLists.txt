@@ -30,8 +30,15 @@ set (HDR_FILES include/${PROJECT_NAME}/Trajectory.h
                include/${PROJECT_NAME}/FcnHandle.h
                include/${PROJECT_NAME}/WatchDog.h)
 
-set (SRC_FILES src/Controllers.cpp
-               src/DataConversion.cpp)
+set (SRC_FILES src/crtkCommon.cpp
+               src/Controllers.cpp
+               src/ControllerData.cpp
+               src/Communication.cpp
+               src/DataConversion.cpp
+               src/Trajectory.cpp
+               src/MotionCmdIfc.cpp
+               src/RobotStateIfc.cpp
+               src/RobotCmdIfc.cpp)
 
 add_library(${PROJECT_NAME} ${SRC_FILES} ${HDR_FILES})
 target_link_libraries(${PROJECT_NAME}

@@ -9,7 +9,7 @@ int main(){
     _cp_data_type cp_data;
     _jp_data_type jp_data;
     DataConversion conversionClass;
-    LinearizedPVA pva;
+    StateSpace pva;
     pva.x.resize(6);
     pva.x << 10, 2, -30, 90, 45, 33.33;
     conversionClass.deserialize(&cp_data, &pva);
