@@ -22,6 +22,12 @@ MotionCmdIfc::MotionCmdIfc(){
 
 }
 
+///
+/// \brief MotionCmdIfc::create_motion_command_interface
+/// \param topic_name
+/// \param comBase
+/// \param wd_timeout
+///
 void MotionCmdIfc::create_motion_command_interface(string topic_name, CommBasePtr& comBase, double wd_timeout){
     comBase = commIfc.create_communication_interface(topic_name, INCOMING, wd_timeout);
     std::vector<std::string> x = split_str(topic_name, '/');
@@ -29,6 +35,10 @@ void MotionCmdIfc::create_motion_command_interface(string topic_name, CommBasePt
     vec_interfaces.push_back(comBase);
 }
 
+///
+/// \brief MotionCmdIfc::get_active_interfaces
+/// \return
+///
 std::vector<CommBasePtr> MotionCmdIfc::get_active_interfaces(){
     vec_activeInterfaces.clear();
     for (std::vector<CommBasePtr>::iterator it = vec_interfaces.begin(); it != vec_interfaces.end() ; it++){

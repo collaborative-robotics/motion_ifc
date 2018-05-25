@@ -29,18 +29,9 @@ public:
     CommBasePtr servo_jv_ifc;
     CommBasePtr servo_jf_ifc;
 
-    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
-        if (method_map.find(method_name) != method_map.end()){
-            return method_map[method_name];
-        }
-        else{
-            throw "Method name not found";
-        }
-    }
+    FcnHandleBasePtr get_method_by_name(std::string method_name);
 
-    _method_map_type* get_method_names_map(){
-        return &method_map;
-    }
+    inline _method_map_type* get_method_names_map(){return &method_map;}
 
 
 private:

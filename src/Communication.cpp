@@ -4,6 +4,13 @@
 boost::shared_ptr<ros::NodeHandle> CommunicationBase::node;
 
 ///
+/// \brief CommunicationBase::CommunicationBase
+///
+CommunicationBase::CommunicationBase():_is_data_new(false){
+    init();
+}
+
+///
 /// \brief CommunicationBase::init
 ///
 void CommunicationBase::init(){
@@ -13,10 +20,14 @@ void CommunicationBase::init(){
     node.reset(new ros::NodeHandle);
 }
 
-/////
-///
-///
+
 template <typename D>
+///
+/// \brief Communication<D>::Communication
+/// \param topic_name
+/// \param com_dir
+/// \param wd_timeout
+///
 Communication<D>::Communication(string topic_name, CommDirection com_dir, double wd_timeout){
     if (com_dir == OUTGOING){
         pub = CommunicationBase::node->advertise<D>(topic_name, 10);
@@ -28,6 +39,10 @@ Communication<D>::Communication(string topic_name, CommDirection com_dir, double
 }
 
 template <typename D>
+///
+/// \brief Communication<D>::cb
+/// \param data
+///
 void Communication<D>::cb(const boost::shared_ptr<const D> &data){
     time_stamp = ros::Time::now().toSec();
     acknowledge_wd();
@@ -36,17 +51,28 @@ void Communication<D>::cb(const boost::shared_ptr<const D> &data){
 }
 
 template<typename D>
+///
+/// \brief Communication<D>::get_data
+/// \param data
+///
 void Communication<D>::get_data(D &data){
     data = cb_data;
     _is_data_new = false;
 }
 
 template<typename D>
+///
+/// \brief Communication<D>::set_data
+/// \param data
+///
 void Communication<D>::set_data(D& data){
     pub.publish(data);
 }
 
 template<typename D>
+///
+/// \brief Communication<D>::execute_controller
+///
 void Communication<D>::execute_controller(){
     if(_is_data_new){
         (*command_method)(cb_data);
@@ -55,7 +81,14 @@ void Communication<D>::execute_controller(){
 }
 
 
-/////
+///
+/// \brief CommunicationIfc::CommunicationIfc
+///
+CommunicationIfc::CommunicationIfc(){
+
+}
+
+///
 /// \brief CommunicationIfc::create_communication_interface
 /// \param topic_name
 /// \param com_dir

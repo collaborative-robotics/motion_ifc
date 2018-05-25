@@ -1,11 +1,57 @@
 #include <motion_ifc/DataConversion.h>
 
-
+///
+/// \brief DataConversion::DataConversion
+///
 DataConversion::DataConversion(){
 
 }
 
+///
+/// \brief DataConversion::resize
+/// \param size
+///
+void DataConversion::resize(const uint &size){
+    if(pva.x.rows() != size){
+        pva.x.resize(size);
+        pva.dx.resize(size);
+        pva.ddx.resize(size);
+    }
+}
+
+///
+/// \brief DataConversion::set_x
+/// \param x
+///
+void DataConversion::set_x(VectorXd &x){
+    resize(x.rows());
+    pva.x = x;
+}
+
+///
+/// \brief DataConversion::set_dx
+/// \param dx
+///
+void DataConversion::set_dx(VectorXd &dx){
+    resize(dx.rows());
+    pva.dx = dx;
+}
+
+///
+/// \brief DataConversion::set_ddx
+/// \param ddx
+///
+void DataConversion::set_ddx(VectorXd &ddx){
+    resize(ddx.rows());
+    pva.ddx = ddx;
+}
+
 template<>
+///
+/// \brief DataConversion::serialize<sensor_msgs::JointState>
+/// \param data
+/// \return
+///
 StateSpace* DataConversion::serialize<sensor_msgs::JointState>(sensor_msgs::JointState &data){
     resize(data.position.size());
     for (int i = 0 ; i < data.position.size(); i++){
@@ -17,6 +63,11 @@ StateSpace* DataConversion::serialize<sensor_msgs::JointState>(sensor_msgs::Join
 }
 
 template<>
+///
+/// \brief DataConversion::serialize<std::vector<double> >
+/// \param data
+/// \return
+///
 StateSpace* DataConversion::serialize<std::vector<double> >(std::vector<double> &data){
     resize(data.size());
     for (int i = 0 ; i < data.size(); i++){
@@ -28,6 +79,11 @@ StateSpace* DataConversion::serialize<std::vector<double> >(std::vector<double> 
 }
 
 template<>
+///
+/// \brief DataConversion::serialize<geometry_msgs::TransformStamped>
+/// \param data
+/// \return
+///
 StateSpace* DataConversion::serialize<geometry_msgs::TransformStamped>(geometry_msgs::TransformStamped &data){
     tf::Quaternion quat;
     tf::Matrix3x3 mat;
@@ -43,6 +99,11 @@ StateSpace* DataConversion::serialize<geometry_msgs::TransformStamped>(geometry_
 }
 
 template<>
+///
+/// \brief DataConversion::serialize<geometry_msgs::PoseStamped>
+/// \param data
+/// \return
+///
 StateSpace* DataConversion::serialize<geometry_msgs::PoseStamped>(geometry_msgs::PoseStamped &data){
     tf::Quaternion quat;
     tf::Matrix3x3 mat;
@@ -58,6 +119,11 @@ StateSpace* DataConversion::serialize<geometry_msgs::PoseStamped>(geometry_msgs:
 }
 
 template<>
+///
+/// \brief DataConversion::serialize<geometry_msgs::Pose>
+/// \param data
+/// \return
+///
 StateSpace* DataConversion::serialize<geometry_msgs::Pose>(geometry_msgs::Pose &data){
     tf::Quaternion quat;
     tf::Matrix3x3 mat;
@@ -73,6 +139,11 @@ StateSpace* DataConversion::serialize<geometry_msgs::Pose>(geometry_msgs::Pose &
 }
 
 template<>
+///
+/// \brief DataConversion::deserialize<sensor_msgs::JointState>
+/// \param data
+/// \param pva
+///
 void DataConversion::deserialize<sensor_msgs::JointState>(sensor_msgs::JointState *data, StateSpace* pva){
     data->position.resize(pva->x.rows());
     for (int i = 0 ; i < pva->x.rows(); i++){
@@ -85,6 +156,11 @@ void DataConversion::deserialize<sensor_msgs::JointState>(sensor_msgs::JointStat
 }
 
 template<>
+///
+/// \brief DataConversion::deserialize<std::vector<double> >
+/// \param data
+/// \param pva
+///
 void DataConversion::deserialize<std::vector<double> >(std::vector<double> *data, StateSpace* pva){
     data->resize(pva->x.rows());
     for (int i = 0 ; i < pva->x.rows(); i++){
@@ -93,6 +169,11 @@ void DataConversion::deserialize<std::vector<double> >(std::vector<double> *data
 }
 
 template<>
+///
+/// \brief DataConversion::deserialize<geometry_msgs::TransformStamped>
+/// \param data
+/// \param pva
+///
 void DataConversion::deserialize<geometry_msgs::TransformStamped>(geometry_msgs::TransformStamped *data, StateSpace* pva){
     data->transform.translation.x = pva->x[0];
     data->transform.translation.y = pva->x[1];
@@ -103,6 +184,11 @@ void DataConversion::deserialize<geometry_msgs::TransformStamped>(geometry_msgs:
 }
 
 template<>
+///
+/// \brief DataConversion::deserialize<geometry_msgs::PoseStamped>
+/// \param data
+/// \param pva
+///
 void DataConversion::deserialize<geometry_msgs::PoseStamped>(geometry_msgs::PoseStamped *data, StateSpace* pva){
     data->pose.position.x = pva->x[0];
     data->pose.position.y = pva->x[1];
@@ -113,6 +199,11 @@ void DataConversion::deserialize<geometry_msgs::PoseStamped>(geometry_msgs::Pose
 }
 
 template<>
+///
+/// \brief DataConversion::deserialize<geometry_msgs::Pose>
+/// \param data
+/// \param pva
+///
 void DataConversion::deserialize<geometry_msgs::Pose>(geometry_msgs::Pose *data, StateSpace* pva){
     data->position.x = pva->x[0];
     data->position.y = pva->x[1];

@@ -8,7 +8,7 @@
 using namespace Eigen;
 
 ////
-/// \brief The LinearizedPVA struct
+/// \brief The StateSpace struct
 ///
 struct StateSpace{
     VectorXd x, dx, ddx;
@@ -26,28 +26,11 @@ public:
     template <typename T>
     void deserialize(T *data, StateSpace* pva);
 
-    void resize(const uint &size){
-        if(pva.x.rows() != size){
-            pva.x.resize(size);
-            pva.dx.resize(size);
-            pva.ddx.resize(size);
-        }
-    }
+    void resize(const uint &size);
 
-    void set_x(VectorXd &x){
-        resize(x.rows());
-        pva.x = x;
-    }
-
-    void set_dx(VectorXd &dx){
-        resize(dx.rows());
-        pva.dx = dx;
-    }
-
-    void set_ddx(VectorXd &ddx){
-        resize(ddx.rows());
-        pva.ddx = ddx;
-    }
+    void set_x(VectorXd &x);
+    void set_dx(VectorXd &dx);
+    void set_ddx(VectorXd &ddx);
 
     inline VectorXd get_x(){return pva.x;}
     inline VectorXd get_dx(){return pva.dx;}

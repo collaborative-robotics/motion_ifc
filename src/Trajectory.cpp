@@ -1,16 +1,28 @@
 #include <motion_ifc/Trajectory.h>
 
 
+///
+/// \brief Trajectory::Trajectory
+///
 Trajectory::Trajectory() {
     Tmat.resize(6,6);
     BoundaryConditions.resize(6,1);
     Coefficients.resize(1,6);
 }
 
+///
+/// \brief Trajectory::~Trajectory
+///
 Trajectory::~Trajectory() {
 //    delete Tmat;
 }
 
+///
+/// \brief Trajectory::compute_t_mat
+/// \param t0
+/// \param tf
+/// \return
+///
 MatrixXd Trajectory::compute_t_mat(double t0, double tf){
 
     Tmat << 1, t0, pow(t0, 2),   pow(t0, 3),    pow(t0, 4),    pow(t0, 5),
@@ -22,6 +34,17 @@ MatrixXd Trajectory::compute_t_mat(double t0, double tf){
     return Tmat;
 }
 
+///
+/// \brief Trajectory::compute_interpolation_params
+/// \param x0
+/// \param dx0
+/// \param ddx0
+/// \param xf
+/// \param dxf
+/// \param ddxf
+/// \param t0
+/// \param tf
+///
 void Trajectory::compute_interpolation_params(VectorXd x0,
                                               VectorXd dx0,
                                               VectorXd ddx0,
@@ -55,6 +78,13 @@ void Trajectory::compute_interpolation_params(VectorXd x0,
     }
 }
 
+///
+/// \brief Trajectory::compute_interpolation_params
+/// \param pva0
+/// \param pvaf
+/// \param t0
+/// \param tf
+///
 void Trajectory::compute_interpolation_params(StateSpace pva0,
                                               StateSpace pvaf,
                                               double t0,
@@ -62,7 +92,11 @@ void Trajectory::compute_interpolation_params(StateSpace pva0,
     compute_interpolation_params(pva0.x, pva0.dx, pva0.ddx, pvaf.x, pvaf.dx, pvaf.ddx, t0, tf);
 }
 
-
+///
+/// \brief Trajectory::get_interpolated_x
+/// \param t
+/// \return
+///
 MatrixXd Trajectory::get_interpolated_x(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
@@ -76,6 +110,11 @@ MatrixXd Trajectory::get_interpolated_x(double t){
     return X;
 }
 
+///
+/// \brief Trajectory::get_interpolated_dx
+/// \param t
+/// \return
+///
 MatrixXd Trajectory::get_interpolated_dx(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
@@ -89,6 +128,11 @@ MatrixXd Trajectory::get_interpolated_dx(double t){
     return X;
 }
 
+///
+/// \brief Trajectory::get_interpolated_ddx
+/// \param t
+/// \return
+///
 MatrixXd Trajectory::get_interpolated_ddx(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
@@ -102,6 +146,11 @@ MatrixXd Trajectory::get_interpolated_ddx(double t){
     return X;
 }
 
+///
+/// \brief Trajectory::get_interpolated_pva
+/// \param t
+/// \return
+///
 StateSpace Trajectory::get_interpolated_pva(double t){
     StateSpace pva;
     pva.x = get_interpolated_x(t);

@@ -8,7 +8,7 @@
 
 using namespace Eigen;
 
-///////
+///
 /// \brief The Interpolate class
 ///
 class Interpolate{
@@ -59,7 +59,7 @@ private:
 };
 
 
-////////
+///
 /// \brief The Move class
 ///
 class Move{
@@ -86,7 +86,7 @@ private:
 };
 
 
-/////////////////
+///
 /// \brief The Servo class
 ///
 class Servo{
@@ -117,7 +117,7 @@ private:
 };
 
 
-//////////
+///
 /// \brief The Controllers class
 ///
 class Controllers{

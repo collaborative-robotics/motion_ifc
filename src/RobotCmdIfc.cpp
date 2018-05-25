@@ -21,3 +21,17 @@ RobotCmdIfc::RobotCmdIfc(){
     method_map["servo_jv"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jv_data_type>(&CommunicationBase::set_data, servo_jv_ifc.get()));
     method_map["servo_jf"] = boost::shared_ptr<FcnHandleBase>(new FcnHandle<_jf_data_type>(&CommunicationBase::set_data, servo_jf_ifc.get()));
 }
+
+///
+/// \brief RobotCmdIfc::get_method_by_name
+/// \param method_name
+/// \return
+///
+FcnHandleBasePtr RobotCmdIfc::get_method_by_name(std::string method_name){
+    if (method_map.find(method_name) != method_map.end()){
+        return method_map[method_name];
+    }
+    else{
+        throw "Method name not found";
+    }
+}

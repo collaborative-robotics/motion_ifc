@@ -71,18 +71,9 @@ public:
 //    _cf_data_type goal_cf(){goal_cf_ifc->get_data(goal_cf_data); return goal_cf_data;}
 //    _js_data_type goal_js(){goal_cp_ifc->get_data(goal_js_data); return goal_js_data;}
 
-    boost::shared_ptr<FcnHandleBase> get_method_by_name(std::string method_name){
-        if (method_map.find(method_name) != method_map.end()){
-            return method_map[method_name];
-        }
-        else{
-            throw "Method name not found";
-        }
-    }
+    FcnHandleBasePtr get_method_by_name(std::string method_name);
 
-    _method_map_type* get_method_names_map(){
-        return &method_map;
-    }
+    inline _method_map_type* get_method_names_map(){return &method_map;}
 
 
 private:

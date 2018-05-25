@@ -37,6 +37,10 @@ Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStat
     execTh = boost::thread(boost::bind(&Interpolate::execute, this));
 }
 
+///
+/// \brief Interpolate::interpolate_cp
+/// \param data
+///
 void Interpolate::interpolate_cp(_cp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
     _cp_data_type robot_state;
@@ -50,35 +54,72 @@ void Interpolate::interpolate_cp(_cp_data_type &data){
     cpCtrl->set_active();
 }
 
+
+///
+/// \brief Interpolate::interpolate_cr
+/// \param data
+///
 void Interpolate::interpolate_cr(_cr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Interpolate::interpolate_cv
+/// \param data
+///
 void Interpolate::interpolate_cv(_cv_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+
+///
+/// \brief Interpolate::interpolate_cf
+/// \param data
+///
 void Interpolate::interpolate_cf(_cf_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+
+///
+/// \brief Interpolate::interpolate_jp
+/// \param data
+///
 void Interpolate::interpolate_jp(_jp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
     StateSpace df = *jpCtrl->serialize(data);
 }
 
+///
+/// \brief Interpolate::interpolate_jr
+/// \param data
+///
 void Interpolate::interpolate_jr(_jr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+
+///
+/// \brief Interpolate::interpolate_jv
+/// \param data
+///
 void Interpolate::interpolate_jv(_jv_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+
+///
+/// \brief Interpolate::interpolate_jf
+/// \param data
+///
 void Interpolate::interpolate_jf(_jf_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+
+///
+/// \brief Interpolate::execute
+///
 void Interpolate::execute(){
     while (ros::ok()){
         for (std::vector<CtrlrBasePtr>::iterator it = vec_ctrlrs.begin() ; it != vec_ctrlrs.end() ; it++){
@@ -106,18 +147,34 @@ Move::Move(){
     method_map["move_jr"] = FcnHandleBasePtr(new FcnHandle<_jr_data_type>(&Move::move_jr, this));
 }
 
+///
+/// \brief Move::move_cp
+/// \param data
+///
 void Move::move_cp(_cp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Move::move_cr
+/// \param data
+///
 void Move::move_cr(_cr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Move::move_jp
+/// \param data
+///
 void Move::move_jp(_jp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Move::move_jr
+/// \param data
+///
 void Move::move_jr(_jr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
@@ -137,34 +194,66 @@ Servo::Servo(){
     method_map["servo_jf"] = FcnHandleBasePtr(new FcnHandle<_jf_data_type>(&Servo::servo_jf, this));
 }
 
+///
+/// \brief Servo::servo_cp
+/// \param data
+///
 void Servo::servo_cp(_cp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Servo::servo_cr
+/// \param data
+///
 void Servo::servo_cr(_cr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Servo::servo_cv
+/// \param data
+///
 void Servo::servo_cv(_cv_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Servo::servo_cf
+/// \param data
+///
 void Servo::servo_cf(_cf_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Servo::servo_jp
+/// \param data
+///
 void Servo::servo_jp(_jp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Servo::servo_jr
+/// \param data
+///
 void Servo::servo_jr(_jr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Servo::servo_jv
+/// \param data
+///
 void Servo::servo_jv(_jv_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
+///
+/// \brief Servo::servo_jf
+/// \param data
+///
 void Servo::servo_jf(_jf_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }

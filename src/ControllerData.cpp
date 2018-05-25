@@ -1,6 +1,13 @@
 #include <motion_ifc/ControllerData.h>
 
 
+///
+/// \brief ControllerDataIfc::create_controller_data_ifc
+/// \param interface_name
+/// \param rCmdIfc
+/// \param rStateIfc
+/// \return
+///
 CtrlrBasePtr ControllerDataIfc::create_controller_data_ifc(string interface_name, RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc){
     std::vector<std::string> x = split_str(interface_name, '/');
     std::vector<std::string> crtk_str = split_str(x.back(), '_');

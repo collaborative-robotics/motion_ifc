@@ -9,8 +9,10 @@
 #include <motion_ifc/WatchDog.h>
 
 using namespace std;
-class CommunicationIfc;
 
+///
+/// \brief The CommDirection enum
+///
 enum CommDirection{INCOMING, OUTGOING};
 
 //////////
@@ -18,7 +20,7 @@ enum CommDirection{INCOMING, OUTGOING};
 ///
 class CommunicationBase: public WatchDog{
 public:
-    CommunicationBase():_is_data_new(false){init();}
+    CommunicationBase();
     static void init();
 
     virtual void set_data(_cp_data_type&){}
@@ -34,20 +36,21 @@ public:
     virtual void execute_controller(){}
 
     boost::shared_ptr<FcnHandleBase> command_method;
-    ros::Subscriber sub;
-    ros::Publisher pub;
-    static boost::shared_ptr<ros::NodeHandle> node;
 protected:
     double time_stamp;
     bool _is_data_new;
+    ros::Subscriber sub;
+    ros::Publisher pub;
+    static boost::shared_ptr<ros::NodeHandle> node;
 private:
 
 };
 
-/////
-///
-///
+
 template <typename D>
+//////
+/// \brief The Communication class
+///
 class Communication: public CommunicationBase{
 public:
     Communication(string topic_name, CommDirection com_dir=INCOMING, double wd_timeout=1.0);
@@ -66,9 +69,7 @@ private:
 ///
 class CommunicationIfc{
 public:
-    CommunicationIfc(){
-
-    }
+    CommunicationIfc();
     boost::shared_ptr<CommunicationBase> create_communication_interface(std::string topic_name, CommDirection com_dir, double wd_timeout = 1.0);
 };
 

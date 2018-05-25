@@ -6,7 +6,7 @@
 #include <motion_ifc/RobotCmdIfc.h>
 #include <motion_ifc/RobotStateIfc.h>
 
-////////
+///
 /// \brief The ControllerDataBase struct
 ///
 struct ControllerDataBase: public DataConversion{
@@ -35,10 +35,11 @@ private:
     double time_out;
 };
 
-/////
-///
-///
+
 template <typename D, typename S>
+///
+/// \brief The ControllerData struct
+///
 struct ControllerData: public ControllerDataBase{
     ControllerData(std::string interface_name){_is_active = false;}
     D cmd_data;
@@ -51,11 +52,14 @@ struct ControllerData: public ControllerDataBase{
 };
 
 
-///////
+///
 /// \brief CtrlrBasePtr
 ///
 typedef boost::shared_ptr<ControllerDataBase> CtrlrBasePtr;
 
+///
+/// \brief The ControllerDataIfc class
+///
 class ControllerDataIfc{
 public:
     ControllerDataIfc(){}

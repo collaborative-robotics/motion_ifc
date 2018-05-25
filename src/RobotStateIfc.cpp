@@ -15,3 +15,17 @@ RobotStateIfc::RobotStateIfc(){
     method_map["measured_cf"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_cf_data_type>(&CommunicationBase::get_data, measured_cf_ifc.get()));
     method_map["measured_js"] = boost::shared_ptr<FcnHandleBase>( new FcnHandle<_js_data_type>(&CommunicationBase::get_data, measured_js_ifc.get()));
 }
+
+///
+/// \brief get_method_by_name
+/// \param method_name
+/// \return
+///
+FcnHandleBasePtr RobotStateIfc::get_method_by_name(std::string method_name){
+    if (method_map.find(method_name) != method_map.end()){
+        return method_map[method_name];
+    }
+    else{
+        throw "Method name not found";
+    }
+}
