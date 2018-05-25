@@ -16,7 +16,7 @@ using namespace Eigen;
 ///
 struct ControllerDataBase: public DataConversion{
 public:
-    ControllerDataBase(){}
+    ControllerDataBase(): time_out(1.0){}
     FcnHandleBasePtr robot_cmd_method;
     FcnHandleBasePtr robot_state_method;
     Trajectory interpolater;
@@ -28,6 +28,16 @@ public:
     inline bool is_active(){return active;}
 
     virtual void cmd_robot(double t){}
+
+    double compute_dt(const double &cur_time){
+        double dt = cur_time - last_time;
+        last_time = cur_time;
+        if (dt > time_out || dt < 0){dt = time_out;}
+        return dt;
+    }
+private:
+    double last_time;
+    double time_out;
 };
 
 /////
@@ -40,9 +50,9 @@ struct ControllerData: public ControllerDataBase{
     D cmd_data;
     S state_data;
     virtual void cmd_robot(double t){
-        interpolater.get_interpolated_x(t);
-        deserialize(&state_data);
-        (*robot_cmd_method)(state_data);
+        LinearizedPVA pva = interpolater.get_interpolated_pva(t);
+        deserialize(&cmd_data, &pva);
+        (*robot_cmd_method)(cmd_data);
     }
 };
 
@@ -158,6 +168,8 @@ public:
         return &method_map;
     }
 
+    ros::Rate rate;
+
 
 private:
     CtrlrBasePtr cpCtrl;
@@ -173,13 +185,13 @@ private:
 
     void execute();
     boost::thread execTh;
-    vector<CtrlrBasePtr> vCtrlrs;
+    vector<CtrlrBasePtr> vec_ctrlrs;
 
     _method_map_type method_map;
     _method_map_type::iterator _method_iterator;
 };
 
-Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStateIfc){
+Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStateIfc): rate(1000){
     method_map["interpolate_cp"] = FcnHandleBasePtr( new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this));
     method_map["interpolate_cr"] = FcnHandleBasePtr( new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this));
     method_map["interpolate_cv"] = FcnHandleBasePtr( new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this));
@@ -199,66 +211,75 @@ Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStat
     jvCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jv", rCmdIfc, rStateIfc);
     jfCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jf", rCmdIfc, rStateIfc);
 
+    vec_ctrlrs.push_back(cpCtrl);
+    vec_ctrlrs.push_back(crCtrl);
+    vec_ctrlrs.push_back(cvCtrl);
+    vec_ctrlrs.push_back(cfCtrl);
+    vec_ctrlrs.push_back(jpCtrl);
+    vec_ctrlrs.push_back(jrCtrl);
+    vec_ctrlrs.push_back(jvCtrl);
+    vec_ctrlrs.push_back(jfCtrl);
+
     execTh = boost::thread(boost::bind(&Interpolate::execute, this));
 }
 
 void Interpolate::interpolate_cp(_cp_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
     _cp_data_type robot_state;
     (*cpCtrl->robot_state_method)(robot_state);
-    double t0 = time(NULL);
-    double tf = t0 + 1.0;
+    double t0 = ros::Time::now().toSec();
+    double tf = t0 + cpCtrl->compute_dt(t0);
     LinearizedPVA d0 = *cpCtrl->serialize(robot_state);
     LinearizedPVA df = *cpCtrl->serialize(data);
     cpCtrl->interpolater.compute_interpolation_params(d0.x,
-                                                      df.x,
                                                       d0.dx,
-                                                      df.dx,
                                                       d0.ddx,
+                                                      df.x,
+                                                      df.dx,
                                                       df.ddx,
                                                       t0,
                                                       tf);
-    cout << "Passed Data is \n" << df.x << std::endl;
+    cpCtrl->set_active();
 }
 
 void Interpolate::interpolate_cr(_cr_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Interpolate::interpolate_cv(_cv_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Interpolate::interpolate_cf(_cf_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Interpolate::interpolate_jp(_jp_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
     LinearizedPVA df = *jpCtrl->serialize(data);
-    cout << "Passed Data is \n" << df.x << std::endl;
 }
 
 void Interpolate::interpolate_jr(_jr_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Interpolate::interpolate_jv(_jv_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Interpolate::interpolate_jf(_jf_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Interpolate::execute(){
     while (ros::ok()){
-        for (std::vector<CtrlrBasePtr>::iterator it = vCtrlrs.begin() ; it != vCtrlrs.end() ; it++){
+        for (std::vector<CtrlrBasePtr>::iterator it = vec_ctrlrs.begin() ; it != vec_ctrlrs.end() ; it++){
             if ((*it)->is_active()){
-                double t = time(NULL);
-                while ( t >= (*it)->interpolater.get_t0() && t<= (*it)->interpolater.get_tf()){
-                    t = time(NULL);
+                double t = ros::Time::now().toSec();
+                while ( (*it)->interpolater.get_t0() <= t && t <= (*it)->interpolater.get_tf()){
+                    t = ros::Time::now().toSec();
                     (*it)->cmd_robot(t);
+                    rate.sleep();
                 }
                 (*it)->set_idle();
             }
@@ -302,19 +323,19 @@ Move::Move(){
 }
 
 void Move::move_cp(_cp_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Move::move_cr(_cr_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Move::move_jp(_jp_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Move::move_jr(_jr_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 /////////////////
@@ -359,35 +380,35 @@ Servo::Servo(){
 }
 
 void Servo::servo_cp(_cp_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Servo::servo_cr(_cr_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Servo::servo_cv(_cv_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Servo::servo_cf(_cf_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Servo::servo_jp(_jp_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Servo::servo_jr(_jr_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Servo::servo_jv(_jv_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 void Servo::servo_jf(_jf_data_type &data){
-    std::cout << "Called: " << __FUNCTION__ << std::endl;
+    if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
 
 

@@ -4,8 +4,7 @@
 #include <eigen3/Eigen/Dense>
 #include <vector>
 #include <iostream>
-
-#define DEBUG 0
+#include <motion_ifc/DataConversion.h>
 
 using namespace Eigen;
 using namespace std;
@@ -26,9 +25,10 @@ public:
     MatrixXd get_interpolated_x(double t);
     MatrixXd get_interpolated_dx(double t);
     MatrixXd get_interpolated_ddx(double t);
+    LinearizedPVA get_interpolated_pva(double t);
 
-    inline double get_t0(){return t0;}
-    inline double get_tf(){return tf;}
+    inline double get_t0(){return t0+t_offset;}
+    inline double get_tf(){return tf+t_offset;}
 
 private:
     MatrixXd compute_t_mat(double t0 , double tf);
@@ -38,6 +38,7 @@ private:
     MatrixXd Coefficients;
 
     double t0, tf;
+    double t_offset;
 };
 
 Trajectory::Trajectory() {
@@ -69,8 +70,9 @@ void Trajectory::compute_interpolation_params(VectorXd x0,
                                                       VectorXd ddxf,
                                                       double t0,
                                                       double tf){
-    this->t0 = t0;
-    this->tf = tf;
+    t_offset = t0;
+    this->t0 = t0 - t_offset;
+    this->tf = tf - t_offset;
     if (BoundaryConditions.cols() != x0.rows()){
         BoundaryConditions.resize(6, x0.rows());
         Coefficients.resize(x0.cols(), 6);
@@ -83,7 +85,7 @@ void Trajectory::compute_interpolation_params(VectorXd x0,
                          dxf.transpose(),
                         ddxf.transpose();
 
-    compute_t_mat(t0, tf);
+    compute_t_mat(this->t0, this->tf);
     Coefficients = Tmat.inverse() * BoundaryConditions;
     if (DEBUG){
         std::cout << "Size of x0 \n" << x0.rows() << x0.cols() << std::endl;
@@ -96,6 +98,7 @@ void Trajectory::compute_interpolation_params(VectorXd x0,
 MatrixXd Trajectory::get_interpolated_x(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
+    t = t - t_offset;
     T << 1, t, pow(t, 2),   pow(t, 3),    pow(t, 4),    pow(t, 5);
     if (DEBUG){
         std::cout << "Size of T \n" << T.rows() << T.cols() << std::endl;
@@ -108,6 +111,7 @@ MatrixXd Trajectory::get_interpolated_x(double t){
 MatrixXd Trajectory::get_interpolated_dx(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
+    t = t - t_offset;
     T << 0, 1, 2*t,   3*pow(t, 2),    4*pow(t, 3),    5*pow(t, 4);
     if (DEBUG){
         std::cout << "Size of T \n" << T.rows() << T.cols() << std::endl;
@@ -120,6 +124,7 @@ MatrixXd Trajectory::get_interpolated_dx(double t){
 MatrixXd Trajectory::get_interpolated_ddx(double t){
     VectorXd X(BoundaryConditions.cols());
     MatrixXd T(6,1);
+    t = t - t_offset;
     T << 0, 1, 2,   6*t,    12*pow(t, 2),    20*pow(t, 3);
     if (DEBUG){
         std::cout << "Size of T \n" << T.rows() << T.cols() << std::endl;
@@ -127,5 +132,13 @@ MatrixXd Trajectory::get_interpolated_ddx(double t){
     }
     X = Coefficients.transpose() * T;
     return X;
+}
+
+LinearizedPVA Trajectory::get_interpolated_pva(double t){
+    LinearizedPVA pva;
+    pva.x = get_interpolated_x(t);
+    pva.dx = get_interpolated_dx(t);
+    pva.ddx = get_interpolated_ddx(t);
+    return pva;
 }
 #endif // INTERPOLATE_H

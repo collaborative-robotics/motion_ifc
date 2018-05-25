@@ -9,15 +9,13 @@ int main(){
     _cp_data_type cp_data;
     _jp_data_type jp_data;
     DataConversion conversionClass;
-    VectorXd x;
-    x.resize(6);
-    x << 10, 2, -30, 90, 45, 33.33;
-    conversionClass.set_x(x);
-    conversionClass.deserialize(&cp_data);
-    x.resize(3);
-    x << 0.0, 1.1, 2.2;
-    conversionClass.set_x(x);
-    conversionClass.deserialize(&jp_data);
+    LinearizedPVA pva;
+    pva.x.resize(6);
+    pva.x << 10, 2, -30, 90, 45, 33.33;
+    conversionClass.deserialize(&cp_data, &pva);
+    pva.x.resize(3);
+    pva.x << 0.0, 1.1, 2.2;
+    conversionClass.deserialize(&jp_data, &pva);
 
     // We can get methods from and sub-controller by passing in the controller name. The returned functor is automatically
     // specialized based on the crtk grammar

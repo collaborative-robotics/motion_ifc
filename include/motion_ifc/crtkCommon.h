@@ -9,7 +9,8 @@
 #include <vector>
 #include <iterator>
 #include <string>
-#include <time.h>
+
+#define DEBUG 0
 
 typedef geometry_msgs::TransformStamped _cp_data_type;
 typedef geometry_msgs::TransformStamped _cr_data_type;

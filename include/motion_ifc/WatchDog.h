@@ -7,20 +7,17 @@ class WatchDog{
 public:
     WatchDog(double time_out = 0.5){
         m_expire_duration.fromSec(time_out);
-        m_initialized = false;
     }
 
     void set_wd_time_out(double time_out){
         m_expire_duration.fromSec(time_out);
     }
+
     inline void acknowledge_wd(){
-        if (m_initialized == false){
-            m_initialized = true;
-            m_next_cmd_expected_time= ros::Time::now() + m_expire_duration;
-        }
+        m_next_cmd_expected_time= ros::Time::now() + m_expire_duration;
     }
     inline bool is_wd_expired(){
-        bool expired = (ros::Time::now() > m_next_cmd_expected_time && m_initialized) ? true : false;
+        bool expired = ros::Time::now() > m_next_cmd_expected_time ? true : false;
         return expired;
     }
 

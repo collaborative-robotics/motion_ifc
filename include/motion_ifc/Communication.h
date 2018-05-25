@@ -17,7 +17,7 @@ enum CommDirection{INCOMING, OUTGOING};
 ///
 class CommunicationBase: public WatchDog{
 public:
-    CommunicationBase(){init();}
+    CommunicationBase():new_data(false){init();}
     static void init();
 
     virtual void set_data(_cp_data_type&){}
@@ -25,6 +25,11 @@ public:
 
     virtual void get_data(_cp_data_type&){}
     virtual void get_data(_jp_data_type&){}
+
+    inline virtual bool is_data_new(){return new_data;}
+
+    virtual void execute_controller(){
+    }
 
     bool is_active(){
         return (!is_wd_expired());
@@ -40,6 +45,7 @@ public:
     static boost::shared_ptr<ros::NodeHandle> node;
 protected:
     double time_stamp;
+    bool new_data;
 private:
 
 };
@@ -59,9 +65,15 @@ void CommunicationBase::init(){
 template <typename D>
 class Communication: public CommunicationBase{
 public:
-    Communication(string topic_name, CommDirection com_dir=INCOMING);
+    Communication(string topic_name, CommDirection com_dir=INCOMING, double wd_timeout=1.0);
     virtual void set_data(D&);
     virtual void get_data(D&);
+    virtual void execute_controller(){
+        if(new_data){
+            new_data = false;
+            (*command_method)(cb_data);
+        }
+    }
     void cb(const boost::shared_ptr<D const> &data);
 
 private:
@@ -69,11 +81,12 @@ private:
 };
 
 template <typename D>
-Communication<D>::Communication(string topic_name, CommDirection com_dir){
+Communication<D>::Communication(string topic_name, CommDirection com_dir, double wd_timeout){
     if (com_dir == OUTGOING){
         pub = CommunicationBase::node->advertise<D>(topic_name, 10);
     }
     else if(com_dir == INCOMING ){
+        set_wd_time_out(wd_timeout);
         sub = CommunicationBase::node->subscribe(topic_name, 10, &Communication<D>::cb, this);
     }
 }
@@ -82,13 +95,14 @@ template <typename D>
 void Communication<D>::cb(const boost::shared_ptr<const D> &data){
     time_stamp = ros::Time::now().toSec();
     acknowledge_wd();
-    std::cout << "Data Received at " << time_stamp << std::endl;
     cb_data = *data;
+    new_data = true;
 }
 
 template<typename D>
 void Communication<D>::get_data(D &data){
     data = cb_data;
+    new_data = false;
 }
 
 template<typename D>
@@ -104,10 +118,10 @@ public:
     CommunicationIfc(){
 
     }
-    boost::shared_ptr<CommunicationBase> create_communication_interface(std::string interface_name, CommDirection com_dir);
+    boost::shared_ptr<CommunicationBase> create_communication_interface(std::string interface_name, CommDirection com_dir, double wd_timeout = 1.0);
 };
 
-boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_interface(std::string interface_name, CommDirection com_dir){
+boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_interface(std::string interface_name, CommDirection com_dir, double wd_timeout){
     std::vector<std::string> x = split_str(interface_name, '/');
     std::vector<std::string> crtk_str = split_str(x.back(), '_');
     char op_space = crtk_str[1][0];
@@ -119,16 +133,16 @@ boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_inte
     if (op_space == 'c'){
         switch (controller){
         case 'p':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cp_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cp_data_type>(interface_name, com_dir, wd_timeout));
             break;
         case 'r':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cr_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cr_data_type>(interface_name, com_dir, wd_timeout));
             break;
         case 'v':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cv_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cv_data_type>(interface_name, com_dir, wd_timeout));
             break;
         case 'f':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cf_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cf_data_type>(interface_name, com_dir, wd_timeout));
             break;
         default:
             throw "The specified format isn't understood";
@@ -137,26 +151,25 @@ boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_inte
     else if (op_space == 'j'){
         switch (controller){
         case 'p':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jp_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jp_data_type>(interface_name, com_dir, wd_timeout));
             break;
         case 's':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_js_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_js_data_type>(interface_name, com_dir, wd_timeout));
             break;
         case 'r':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jr_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jr_data_type>(interface_name, com_dir, wd_timeout));
             break;
         case 'v':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jv_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jv_data_type>(interface_name, com_dir, wd_timeout));
             break;
         case 'f':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jf_data_type>(interface_name, com_dir));
+            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jf_data_type>(interface_name, com_dir, wd_timeout));
             break;
         default:
             throw "The specified format isn't understood";
         }
 
     }
-    std::cout << interface_name << std::endl;
     return commBase;
 }
 

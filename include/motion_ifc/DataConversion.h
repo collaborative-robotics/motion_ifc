@@ -25,7 +25,7 @@ public:
     template <typename T>
     LinearizedPVA* serialize(T &data);
     template <typename T>
-    void deserialize(T *data);
+    void deserialize(T *data, LinearizedPVA* pva);
     void resize(const uint &size){
         if(pva.x.rows() != size){
             pva.x.resize(size);
@@ -131,52 +131,52 @@ LinearizedPVA* DataConversion::serialize<geometry_msgs::Pose>(geometry_msgs::Pos
 }
 
 template<>
-void DataConversion::deserialize<sensor_msgs::JointState>(sensor_msgs::JointState *data){
-    data->position.resize(pva.x.rows());
-    for (int i = 0 ; i < pva.x.rows(); i++){
-        data->position[i] = pva.x[i];
+void DataConversion::deserialize<sensor_msgs::JointState>(sensor_msgs::JointState *data, LinearizedPVA* pva){
+    data->position.resize(pva->x.rows());
+    for (int i = 0 ; i < pva->x.rows(); i++){
+        data->position[i] = pva->x[i];
     }
-    data->velocity.resize(pva.dx.rows());
-    for (int i = 0 ; i < pva.dx.rows(); i++){
-        data->velocity[i] = pva.dx[i];
-    }
-}
-
-template<>
-void DataConversion::deserialize<std::vector<double> >(std::vector<double> *data){
-    data->resize(pva.x.rows());
-    for (int i = 0 ; i < pva.x.rows(); i++){
-        data->at(i) = pva.x[i];
+    data->velocity.resize(pva->dx.rows());
+    for (int i = 0 ; i < pva->dx.rows(); i++){
+        data->velocity[i] = pva->dx[i];
     }
 }
 
 template<>
-void DataConversion::deserialize<geometry_msgs::TransformStamped>(geometry_msgs::TransformStamped *data){
-    data->transform.translation.x = pva.x[0];
-    data->transform.translation.y = pva.x[1];
-    data->transform.translation.z = pva.x[2];
+void DataConversion::deserialize<std::vector<double> >(std::vector<double> *data, LinearizedPVA* pva){
+    data->resize(pva->x.rows());
+    for (int i = 0 ; i < pva->x.rows(); i++){
+        data->at(i) = pva->x[i];
+    }
+}
+
+template<>
+void DataConversion::deserialize<geometry_msgs::TransformStamped>(geometry_msgs::TransformStamped *data, LinearizedPVA* pva){
+    data->transform.translation.x = pva->x[0];
+    data->transform.translation.y = pva->x[1];
+    data->transform.translation.z = pva->x[2];
     tf::Quaternion quat;
-    quat.setRPY(pva.x[3], pva.x[4], pva.x[5]);
+    quat.setRPY(pva->x[3], pva->x[4], pva->x[5]);
     tf::quaternionTFToMsg(quat, data->transform.rotation);
 }
 
 template<>
-void DataConversion::deserialize<geometry_msgs::PoseStamped>(geometry_msgs::PoseStamped *data){
-    data->pose.position.x = pva.x[0];
-    data->pose.position.y = pva.x[1];
-    data->pose.position.z = pva.x[2];
+void DataConversion::deserialize<geometry_msgs::PoseStamped>(geometry_msgs::PoseStamped *data, LinearizedPVA* pva){
+    data->pose.position.x = pva->x[0];
+    data->pose.position.y = pva->x[1];
+    data->pose.position.z = pva->x[2];
     tf::Quaternion quat;
-    quat.setRPY(pva.x[3], pva.x[4], pva.x[5]);
+    quat.setRPY(pva->x[3], pva->x[4], pva->x[5]);
     tf::quaternionTFToMsg(quat, data->pose.orientation);
 }
 
 template<>
-void DataConversion::deserialize<geometry_msgs::Pose>(geometry_msgs::Pose *data){
-    data->position.x = pva.x[0];
-    data->position.y = pva.x[1];
-    data->position.z = pva.x[2];
+void DataConversion::deserialize<geometry_msgs::Pose>(geometry_msgs::Pose *data, LinearizedPVA* pva){
+    data->position.x = pva->x[0];
+    data->position.y = pva->x[1];
+    data->position.z = pva->x[2];
     tf::Quaternion quat;
-    quat.setRPY(pva.x[3], pva.x[4], pva.x[5]);
+    quat.setRPY(pva->x[3], pva->x[4], pva->x[5]);
     tf::quaternionTFToMsg(quat, data->orientation);
 }
 
