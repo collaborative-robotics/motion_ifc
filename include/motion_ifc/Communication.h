@@ -17,7 +17,7 @@ enum CommDirection{INCOMING, OUTGOING};
 ///
 class CommunicationBase: public WatchDog{
 public:
-    CommunicationBase():new_data(false){init();}
+    CommunicationBase():_is_data_new(false){init();}
     static void init();
 
     virtual void set_data(_cp_data_type&){}
@@ -26,7 +26,7 @@ public:
     virtual void get_data(_cp_data_type&){}
     virtual void get_data(_jp_data_type&){}
 
-    inline virtual bool is_data_new(){return new_data;}
+    inline virtual bool is_data_new(){return _is_data_new;}
 
     virtual void execute_controller(){
     }
@@ -45,7 +45,7 @@ public:
     static boost::shared_ptr<ros::NodeHandle> node;
 protected:
     double time_stamp;
-    bool new_data;
+    bool _is_data_new;
 private:
 
 };
@@ -68,12 +68,7 @@ public:
     Communication(string topic_name, CommDirection com_dir=INCOMING, double wd_timeout=1.0);
     virtual void set_data(D&);
     virtual void get_data(D&);
-    virtual void execute_controller(){
-        if(new_data){
-            new_data = false;
-            (*command_method)(cb_data);
-        }
-    }
+    virtual void execute_controller();
     void cb(const boost::shared_ptr<D const> &data);
 
 private:
@@ -96,18 +91,26 @@ void Communication<D>::cb(const boost::shared_ptr<const D> &data){
     time_stamp = ros::Time::now().toSec();
     acknowledge_wd();
     cb_data = *data;
-    new_data = true;
+    _is_data_new = true;
 }
 
 template<typename D>
 void Communication<D>::get_data(D &data){
     data = cb_data;
-    new_data = false;
+    _is_data_new = false;
 }
 
 template<typename D>
 void Communication<D>::set_data(D& data){
     pub.publish(data);
+}
+
+template<typename D>
+void Communication<D>::execute_controller(){
+    if(_is_data_new){
+        (*command_method)(cb_data);
+        _is_data_new = false;
+    }
 }
 
 //////

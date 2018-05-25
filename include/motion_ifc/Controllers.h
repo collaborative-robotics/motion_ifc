@@ -231,6 +231,7 @@ void Interpolate::interpolate_cp(_cp_data_type &data){
     double tf = t0 + cpCtrl->compute_dt(t0);
     LinearizedPVA d0 = *cpCtrl->serialize(robot_state);
     LinearizedPVA df = *cpCtrl->serialize(data);
+    if(DEBUG) std::cout << "T0: " << t0 <<  "TF: " << tf << "DT: " << tf - ros::Time::now().toSec() << std::endl;
     cpCtrl->interpolater.compute_interpolation_params(d0.x,
                                                       d0.dx,
                                                       d0.ddx,
@@ -275,13 +276,13 @@ void Interpolate::execute(){
     while (ros::ok()){
         for (std::vector<CtrlrBasePtr>::iterator it = vec_ctrlrs.begin() ; it != vec_ctrlrs.end() ; it++){
             if ((*it)->is_active()){
+                (*it)->set_idle();
                 double t = ros::Time::now().toSec();
                 while ( (*it)->interpolater.get_t0() <= t && t <= (*it)->interpolater.get_tf()){
                     t = ros::Time::now().toSec();
                     (*it)->cmd_robot(t);
                     rate.sleep();
                 }
-                (*it)->set_idle();
             }
         }
     }
