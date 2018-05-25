@@ -25,16 +25,17 @@ typedef sensor_msgs::JointState _jf_data_type;
 
 class CommunicationBase;
 class FcnHandleBase;
-class RobotStateIfc;
-class RobotCmdIfc;
+class RobotState;
+class RobotCmd;
 
 typedef boost::shared_ptr<CommunicationBase> CommBasePtr;
 typedef boost::shared_ptr<FcnHandleBase> FcnHandleBasePtr;
-typedef boost::shared_ptr<RobotCmdIfc> RobotCmdIfcPtr;
-typedef boost::shared_ptr<RobotStateIfc> RobotStateIfcPtr;
-typedef const boost::shared_ptr<RobotCmdIfc> RobotCmdIfcConstPtr;
-typedef const boost::shared_ptr<RobotStateIfc> RobotStateIfcConstPtr;
+typedef boost::shared_ptr<RobotCmd> RobotCmdIfcPtr;
+typedef boost::shared_ptr<RobotState> RobotStateIfcPtr;
+typedef const boost::shared_ptr<RobotCmd> RobotCmdIfcConstPtr;
+typedef const boost::shared_ptr<RobotState> RobotStateIfcConstPtr;
 typedef std::map<std::string, FcnHandleBasePtr > _method_map_type;
+typedef std::map<std::string, CommBasePtr > _interface_map_type;
 
 // Copied function from:
 // https://stackoverflow.com/questions/236129/the-most-elegant-way-to-iterate-the-words-of-a-string

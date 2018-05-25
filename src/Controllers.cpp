@@ -44,13 +44,13 @@ Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStat
 void Interpolate::interpolate_cp(_cp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
     _cp_data_type robot_state;
-    (*cpCtrl->robot_state_method)(robot_state);
+    cpCtrl->robot_state_ifc->get_data(robot_state);
     double t0 = ros::Time::now().toSec();
     double tf = t0 + cpCtrl->compute_dt(t0);
-    StateSpace d0 = *cpCtrl->serialize(robot_state);
-    StateSpace df = *cpCtrl->serialize(data);
+    StateSpace ss0 = *cpCtrl->serialize(robot_state);
+    StateSpace ssf = *cpCtrl->serialize(data);
     if(DEBUG) std::cout << "T0: " << t0 <<  "TF: " << tf << "DT: " << tf - ros::Time::now().toSec() << std::endl;
-    cpCtrl->interpolater.compute_interpolation_params(d0, df, t0, tf);
+    cpCtrl->interpolater.compute_interpolation_params(ss0, ssf, t0, tf);
     cpCtrl->set_active();
 }
 
@@ -262,8 +262,8 @@ void Servo::servo_jf(_jf_data_type &data){
 /// \brief Controllers::Controllers
 ///
 Controllers::Controllers(){
-    rCmdIfc = RobotCmdIfcPtr(new RobotCmdIfc());
-    rStateIfc = RobotStateIfcPtr(new RobotStateIfc());
+    rCmdIfc = RobotCmdIfcPtr(new RobotCmd());
+    rStateIfc = RobotStateIfcPtr(new RobotState());
     interpolateCtrl = boost::shared_ptr<Interpolate>(new Interpolate(rCmdIfc, rStateIfc));
     moveCtrl = boost::shared_ptr<Move>(new Move);
     servoCtrl = boost::shared_ptr<Servo>(new Servo);

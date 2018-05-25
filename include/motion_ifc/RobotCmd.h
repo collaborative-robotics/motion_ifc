@@ -7,9 +7,9 @@
 //////
 /// \brief The RobotCmdIfc class
 ///
-class RobotCmdIfc{
+class RobotCmd{
 public:
-    RobotCmdIfc();
+    RobotCmd();
 
     inline void servo_cp(_cp_data_type &data){servo_cp_ifc->set_data(data);}
     inline void servo_cv(_cv_data_type &data){servo_cv_ifc->set_data(data);}
@@ -29,7 +29,8 @@ public:
     CommBasePtr servo_jv_ifc;
     CommBasePtr servo_jf_ifc;
 
-    FcnHandleBasePtr get_method_by_name(std::string method_name);
+    FcnHandleBasePtr get_method_by_name(std::string method_name); 
+    CommBasePtr get_interface_by_name(std::string interface_name);
 
     inline _method_map_type* get_method_names_map(){return &method_map;}
 
@@ -37,6 +38,7 @@ public:
 private:
     CommunicationIfc commIfc;
     _method_map_type method_map;
+    _interface_map_type interface_map;
 };
 
 #endif

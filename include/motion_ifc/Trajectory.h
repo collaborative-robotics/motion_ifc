@@ -26,7 +26,7 @@ public:
     MatrixXd get_interpolated_x(double t);
     MatrixXd get_interpolated_dx(double t);
     MatrixXd get_interpolated_ddx(double t);
-    StateSpace get_interpolated_pva(double t);
+    StateSpace get_interpolated_state_space(double t);
 
     inline double get_t0(){return t0+t_offset;}
     inline double get_tf(){return tf+t_offset;}

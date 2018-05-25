@@ -1,10 +1,10 @@
-#include <motion_ifc/MotionCmdIfc.h>
+#include <motion_ifc/MotionCmd.h>
 
 
 /////////
 /// \brief MotionCmdIfc::MotionCmdIfc
 ///
-MotionCmdIfc::MotionCmdIfc(){
+MotionCmd::MotionCmd(){
     create_motion_command_interface("/motion_ifc/interpolate_cp", interpolate_cp_ifc, 1.0);
     create_motion_command_interface("/motion_ifc/interpolate_cr", interpolate_cr_ifc, 1.0);
     create_motion_command_interface("/motion_ifc/interpolate_cv", interpolate_cv_ifc, 1.0);
@@ -28,7 +28,7 @@ MotionCmdIfc::MotionCmdIfc(){
 /// \param comBase
 /// \param wd_timeout
 ///
-void MotionCmdIfc::create_motion_command_interface(string topic_name, CommBasePtr& comBase, double wd_timeout){
+void MotionCmd::create_motion_command_interface(string topic_name, CommBasePtr& comBase, double wd_timeout){
     comBase = commIfc.create_communication_interface(topic_name, INCOMING, wd_timeout);
     std::vector<std::string> x = split_str(topic_name, '/');
     comBase->command_method = controller_ifc.get_method_by_name(x.back());
@@ -39,7 +39,7 @@ void MotionCmdIfc::create_motion_command_interface(string topic_name, CommBasePt
 /// \brief MotionCmdIfc::get_active_interfaces
 /// \return
 ///
-std::vector<CommBasePtr> MotionCmdIfc::get_active_interfaces(){
+std::vector<CommBasePtr> MotionCmd::get_active_interfaces(){
     vec_activeInterfaces.clear();
     for (std::vector<CommBasePtr>::iterator it = vec_interfaces.begin(); it != vec_interfaces.end() ; it++){
         if ((*it)->is_active()){

@@ -147,11 +147,11 @@ MatrixXd Trajectory::get_interpolated_ddx(double t){
 }
 
 ///
-/// \brief Trajectory::get_interpolated_pva
+/// \brief Trajectory::get_interpolated_state_space
 /// \param t
 /// \return
 ///
-StateSpace Trajectory::get_interpolated_pva(double t){
+StateSpace Trajectory::get_interpolated_state_space(double t){
     StateSpace pva;
     pva.x = get_interpolated_x(t);
     pva.dx = get_interpolated_dx(t);

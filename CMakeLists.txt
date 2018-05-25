@@ -23,9 +23,9 @@ set (HDR_FILES include/${PROJECT_NAME}/Trajectory.h
                include/${PROJECT_NAME}/Controllers.h
                include/${PROJECT_NAME}/DataConversion.h
                include/${PROJECT_NAME}/Communication.h
-               include/${PROJECT_NAME}/MotionCmdIfc.h
-               include/${PROJECT_NAME}/RobotCmdIfc.h
-               include/${PROJECT_NAME}/RobotStateIfc.h
+               include/${PROJECT_NAME}/MotionCmd.h
+               include/${PROJECT_NAME}/RobotCmd.h
+               include/${PROJECT_NAME}/RobotState.h
                include/${PROJECT_NAME}/crtkCommon.h
                include/${PROJECT_NAME}/FcnHandle.h
                include/${PROJECT_NAME}/WatchDog.h)
@@ -36,9 +36,9 @@ set (SRC_FILES src/crtkCommon.cpp
                src/Communication.cpp
                src/DataConversion.cpp
                src/Trajectory.cpp
-               src/MotionCmdIfc.cpp
-               src/RobotStateIfc.cpp
-               src/RobotCmdIfc.cpp)
+               src/MotionCmd.cpp
+               src/RobotState.cpp
+               src/RobotCmd.cpp)
 
 add_library(${PROJECT_NAME} ${SRC_FILES} ${HDR_FILES})
 target_link_libraries(${PROJECT_NAME}

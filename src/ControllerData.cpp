@@ -71,6 +71,19 @@ CtrlrBasePtr ControllerDataIfc::create_controller_data_ifc(string interface_name
 
     ctrlrBase->robot_cmd_method = rCmdIfc->get_method_by_name(robot_cmd_search_str);
     ctrlrBase->robot_state_method = rStateIfc->get_method_by_name(robot_state_search_str);
+    ctrlrBase->robot_cmd_ifc = rCmdIfc->get_interface_by_name(robot_cmd_search_str);
+    ctrlrBase->robot_state_ifc = rStateIfc->get_interface_by_name(robot_state_search_str);
 
     return ctrlrBase;
+}
+
+template<typename D, typename S>
+///
+/// \brief ControllerData::cmd_robot
+/// \param t
+///
+void ControllerData<D, S>::cmd_robot(double t){
+    StateSpace pva = interpolater.get_interpolated_state_space(t);
+    deserialize(&cmd_data, &pva);
+    robot_cmd_ifc->set_data(cmd_data);
 }

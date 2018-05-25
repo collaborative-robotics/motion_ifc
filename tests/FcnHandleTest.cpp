@@ -1,7 +1,7 @@
 #include <motion_ifc/Controllers.h>
 #include <motion_ifc/crtkCommon.h>
-#include <motion_ifc/RobotCmdIfc.h>
-#include <motion_ifc/RobotStateIfc.h>
+#include <motion_ifc/RobotCmd.h>
+#include <motion_ifc/RobotState.h>
 
 int main(){
 //     The easiest way of assigning data to any crtk data type is as follows
@@ -21,8 +21,8 @@ int main(){
     // specialized based on the crtk grammar
 
     // For Interpolate Sub-conroller
-    RobotCmdIfcPtr rCmdIfc(new RobotCmdIfc());
-    RobotStateIfcPtr rStateIfc(new RobotStateIfc);
+    RobotCmdIfcPtr rCmdIfc(new RobotCmd());
+    RobotStateIfcPtr rStateIfc(new RobotState);
     FcnHandleBasePtr method_handle;
     Interpolate interpController(rCmdIfc, rStateIfc);
     method_handle = interpController.get_method_by_name("interpolate_cp");

@@ -7,9 +7,9 @@
 //////////
 /// \brief The MotionCmdIfc class
 ///
-class MotionCmdIfc{
+class MotionCmd{
 public:
-    MotionCmdIfc();
+    MotionCmd();
 
     CommBasePtr interpolate_cp_ifc;
     CommBasePtr interpolate_cr_ifc;

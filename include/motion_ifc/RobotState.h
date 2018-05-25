@@ -42,9 +42,9 @@
 /////////////////
 /// \brief The RobotStateIfc class
 ///
-class RobotStateIfc{
+class RobotState{
 public:
-    RobotStateIfc();
+    RobotState();
 
     CommBasePtr measured_cp_ifc;
     CommBasePtr measured_cv_ifc;
@@ -72,6 +72,7 @@ public:
 //    _js_data_type goal_js(){goal_cp_ifc->get_data(goal_js_data); return goal_js_data;}
 
     FcnHandleBasePtr get_method_by_name(std::string method_name);
+    CommBasePtr get_interface_by_name(std::string interface_name);
 
     inline _method_map_type* get_method_names_map(){return &method_map;}
 
@@ -95,6 +96,7 @@ private:
 
     CommunicationIfc commIfc;
     _method_map_type method_map;
+    _interface_map_type interface_map;
 };
 
 

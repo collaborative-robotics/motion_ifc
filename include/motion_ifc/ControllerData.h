@@ -3,8 +3,8 @@
 
 #include <motion_ifc/crtkCommon.h>
 #include <motion_ifc/Trajectory.h>
-#include <motion_ifc/RobotCmdIfc.h>
-#include <motion_ifc/RobotStateIfc.h>
+#include <motion_ifc/RobotCmd.h>
+#include <motion_ifc/RobotState.h>
 
 ///
 /// \brief The ControllerDataBase struct
@@ -14,6 +14,8 @@ public:
     ControllerDataBase(): time_out(1.0){}
     FcnHandleBasePtr robot_cmd_method;
     FcnHandleBasePtr robot_state_method;
+    CommBasePtr robot_cmd_ifc;
+    CommBasePtr robot_state_ifc;
     Trajectory interpolater;
 
     bool _is_active;
@@ -44,11 +46,7 @@ struct ControllerData: public ControllerDataBase{
     ControllerData(std::string interface_name){_is_active = false;}
     D cmd_data;
     S state_data;
-    virtual void cmd_robot(double t){
-        StateSpace pva = interpolater.get_interpolated_pva(t);
-        deserialize(&cmd_data, &pva);
-        (*robot_cmd_method)(cmd_data);
-    }
+    virtual void cmd_robot(double t);
 };
 
 

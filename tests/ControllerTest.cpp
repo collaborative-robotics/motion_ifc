@@ -1,10 +1,10 @@
 #include <motion_ifc/Controllers.h>
-#include <motion_ifc/MotionCmdIfc.h>
+#include <motion_ifc/MotionCmd.h>
 
 int main(){
 
     //    Controllers controllers;
-    MotionCmdIfc motionCmd;
+    MotionCmd motionCmd;
     ros::Rate rate(1000);
     int ctr = 0;
 

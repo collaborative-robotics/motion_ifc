@@ -1,6 +1,6 @@
-#include <motion_ifc/MotionCmdIfc.h>
-#include <motion_ifc/RobotCmdIfc.h>
-#include <motion_ifc/RobotStateIfc.h>
+#include <motion_ifc/MotionCmd.h>
+#include <motion_ifc/RobotCmd.h>
+#include <motion_ifc/RobotState.h>
 #include <motion_ifc/DataConversion.h>
 
 int main(){
