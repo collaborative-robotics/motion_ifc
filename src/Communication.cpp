@@ -95,7 +95,7 @@ CommunicationIfc::CommunicationIfc(){
 /// \param wd_timeout
 /// \return
 ///
-boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_interface(std::string topic_name, CommDirection com_dir, double wd_timeout){
+CommBasePtr CommunicationIfc::create_communication_interface(std::string topic_name, CommDirection com_dir, double wd_timeout){
     std::vector<std::string> x = split_str(topic_name, '/');
     std::vector<std::string> crtk_str = split_str(x.back(), '_');
     char op_space = crtk_str[1][0];
@@ -103,20 +103,20 @@ boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_inte
 
     std::cout << topic_name << std::endl;
 
-    boost::shared_ptr<CommunicationBase> commBase;
+    CommBasePtr commBase;
     if (op_space == 'c'){
         switch (controller){
         case 'p':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cp_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_cp_data_type>(topic_name, com_dir, wd_timeout));
             break;
         case 'r':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cr_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_cr_data_type>(topic_name, com_dir, wd_timeout));
             break;
         case 'v':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cv_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_cv_data_type>(topic_name, com_dir, wd_timeout));
             break;
         case 'f':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_cf_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_cf_data_type>(topic_name, com_dir, wd_timeout));
             break;
         default:
             throw "The specified format isn't understood";
@@ -125,19 +125,19 @@ boost::shared_ptr<CommunicationBase> CommunicationIfc::create_communication_inte
     else if (op_space == 'j'){
         switch (controller){
         case 'p':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jp_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_jp_data_type>(topic_name, com_dir, wd_timeout));
             break;
         case 's':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_js_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_js_data_type>(topic_name, com_dir, wd_timeout));
             break;
         case 'r':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jr_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_jr_data_type>(topic_name, com_dir, wd_timeout));
             break;
         case 'v':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jv_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_jv_data_type>(topic_name, com_dir, wd_timeout));
             break;
         case 'f':
-            commBase = boost::shared_ptr<CommunicationBase>(new Communication<_jf_data_type>(topic_name, com_dir, wd_timeout));
+            commBase = CommBasePtr(new Communication<_jf_data_type>(topic_name, com_dir, wd_timeout));
             break;
         default:
             throw "The specified format isn't understood";

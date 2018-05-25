@@ -35,7 +35,7 @@ public:
 
     virtual void execute_controller(){}
 
-    boost::shared_ptr<FcnHandleBase> command_method;
+    FcnHandleBasePtr command_method;
 protected:
     double time_stamp;
     bool _is_data_new;

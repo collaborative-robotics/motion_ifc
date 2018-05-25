@@ -30,11 +30,11 @@ class RobotCmdIfc;
 
 typedef boost::shared_ptr<CommunicationBase> CommBasePtr;
 typedef boost::shared_ptr<FcnHandleBase> FcnHandleBasePtr;
-typedef std::map<std::string, FcnHandleBasePtr > _method_map_type;
 typedef boost::shared_ptr<RobotCmdIfc> RobotCmdIfcPtr;
 typedef boost::shared_ptr<RobotStateIfc> RobotStateIfcPtr;
 typedef const boost::shared_ptr<RobotCmdIfc> RobotCmdIfcConstPtr;
 typedef const boost::shared_ptr<RobotStateIfc> RobotStateIfcConstPtr;
+typedef std::map<std::string, FcnHandleBasePtr > _method_map_type;
 
 // Copied function from:
 // https://stackoverflow.com/questions/236129/the-most-elegant-way-to-iterate-the-words-of-a-string
