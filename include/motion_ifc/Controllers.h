@@ -8,15 +8,37 @@
 
 using namespace Eigen;
 
-class SubControllersBase: public RobotCmd, public RobotState{
+class SubControllersCommon: public RobotCmd, public RobotState{
+    friend class Interpolate;
+    friend class Move;
+    friend class Servo;
+
 public:
-    SubControllersBase(){}
+    SubControllersCommon();
+
+private:
+    CtrlrBasePtr cpCtrl;
+    CtrlrBasePtr crCtrl;
+    CtrlrBasePtr cvCtrl;
+    CtrlrBasePtr cfCtrl;
+    CtrlrBasePtr jpCtrl;
+    CtrlrBasePtr jrCtrl;
+    CtrlrBasePtr jvCtrl;
+    CtrlrBasePtr jfCtrl;
+
+    ros::Rate rate;
+    void execute();
+    boost::thread execTh;
+
+    vector<CtrlrBasePtr> vec_ctrlrs;
+    static bool _initialized;
+    void bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase);
 };
 
 ///
 /// \brief The Interpolate class
 ///
-class Interpolate: public SubControllersBase{
+class Interpolate: public SubControllersCommon{
 public:
     Interpolate();
     ~Interpolate(){
@@ -31,7 +53,6 @@ public:
     void interpolate_jv(_jv_data_type &data);
     void interpolate_jf(_jf_data_type &data);
 
-
     FcnHandleBasePtr get_method_by_name(std::string method_name){
         return method_map[method_name];
     }
@@ -40,24 +61,8 @@ public:
         return &method_map;
     }
 
-    ros::Rate rate;
-
-
 private:
-    CtrlrBasePtr cpCtrl;
-    CtrlrBasePtr crCtrl;
-    CtrlrBasePtr cvCtrl;
-    CtrlrBasePtr cfCtrl;
-    CtrlrBasePtr jpCtrl;
-    CtrlrBasePtr jrCtrl;
-    CtrlrBasePtr jvCtrl;
-    CtrlrBasePtr jfCtrl;
-
     void bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase);
-
-    void execute();
-    boost::thread execTh;
-    vector<CtrlrBasePtr> vec_ctrlrs;
 
     _method_map_type method_map;
     _method_map_type::iterator _method_iterator;
@@ -67,7 +72,7 @@ private:
 ///
 /// \brief The Move class
 ///
-class Move: public SubControllersBase{
+class Move: public SubControllersCommon{
 public:
     Move();
     void move_cp(_cp_data_type &data);
@@ -94,7 +99,7 @@ private:
 ///
 /// \brief The Servo class
 ///
-class Servo: public SubControllersBase{
+class Servo: public SubControllersCommon{
 public:
     Servo();
     void servo_cp(_cp_data_type &data);

@@ -1,23 +1,37 @@
 #include "motion_ifc/Controllers.h"
 
-//SubControllersBase::SubControllersBase(){
-//    bind_robot_io("robot_cp", cpCtrl);
-//    bind_robot_io("robot_cr", crCtrl);
-//    bind_robot_io("robot_cv", cvCtrl);
-//    bind_robot_io("robot_cf", cfCtrl);
+///
+/// \brief SubControllersCommon::_initialized
+///
+bool SubControllersCommon::_initialized = false;
 
-//    bind_robot_io("robot_jp", jpCtrl);
-//    bind_robot_io("robot_jr", jrCtrl);
-//    bind_robot_io("robot_jv", jvCtrl);
-//    bind_robot_io("robot_jf", jfCtrl);
-//}
 
 ///
-/// \brief SubControllersBase::bind_robot_io
+/// \brief SubControllersCommon::SubControllersCommon
+///
+SubControllersCommon::SubControllersCommon():rate(1000){
+    if (!_initialized){
+        _initialized = true;
+        bind_robot_io("robot_cp", cpCtrl);
+        bind_robot_io("robot_cr", crCtrl);
+        bind_robot_io("robot_cv", cvCtrl);
+        bind_robot_io("robot_cf", cfCtrl);
+
+        bind_robot_io("robot_jp", jpCtrl);
+        bind_robot_io("robot_jr", jrCtrl);
+        bind_robot_io("robot_jv", jvCtrl);
+        bind_robot_io("robot_jf", jfCtrl);
+
+        execTh = boost::thread(boost::bind(&Interpolate::execute, this));
+    }
+}
+
+///
+/// \brief SubControllersCommon::bind_robot_io
 /// \param interface_name
 /// \param ctrlrBase
 ///
-void Interpolate::bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase){
+void SubControllersCommon::bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase){
     std::vector<std::string> crtk_str = split_str(interface_name, '_');
     char op_space = crtk_str[1][0];
     char controller = crtk_str[1][1];
@@ -92,9 +106,28 @@ void Interpolate::bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase){
 }
 
 ///
+/// \brief SubControllersCommon::execute
+///
+void SubControllersCommon::execute(){
+    while (ros::ok()){
+        for (std::vector<CtrlrBasePtr>::iterator it = vec_ctrlrs.begin() ; it != vec_ctrlrs.end() ; it++){
+            if ((*it)->is_active()){
+                (*it)->set_idle();
+                double t = ros::Time::now().toSec();
+                while ( (*it)->interpolater.get_t0() <= t && t <= (*it)->interpolater.get_tf()){
+                    t = ros::Time::now().toSec();
+                    (*it)->cmd_robot(t);
+                    rate.sleep();
+                }
+            }
+        }
+    }
+}
+
+///
 /// \brief Interpolate::Interpolate
 ///
-Interpolate::Interpolate():rate(1000){
+Interpolate::Interpolate(){
     method_map["interpolate_cp"] = FcnHandleBasePtr( new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this));
     method_map["interpolate_cr"] = FcnHandleBasePtr( new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this));
     method_map["interpolate_cv"] = FcnHandleBasePtr( new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this));
@@ -104,18 +137,6 @@ Interpolate::Interpolate():rate(1000){
     method_map["interpolate_jr"] = FcnHandleBasePtr( new FcnHandle<_jr_data_type>(&Interpolate::interpolate_jr, this));
     method_map["interpolate_jv"] = FcnHandleBasePtr( new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this));
     method_map["interpolate_jf"] = FcnHandleBasePtr( new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this));
-
-    bind_robot_io("robot_cp", cpCtrl);
-    bind_robot_io("robot_cr", crCtrl);
-    bind_robot_io("robot_cv", cvCtrl);
-    bind_robot_io("robot_cf", cfCtrl);
-
-    bind_robot_io("robot_jp", jpCtrl);
-    bind_robot_io("robot_jr", jrCtrl);
-    bind_robot_io("robot_jv", jvCtrl);
-    bind_robot_io("robot_jf", jfCtrl);
-
-    execTh = boost::thread(boost::bind(&Interpolate::execute, this));
 }
 
 ///
@@ -206,28 +227,6 @@ void Interpolate::interpolate_jf(_jf_data_type &data){
 }
 
 
-///
-/// \brief Interpolate::execute
-///
-void Interpolate::execute(){
-    while (ros::ok()){
-        for (std::vector<CtrlrBasePtr>::iterator it = vec_ctrlrs.begin() ; it != vec_ctrlrs.end() ; it++){
-            if ((*it)->is_active()){
-                (*it)->set_idle();
-                double t = ros::Time::now().toSec();
-                while ( (*it)->interpolater.get_t0() <= t && t <= (*it)->interpolater.get_tf()){
-                    t = ros::Time::now().toSec();
-                    (*it)->cmd_robot(t);
-                    rate.sleep();
-                }
-            }
-        }
-    }
-}
-
-
-
-
 /////
 /// \brief Move::Move
 ///
@@ -290,6 +289,7 @@ Servo::Servo(){
 ///
 void Servo::servo_cp(_cp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    cpCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ///
@@ -298,6 +298,7 @@ void Servo::servo_cp(_cp_data_type &data){
 ///
 void Servo::servo_cr(_cr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    crCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ///
@@ -306,6 +307,7 @@ void Servo::servo_cr(_cr_data_type &data){
 ///
 void Servo::servo_cv(_cv_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    cvCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ///
@@ -314,6 +316,7 @@ void Servo::servo_cv(_cv_data_type &data){
 ///
 void Servo::servo_cf(_cf_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    cfCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ///
@@ -322,6 +325,7 @@ void Servo::servo_cf(_cf_data_type &data){
 ///
 void Servo::servo_jp(_jp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    jpCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ///
@@ -330,6 +334,7 @@ void Servo::servo_jp(_jp_data_type &data){
 ///
 void Servo::servo_jr(_jr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    jrCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ///
@@ -338,6 +343,7 @@ void Servo::servo_jr(_jr_data_type &data){
 ///
 void Servo::servo_jv(_jv_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    jvCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ///
@@ -346,6 +352,7 @@ void Servo::servo_jv(_jv_data_type &data){
 ///
 void Servo::servo_jf(_jf_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
+    jfCtrl->robot_cmd_ifc->set_data(data);
 }
 
 ////
