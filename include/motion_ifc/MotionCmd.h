@@ -5,7 +5,7 @@
 #include <motion_ifc/Controllers.h>
 
 //////////
-/// \brief The MotionCmdIfc class
+/// \brief The MotionCmd class
 ///
 class MotionCmd{
 public:

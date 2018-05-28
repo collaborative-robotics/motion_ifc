@@ -11,7 +11,7 @@ DataConversion::DataConversion(){
 /// \brief DataConversion::resize
 /// \param size
 ///
-void DataConversion::resize(const uint &size){
+void DataConversion::resize_ss(const uint &size){
     if(pva.x.rows() != size){
         pva.x.resize(size);
         pva.dx.resize(size);
@@ -24,7 +24,7 @@ void DataConversion::resize(const uint &size){
 /// \param x
 ///
 void DataConversion::set_x(VectorXd &x){
-    resize(x.rows());
+    resize_ss(x.rows());
     pva.x = x;
 }
 
@@ -33,7 +33,7 @@ void DataConversion::set_x(VectorXd &x){
 /// \param dx
 ///
 void DataConversion::set_dx(VectorXd &dx){
-    resize(dx.rows());
+    resize_ss(dx.rows());
     pva.dx = dx;
 }
 
@@ -42,7 +42,7 @@ void DataConversion::set_dx(VectorXd &dx){
 /// \param ddx
 ///
 void DataConversion::set_ddx(VectorXd &ddx){
-    resize(ddx.rows());
+    resize_ss(ddx.rows());
     pva.ddx = ddx;
 }
 
@@ -53,7 +53,7 @@ template<>
 /// \return
 ///
 StateSpace* DataConversion::serialize<sensor_msgs::JointState>(sensor_msgs::JointState &data){
-    resize(data.position.size());
+    resize_ss(data.position.size());
     for (int i = 0 ; i < data.position.size(); i++){
         pva.x[i] = data.position[i];
         pva.dx[i] = 0;
@@ -69,7 +69,7 @@ template<>
 /// \return
 ///
 StateSpace* DataConversion::serialize<std::vector<double> >(std::vector<double> &data){
-    resize(data.size());
+    resize_ss(data.size());
     for (int i = 0 ; i < data.size(); i++){
         pva.x[i] = data[i];
         pva.dx[i] = 0;
@@ -91,7 +91,7 @@ StateSpace* DataConversion::serialize<geometry_msgs::TransformStamped>(geometry_
     mat.setRotation(quat);
     double r, p, y;
     mat.getRPY(r, p, y);
-    resize(6);
+    resize_ss(6);
     pva.x << data.transform.translation.x, data.transform.translation.y, data.transform.translation.z, r, p, y;
     pva.dx << 0, 0, 0, 0, 0, 0;
     pva.ddx << 0, 0, 0, 0, 0, 0;
@@ -111,7 +111,7 @@ StateSpace* DataConversion::serialize<geometry_msgs::PoseStamped>(geometry_msgs:
     mat.setRotation(quat);
     double r, p, y;
     mat.getRPY(r, p, y);
-    resize(6);
+    resize_ss(6);
     pva.x << data.pose.position.x, data.pose.position.y, data.pose.position.z, r, p, y;
     pva.dx << 0, 0, 0, 0, 0, 0;
     pva.ddx << 0, 0, 0, 0, 0, 0;
@@ -131,7 +131,7 @@ StateSpace* DataConversion::serialize<geometry_msgs::Pose>(geometry_msgs::Pose &
     mat.setRotation(quat);
     double r, p, y;
     mat.getRPY(r, p, y);
-    resize(6);
+    resize_ss(6);
     pva.x << data.position.x, data.position.y, data.position.z, r, p, y;
     pva.dx << 0, 0, 0, 0, 0, 0;
     pva.ddx << 0, 0, 0, 0, 0, 0;

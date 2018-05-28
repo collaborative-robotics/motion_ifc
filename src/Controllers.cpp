@@ -16,14 +16,14 @@ Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStat
     method_map["interpolate_jv"] = FcnHandleBasePtr( new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this));
     method_map["interpolate_jf"] = FcnHandleBasePtr( new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this));
 
-    cpCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cp", rCmdIfc, rStateIfc);
-    crCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cr", rCmdIfc, rStateIfc);
-    cvCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cv", rCmdIfc, rStateIfc);
-    cfCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_cf", rCmdIfc, rStateIfc);
-    jpCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jp", rCmdIfc, rStateIfc);
-    jrCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jr", rCmdIfc, rStateIfc);
-    jvCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jv", rCmdIfc, rStateIfc);
-    jfCtrl = ctrlrIfc.create_controller_data_ifc("interpolate_jf", rCmdIfc, rStateIfc);
+    cpCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cp", rCmdIfc, rStateIfc);
+    crCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cr", rCmdIfc, rStateIfc);
+    cvCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cv", rCmdIfc, rStateIfc);
+    cfCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cf", rCmdIfc, rStateIfc);
+    jpCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jp", rCmdIfc, rStateIfc);
+    jrCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jr", rCmdIfc, rStateIfc);
+    jvCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jv", rCmdIfc, rStateIfc);
+    jfCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jf", rCmdIfc, rStateIfc);
 
     vec_ctrlrs.push_back(cpCtrl);
     vec_ctrlrs.push_back(crCtrl);
@@ -87,7 +87,15 @@ void Interpolate::interpolate_cf(_cf_data_type &data){
 ///
 void Interpolate::interpolate_jp(_jp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
-    StateSpace df = *jpCtrl->serialize(data);
+    _jp_data_type robot_state;
+    jpCtrl->robot_state_ifc->get_data(robot_state);
+    double t0 = ros::Time::now().toSec();
+    double tf = t0 + jpCtrl->compute_dt(t0);
+    StateSpace ss0 = *jpCtrl->serialize(robot_state);
+    StateSpace ssf = *jpCtrl->serialize(data);
+    if(DEBUG) std::cout << "T0: " << t0 <<  "TF: " << tf << "DT: " << tf - ros::Time::now().toSec() << std::endl;
+    jpCtrl->interpolater.compute_interpolation_params(ss0, ssf, t0, tf);
+    jpCtrl->set_active();
 }
 
 ///

@@ -5,7 +5,7 @@
 
 
 //////
-/// \brief The RobotCmdIfc class
+/// \brief The RobotCmd class
 ///
 class RobotCmd{
 public:

@@ -2,7 +2,7 @@
 
 
 /////
-/// \brief RobotCmdIfc::RobotCmdIfc
+/// \brief RobotCmd::RobotCmd
 ///
 RobotCmd::RobotCmd(){
     servo_cp_ifc = commIfc.create_communication_interface("/dvrk/MTMR/servo_cp", OUTGOING);
@@ -30,7 +30,7 @@ RobotCmd::RobotCmd(){
 }
 
 ///
-/// \brief RobotCmdIfc::get_method_by_name
+/// \brief RobotCmd::get_method_by_name
 /// \param method_name
 /// \return
 ///
@@ -44,7 +44,7 @@ FcnHandleBasePtr RobotCmd::get_method_by_name(std::string method_name){
 }
 
 ///
-/// \brief RobotCmdIfc::get_interface_by_name
+/// \brief RobotCmd::get_interface_by_name
 /// \param interface_name
 /// \return
 ///

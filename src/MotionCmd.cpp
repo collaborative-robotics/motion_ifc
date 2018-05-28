@@ -2,7 +2,7 @@
 
 
 /////////
-/// \brief MotionCmdIfc::MotionCmdIfc
+/// \brief MotoinCmd::MotoinCmd
 ///
 MotionCmd::MotionCmd(){
     create_motion_command_interface("/motion_ifc/interpolate_cp", interpolate_cp_ifc, 1.0);
@@ -23,7 +23,7 @@ MotionCmd::MotionCmd(){
 }
 
 ///
-/// \brief MotionCmdIfc::create_motion_command_interface
+/// \brief MotoinCmd::create_motion_command_interface
 /// \param topic_name
 /// \param comBase
 /// \param wd_timeout
@@ -36,7 +36,7 @@ void MotionCmd::create_motion_command_interface(string topic_name, CommBasePtr& 
 }
 
 ///
-/// \brief MotionCmdIfc::get_active_interfaces
+/// \brief MotoinCmd::get_active_interfaces
 /// \return
 ///
 std::vector<CommBasePtr> MotionCmd::get_active_interfaces(){

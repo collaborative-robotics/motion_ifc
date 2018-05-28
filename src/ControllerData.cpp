@@ -8,7 +8,7 @@
 /// \param rStateIfc
 /// \return
 ///
-CtrlrBasePtr ControllerDataIfc::create_controller_data_ifc(string interface_name, RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc){
+CtrlrBasePtr ControllerDataIfc::create_controller_data_interface(string interface_name, RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc){
     std::vector<std::string> x = split_str(interface_name, '/');
     std::vector<std::string> crtk_str = split_str(x.back(), '_');
     char op_space = crtk_str[1][0];
@@ -79,11 +79,28 @@ CtrlrBasePtr ControllerDataIfc::create_controller_data_ifc(string interface_name
 
 template<typename D, typename S>
 ///
+/// \brief ControllerData<D, S>::cmd_robot
+/// \param pva
+///
+void ControllerData<D, S>::cmd_robot(StateSpace &pva){
+    deserialize(&cmd_data, &pva);
+    robot_cmd_ifc->set_data(cmd_data);
+}
+
+template<typename D, typename S>
+///
 /// \brief ControllerData::cmd_robot
 /// \param t
 ///
 void ControllerData<D, S>::cmd_robot(double t){
     StateSpace pva = interpolater.get_interpolated_state_space(t);
-    deserialize(&cmd_data, &pva);
-    robot_cmd_ifc->set_data(cmd_data);
+    cmd_robot(pva);
+}
+
+template<typename D, typename S>
+///
+/// \brief ControllerData<D, S>::cmd_robot
+///
+void ControllerData<D, S>::cmd_robot(){
+    cmd_robot(ros::Time::now().toSec());
 }

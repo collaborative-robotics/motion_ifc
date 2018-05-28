@@ -40,7 +40,7 @@
 //};
 
 /////////////////
-/// \brief The RobotStateIfc class
+/// \brief The RobotState class
 ///
 class RobotState{
 public:

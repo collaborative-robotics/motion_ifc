@@ -26,7 +26,7 @@ public:
     template <typename T>
     void deserialize(T *data, StateSpace* pva);
 
-    void resize(const uint &size);
+    void resize_ss(const uint &size);
 
     void set_x(VectorXd &x);
     void set_dx(VectorXd &dx);

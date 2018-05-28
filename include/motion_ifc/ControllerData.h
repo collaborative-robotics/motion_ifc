@@ -24,7 +24,9 @@ public:
     inline void set_idle(){_is_active = false;}
     inline bool is_active(){return _is_active;}
 
+    virtual void cmd_robot(StateSpace &pva){}
     virtual void cmd_robot(double t){}
+    virtual void cmd_robot(){}
 
     double compute_dt(const double &cur_time){
         double dt = cur_time - last_time;
@@ -46,7 +48,9 @@ struct ControllerData: public ControllerDataBase{
     ControllerData(std::string interface_name){_is_active = false;}
     D cmd_data;
     S state_data;
+    virtual void cmd_robot(StateSpace &pva);
     virtual void cmd_robot(double t);
+    virtual void cmd_robot();
 };
 
 
@@ -61,7 +65,7 @@ typedef boost::shared_ptr<ControllerDataBase> CtrlrBasePtr;
 class ControllerDataIfc{
 public:
     ControllerDataIfc(){}
-    CtrlrBasePtr create_controller_data_ifc(string interface_name, RobotCmdIfcConstPtr rCmdIfcPtr, RobotStateIfcConstPtr rStateIfc);
+    CtrlrBasePtr create_controller_data_interface(string interface_name, RobotCmdIfcConstPtr rCmdIfcPtr, RobotStateIfcConstPtr rStateIfc);
 };
 
 

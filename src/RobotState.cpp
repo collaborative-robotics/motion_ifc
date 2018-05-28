@@ -2,7 +2,7 @@
 
 
 /////
-/// \brief RobotStateIfc::RobotStateIfc
+/// \brief RobotState::RobotState
 ///
 RobotState::RobotState(){
     measured_cp_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cp", INCOMING);
@@ -37,7 +37,7 @@ FcnHandleBasePtr RobotState::get_method_by_name(std::string method_name){
 }
 
 ///
-/// \brief RobotStateIfc::get_interface_by_name
+/// \brief RobotState::get_interface_by_name
 /// \param interface_name
 /// \return
 ///
