@@ -8,12 +8,17 @@
 
 using namespace Eigen;
 
+class SubControllersBase: public RobotCmd, public RobotState{
+public:
+    SubControllersBase(){}
+};
+
 ///
 /// \brief The Interpolate class
 ///
-class Interpolate{
+class Interpolate: public SubControllersBase{
 public:
-    Interpolate(RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc);
+    Interpolate();
     ~Interpolate(){
     }
     void interpolate_cp(_cp_data_type &data);
@@ -48,7 +53,7 @@ private:
     CtrlrBasePtr jvCtrl;
     CtrlrBasePtr jfCtrl;
 
-    ControllerDataIfc ctrlrIfc;
+    void bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase);
 
     void execute();
     boost::thread execTh;
@@ -62,7 +67,7 @@ private:
 ///
 /// \brief The Move class
 ///
-class Move{
+class Move: public SubControllersBase{
 public:
     Move();
     void move_cp(_cp_data_type &data);
@@ -89,7 +94,7 @@ private:
 ///
 /// \brief The Servo class
 ///
-class Servo{
+class Servo: public SubControllersBase{
 public:
     Servo();
     void servo_cp(_cp_data_type &data);
@@ -120,15 +125,12 @@ private:
 ///
 /// \brief The Controllers class
 ///
-class Controllers{
+class Controllers:
+        public Interpolate,
+        public Move,
+        public Servo{
 public:
     Controllers();
-    RobotCmdIfcPtr rCmdIfc;
-    RobotStateIfcPtr rStateIfc;
-    boost::shared_ptr<Interpolate> interpolateCtrl;
-    boost::shared_ptr<Move> moveCtrl;
-    boost::shared_ptr<Servo> servoCtrl;
-
     FcnHandleBasePtr get_method_by_name(std::string method_name);
 
 private:

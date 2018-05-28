@@ -1,11 +1,100 @@
 #include "motion_ifc/Controllers.h"
 
-////
-/// \brief Interpolate::Interpolate
-/// \param rCmdIfc
-/// \param rStateIfc
+//SubControllersBase::SubControllersBase(){
+//    bind_robot_io("robot_cp", cpCtrl);
+//    bind_robot_io("robot_cr", crCtrl);
+//    bind_robot_io("robot_cv", cvCtrl);
+//    bind_robot_io("robot_cf", cfCtrl);
+
+//    bind_robot_io("robot_jp", jpCtrl);
+//    bind_robot_io("robot_jr", jrCtrl);
+//    bind_robot_io("robot_jv", jvCtrl);
+//    bind_robot_io("robot_jf", jfCtrl);
+//}
+
 ///
-Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStateIfc): rate(1000){
+/// \brief SubControllersBase::bind_robot_io
+/// \param interface_name
+/// \param ctrlrBase
+///
+void Interpolate::bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase){
+    std::vector<std::string> crtk_str = split_str(interface_name, '_');
+    char op_space = crtk_str[1][0];
+    char controller = crtk_str[1][1];
+
+    char cmd_controller = controller;
+    char state_controller = controller;
+
+    if (op_space == 'c'){
+        switch (controller){
+        case 'p':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cp_data_type,  _cp_data_type>(interface_name));
+            break;
+        case 'r':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cr_data_type,  _cr_data_type>(interface_name));
+            cmd_controller = 'p';
+            state_controller = 'p';
+            break;
+        case 'v':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cv_data_type,  _cv_data_type>(interface_name));
+            break;
+        case 'f':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_cf_data_type,  _cf_data_type>(interface_name));
+            break;
+        default:
+            throw "The specified format isnt understood";
+        }
+    }
+    else if (op_space == 'j'){
+        state_controller = 's';
+        switch (controller){
+        case 'p':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jp_data_type,  _js_data_type>(interface_name));
+            break;
+        case 's':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jp_data_type,  _js_data_type>(interface_name));
+            break;
+        case 'r':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jr_data_type,  _js_data_type>(interface_name));
+            cmd_controller = 'p';
+            break;
+        case 'v':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jv_data_type,  _js_data_type>(interface_name));
+            break;
+        case 'f':
+            ctrlrBase = CtrlrBasePtr(new ControllerData<_jf_data_type,  _js_data_type>(interface_name));
+            break;
+        default:
+
+            throw "The specified format isnt understood";
+        }
+
+    }
+    std::string robot_state_search_str = "measured_";
+    robot_state_search_str += op_space;
+    robot_state_search_str += state_controller;
+    std::string robot_cmd_search_str = "servo_";
+    robot_cmd_search_str += op_space;
+    robot_cmd_search_str += cmd_controller;
+
+    if(DEBUG){
+        std::cout << "Robot CMD Method: " << robot_cmd_search_str << std::endl;
+        std::cout << "Robot STATE Method: " << robot_state_search_str << std::endl;
+    }
+
+    ctrlrBase->robot_cmd_method = RobotCmd::get_method_by_name(robot_cmd_search_str);
+    ctrlrBase->robot_state_method = RobotState::get_method_by_name(robot_state_search_str);
+    ctrlrBase->robot_cmd_ifc = RobotCmd::get_interface_by_name(robot_cmd_search_str);
+    ctrlrBase->robot_state_ifc = RobotState::get_interface_by_name(robot_state_search_str);
+
+    vec_ctrlrs.push_back(ctrlrBase);
+
+}
+
+///
+/// \brief Interpolate::Interpolate
+///
+Interpolate::Interpolate():rate(1000){
     method_map["interpolate_cp"] = FcnHandleBasePtr( new FcnHandle<_cp_data_type>(&Interpolate::interpolate_cp, this));
     method_map["interpolate_cr"] = FcnHandleBasePtr( new FcnHandle<_cr_data_type>(&Interpolate::interpolate_cr, this));
     method_map["interpolate_cv"] = FcnHandleBasePtr( new FcnHandle<_cv_data_type>(&Interpolate::interpolate_cv, this));
@@ -16,23 +105,15 @@ Interpolate::Interpolate(RobotCmdIfcConstPtr rCmdIfc,RobotStateIfcConstPtr rStat
     method_map["interpolate_jv"] = FcnHandleBasePtr( new FcnHandle<_jv_data_type>(&Interpolate::interpolate_jv, this));
     method_map["interpolate_jf"] = FcnHandleBasePtr( new FcnHandle<_jf_data_type>(&Interpolate::interpolate_jf, this));
 
-    cpCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cp", rCmdIfc, rStateIfc);
-    crCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cr", rCmdIfc, rStateIfc);
-    cvCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cv", rCmdIfc, rStateIfc);
-    cfCtrl = ctrlrIfc.create_controller_data_interface("interpolate_cf", rCmdIfc, rStateIfc);
-    jpCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jp", rCmdIfc, rStateIfc);
-    jrCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jr", rCmdIfc, rStateIfc);
-    jvCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jv", rCmdIfc, rStateIfc);
-    jfCtrl = ctrlrIfc.create_controller_data_interface("interpolate_jf", rCmdIfc, rStateIfc);
+    bind_robot_io("robot_cp", cpCtrl);
+    bind_robot_io("robot_cr", crCtrl);
+    bind_robot_io("robot_cv", cvCtrl);
+    bind_robot_io("robot_cf", cfCtrl);
 
-    vec_ctrlrs.push_back(cpCtrl);
-    vec_ctrlrs.push_back(crCtrl);
-    vec_ctrlrs.push_back(cvCtrl);
-    vec_ctrlrs.push_back(cfCtrl);
-    vec_ctrlrs.push_back(jpCtrl);
-    vec_ctrlrs.push_back(jrCtrl);
-    vec_ctrlrs.push_back(jvCtrl);
-    vec_ctrlrs.push_back(jfCtrl);
+    bind_robot_io("robot_jp", jpCtrl);
+    bind_robot_io("robot_jr", jrCtrl);
+    bind_robot_io("robot_jv", jvCtrl);
+    bind_robot_io("robot_jf", jfCtrl);
 
     execTh = boost::thread(boost::bind(&Interpolate::execute, this));
 }
@@ -145,6 +226,8 @@ void Interpolate::execute(){
 }
 
 
+
+
 /////
 /// \brief Move::Move
 ///
@@ -186,7 +269,6 @@ void Move::move_jp(_jp_data_type &data){
 void Move::move_jr(_jr_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
 }
-
 
 /////
 /// \brief Servo::Servo
@@ -270,11 +352,7 @@ void Servo::servo_jf(_jf_data_type &data){
 /// \brief Controllers::Controllers
 ///
 Controllers::Controllers(){
-    rCmdIfc = RobotCmdIfcPtr(new RobotCmd());
-    rStateIfc = RobotStateIfcPtr(new RobotState());
-    interpolateCtrl = boost::shared_ptr<Interpolate>(new Interpolate(rCmdIfc, rStateIfc));
-    moveCtrl = boost::shared_ptr<Move>(new Move);
-    servoCtrl = boost::shared_ptr<Servo>(new Servo);
+
 }
 
 ///
@@ -289,13 +367,16 @@ FcnHandleBasePtr Controllers::get_method_by_name(std::string method_name){
     char controller = x[1][1];
 
     if (mode.compare("interpolate") == 0){
-        return interpolateCtrl->get_method_by_name(method_name);
+        return Interpolate::get_method_by_name(method_name);
     }
     if (mode.compare("move") == 0){
-        return moveCtrl->get_method_by_name(method_name);
+        return Move::get_method_by_name(method_name);
     }
     if (mode.compare("servo") == 0){
-        return servoCtrl->get_method_by_name(method_name);
+        return Servo::get_method_by_name(method_name);
+    }
+    else{
+        throw "method name not understood";
     }
 }
 

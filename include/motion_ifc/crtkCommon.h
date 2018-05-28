@@ -30,10 +30,10 @@ class RobotCmd;
 
 typedef boost::shared_ptr<CommunicationBase> CommBasePtr;
 typedef boost::shared_ptr<FcnHandleBase> FcnHandleBasePtr;
-typedef boost::shared_ptr<RobotCmd> RobotCmdIfcPtr;
-typedef boost::shared_ptr<RobotState> RobotStateIfcPtr;
-typedef const boost::shared_ptr<RobotCmd> RobotCmdIfcConstPtr;
-typedef const boost::shared_ptr<RobotState> RobotStateIfcConstPtr;
+typedef boost::shared_ptr<RobotCmd> RobotCmdPtr;
+typedef boost::shared_ptr<RobotState> RobotStatePtr;
+typedef const boost::shared_ptr<RobotCmd> RobotCmdConstPtr;
+typedef const boost::shared_ptr<RobotState> RobotStateConstPtr;
 typedef std::map<std::string, FcnHandleBasePtr > _method_map_type;
 typedef std::map<std::string, CommBasePtr > _interface_map_type;
 

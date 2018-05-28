@@ -8,7 +8,7 @@
 /// \param rStateIfc
 /// \return
 ///
-CtrlrBasePtr ControllerDataIfc::create_controller_data_interface(string interface_name, RobotCmdIfcConstPtr rCmdIfc, RobotStateIfcConstPtr rStateIfc){
+CtrlrBasePtr ControllerDataIfc::create_controller_data_interface(string interface_name, RobotCmdConstPtr rCmdIfc, RobotStateConstPtr rStateIfc){
     std::vector<std::string> x = split_str(interface_name, '/');
     std::vector<std::string> crtk_str = split_str(x.back(), '_');
     char op_space = crtk_str[1][0];
@@ -35,7 +35,7 @@ CtrlrBasePtr ControllerDataIfc::create_controller_data_interface(string interfac
             ctrlrBase = CtrlrBasePtr(new ControllerData<_cf_data_type,  _cf_data_type>(interface_name));
             break;
         default:
-            throw "The specified format isn't understood";
+            throw "The specified format isnt understood";
         }
     }
     else if (op_space == 'j'){
@@ -58,7 +58,7 @@ CtrlrBasePtr ControllerDataIfc::create_controller_data_interface(string interfac
             ctrlrBase = CtrlrBasePtr(new ControllerData<_jf_data_type,  _js_data_type>(interface_name));
             break;
         default:
-            throw "The specified format isn't understood";
+            throw "The specified format isnt understood";
         }
 
     }

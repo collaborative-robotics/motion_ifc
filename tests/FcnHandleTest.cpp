@@ -21,10 +21,10 @@ int main(){
     // specialized based on the crtk grammar
 
     // For Interpolate Sub-conroller
-    RobotCmdIfcPtr rCmdIfc(new RobotCmd());
-    RobotStateIfcPtr rStateIfc(new RobotState);
+    RobotCmdPtr rCmdIfc(new RobotCmd());
+    RobotStatePtr rStateIfc(new RobotState);
     FcnHandleBasePtr method_handle;
-    Interpolate interpController(rCmdIfc, rStateIfc);
+    Interpolate interpController;
     method_handle = interpController.get_method_by_name("interpolate_cp");
     (*method_handle)(cp_data);
     method_handle = interpController.get_method_by_name("interpolate_jp");

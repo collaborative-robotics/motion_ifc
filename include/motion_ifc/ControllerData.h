@@ -65,7 +65,7 @@ typedef boost::shared_ptr<ControllerDataBase> CtrlrBasePtr;
 class ControllerDataIfc{
 public:
     ControllerDataIfc(){}
-    CtrlrBasePtr create_controller_data_interface(string interface_name, RobotCmdIfcConstPtr rCmdIfcPtr, RobotStateIfcConstPtr rStateIfc);
+    CtrlrBasePtr create_controller_data_interface(string interface_name, RobotCmdConstPtr rCmdIfcPtr, RobotStateConstPtr rStateIfc);
 };
 
 
