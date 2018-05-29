@@ -148,14 +148,19 @@ Interpolate::Interpolate(){
 void Interpolate::interpolate_cp(_cp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
     _cp_data_type robot_state;
-    cpCtrl->robot_state_ifc->get_data(robot_state);
-    double t0 = ros::Time::now().toSec();
-    double tf = t0 + cpCtrl->compute_dt(t0);
-    StateSpace ss0 = *cpCtrl->serialize(robot_state);
-    StateSpace ssf = *cpCtrl->serialize(data);
-    if(DEBUG) std::cout << "T0: " << t0 <<  "TF: " << tf << "DT: " << tf - ros::Time::now().toSec() << std::endl;
-    cpCtrl->interpolater.compute_interpolation_params(ss0, ssf, t0, tf);
-    cpCtrl->set_active();
+    if (cpCtrl->robot_state_ifc->is_data_new()){
+        cpCtrl->robot_state_ifc->get_data(robot_state);
+        double t0 = ros::Time::now().toSec();
+        double tf = t0 + cpCtrl->compute_dt(t0);
+        StateSpace ss0 = *cpCtrl->serialize(robot_state);
+        StateSpace ssf = *cpCtrl->serialize(data);
+        if(DEBUG) std::cout << "T0: " << t0 <<  "TF: " << tf << "DT: " << tf - ros::Time::now().toSec() << std::endl;
+        cpCtrl->interpolater.compute_interpolation_params(ss0, ssf, t0, tf);
+        cpCtrl->set_active();
+    }
+    else{
+        std::cout << "Waiting for new robot state data \n";
+    }
 }
 
 
@@ -192,14 +197,19 @@ void Interpolate::interpolate_cf(_cf_data_type &data){
 void Interpolate::interpolate_jp(_jp_data_type &data){
     if(DEBUG) std::cout << "Called: " << __FUNCTION__ << std::endl;
     _jp_data_type robot_state;
-    jpCtrl->robot_state_ifc->get_data(robot_state);
-    double t0 = ros::Time::now().toSec();
-    double tf = t0 + jpCtrl->compute_dt(t0);
-    StateSpace ss0 = *jpCtrl->serialize(robot_state);
-    StateSpace ssf = *jpCtrl->serialize(data);
-    if(DEBUG) std::cout << "T0: " << t0 <<  "TF: " << tf << "DT: " << tf - ros::Time::now().toSec() << std::endl;
-    jpCtrl->interpolater.compute_interpolation_params(ss0, ssf, t0, tf);
-    jpCtrl->set_active();
+    if(jpCtrl->robot_state_ifc->is_data_new()){
+        jpCtrl->robot_state_ifc->get_data(robot_state);
+        double t0 = ros::Time::now().toSec();
+        double tf = t0 + jpCtrl->compute_dt(t0);
+        StateSpace ss0 = *jpCtrl->serialize(robot_state);
+        StateSpace ssf = *jpCtrl->serialize(data);
+        if(DEBUG) std::cout << "T0: " << t0 <<  "TF: " << tf << "DT: " << tf - ros::Time::now().toSec() << std::endl;
+        jpCtrl->interpolater.compute_interpolation_params(ss0, ssf, t0, tf);
+        jpCtrl->set_active();
+    }
+    else{
+        std::cout << "Waiting for new robot state data \n";
+    }
 }
 
 ///
