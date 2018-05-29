@@ -15,6 +15,7 @@ class ControllerManager: public RobotCmd, public RobotState{
 
 public:
     ControllerManager();
+    static inline void clear_initialized_flag(){_initialized = false;}
 
 private:
     CtrlrBasePtr cpCtrl;

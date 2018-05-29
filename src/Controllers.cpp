@@ -363,7 +363,7 @@ void Servo::servo_jf(_jf_data_type &data){
 /// \param arm_name
 ///
 Controllers::Controllers(){
-
+    ControllerManager::clear_initialized_flag();
 }
 
 
