@@ -3,13 +3,15 @@
 ///
 /// \brief SubControllersCommon::_initialized
 ///
-bool SubControllersCommon::_initialized = false;
-
+bool ControllerManager::_initialized = false;
 
 ///
 /// \brief SubControllersCommon::SubControllersCommon
 ///
-SubControllersCommon::SubControllersCommon():rate(1000){
+ControllerManager::ControllerManager():
+    rate(1000),
+    RobotCmd(crtk::get_name_space(), crtk::get_arm_name() ),
+    RobotState(crtk::get_name_space(), crtk::get_arm_name() ){
     if (!_initialized){
         _initialized = true;
         bind_robot_io("robot_cp", cpCtrl);
@@ -31,7 +33,7 @@ SubControllersCommon::SubControllersCommon():rate(1000){
 /// \param interface_name
 /// \param ctrlrBase
 ///
-void SubControllersCommon::bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase){
+void ControllerManager::bind_robot_io(string interface_name, CtrlrBasePtr &ctrlrBase){
     std::vector<std::string> crtk_str = split_str(interface_name, '_');
     char op_space = crtk_str[1][0];
     char controller = crtk_str[1][1];
@@ -108,7 +110,7 @@ void SubControllersCommon::bind_robot_io(string interface_name, CtrlrBasePtr &ct
 ///
 /// \brief SubControllersCommon::execute
 ///
-void SubControllersCommon::execute(){
+void ControllerManager::execute(){
     while (ros::ok()){
         for (std::vector<CtrlrBasePtr>::iterator it = vec_ctrlrs.begin() ; it != vec_ctrlrs.end() ; it++){
             if ((*it)->is_active()){
@@ -355,12 +357,15 @@ void Servo::servo_jf(_jf_data_type &data){
     jfCtrl->robot_cmd_ifc->set_data(data);
 }
 
-////
+///
 /// \brief Controllers::Controllers
+/// \param name_space
+/// \param arm_name
 ///
 Controllers::Controllers(){
 
 }
+
 
 ///
 /// \brief Controllers::get_method_by_name

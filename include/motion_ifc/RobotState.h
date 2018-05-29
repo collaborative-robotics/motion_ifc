@@ -44,7 +44,7 @@
 ///
 class RobotState{
 public:
-    RobotState();
+    RobotState(std::string name_space, std::string arm_name);
 
     CommBasePtr measured_cp_ifc;
     CommBasePtr measured_cv_ifc;

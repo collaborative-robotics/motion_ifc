@@ -89,7 +89,7 @@ void ControllerData<D, S>::cmd_robot(StateSpace &pva){
 
 template<typename D, typename S>
 ///
-/// \brief ControllerData::cmd_robot
+/// \brief ControllerData<D, S>::cmd_robot
 /// \param t
 ///
 void ControllerData<D, S>::cmd_robot(double t){

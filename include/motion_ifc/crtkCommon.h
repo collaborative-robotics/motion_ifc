@@ -37,12 +37,22 @@ typedef const boost::shared_ptr<RobotState> RobotStateConstPtr;
 typedef std::map<std::string, FcnHandleBasePtr > _method_map_type;
 typedef std::map<std::string, CommBasePtr > _interface_map_type;
 
+class crtk{
+public:
+    crtk();
+    static void set_ns_and_arm(std::string name_space, std::string arm_name);
+    static std::string get_name_space();
+    static std::string get_arm_name();
+private:
+    static std::string _name_space;
+    static std::string _arm_name;
+};
+
 // Copied function from:
 // https://stackoverflow.com/questions/236129/the-most-elegant-way-to-iterate-the-words-of-a-string
 
 template<typename Out>
 void split_str(const std::string &s, char delim, Out result);
-
 std::vector<std::string> split_str(const std::string &s, char delim);
 
 

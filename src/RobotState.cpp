@@ -4,11 +4,12 @@
 /////
 /// \brief RobotState::RobotState
 ///
-RobotState::RobotState(){
-    measured_cp_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cp", INCOMING);
-    measured_cv_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cv", INCOMING);
-    measured_cf_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_cf", INCOMING);
-    measured_js_ifc = commIfc.create_communication_interface("/dvrk/MTMR/measured_js", INCOMING);
+RobotState::RobotState(string name_space, string arm_name){
+    std::string prefix = "/" + name_space + "/" + arm_name+ "/";
+    measured_cp_ifc = commIfc.create_communication_interface(prefix + "measured_cp", INCOMING);
+    measured_cv_ifc = commIfc.create_communication_interface(prefix + "measured_cv", INCOMING);
+    measured_cf_ifc = commIfc.create_communication_interface(prefix + "measured_cf", INCOMING);
+    measured_js_ifc = commIfc.create_communication_interface(prefix + "measured_js", INCOMING);
 
     method_map["measured_cp"] = FcnHandleBasePtr( new FcnHandle<_cp_data_type>(&CommunicationBase::get_data, measured_cp_ifc.get()));
     method_map["measured_cv"] = FcnHandleBasePtr( new FcnHandle<_cv_data_type>(&CommunicationBase::get_data, measured_cv_ifc.get()));

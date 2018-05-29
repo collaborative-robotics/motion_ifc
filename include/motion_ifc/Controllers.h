@@ -8,13 +8,13 @@
 
 using namespace Eigen;
 
-class SubControllersCommon: public RobotCmd, public RobotState{
+class ControllerManager: public RobotCmd, public RobotState{
     friend class Interpolate;
     friend class Move;
     friend class Servo;
 
 public:
-    SubControllersCommon();
+    ControllerManager();
 
 private:
     CtrlrBasePtr cpCtrl;
@@ -38,7 +38,7 @@ private:
 ///
 /// \brief The Interpolate class
 ///
-class Interpolate: public SubControllersCommon{
+class Interpolate: public ControllerManager{
 public:
     Interpolate();
     ~Interpolate(){
@@ -72,7 +72,7 @@ private:
 ///
 /// \brief The Move class
 ///
-class Move: public SubControllersCommon{
+class Move: public ControllerManager{
 public:
     Move();
     void move_cp(_cp_data_type &data);
@@ -99,7 +99,7 @@ private:
 ///
 /// \brief The Servo class
 ///
-class Servo: public SubControllersCommon{
+class Servo: public ControllerManager{
 public:
     Servo();
     void servo_cp(_cp_data_type &data);
@@ -137,9 +137,6 @@ class Controllers:
 public:
     Controllers();
     FcnHandleBasePtr get_method_by_name(std::string method_name);
-
-private:
 };
-
 
 #endif // CONTROLLERS_H

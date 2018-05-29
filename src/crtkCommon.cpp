@@ -30,3 +30,42 @@ std::vector<std::string> split_str(const std::string &s, char delim) {
     return elems;
 }
 
+///
+/// \brief Controllers::_name_space
+///
+std::string crtk::_name_space = "dvrk";
+
+///
+/// \brief Controllers::_arm_name
+///
+std::string crtk::_arm_name = "MTMR";
+
+///
+/// \brief crtk::crtk
+///
+crtk::crtk(){
+
+}
+
+///
+/// \brief crtk::init
+/// \param name_space
+/// \param arm_name
+///
+void crtk::set_ns_and_arm(std::string name_space, std::string arm_name){
+    _name_space = name_space;
+    _arm_name = arm_name;
+}
+
+///
+/// \brief Controllers::get_topic_prefix
+/// \return
+///
+std::string crtk::get_name_space(){
+    return _name_space;
+}
+
+std::string crtk::get_arm_name(){
+    return _arm_name;
+}
+

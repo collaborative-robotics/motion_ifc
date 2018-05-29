@@ -9,7 +9,7 @@
 ///
 class RobotCmd{
 public:
-    RobotCmd();
+    RobotCmd(const std::string name_space, const std::string arm_name);
 
     inline void servo_cp(_cp_data_type &data){servo_cp_ifc->set_data(data);}
     inline void servo_cv(_cv_data_type &data){servo_cv_ifc->set_data(data);}

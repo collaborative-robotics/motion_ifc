@@ -21,8 +21,8 @@ int main(){
     // specialized based on the crtk grammar
 
     // For Interpolate Sub-conroller
-    RobotCmdPtr rCmdIfc(new RobotCmd());
-    RobotStatePtr rStateIfc(new RobotState);
+    RobotCmdPtr rCmdIfc(new RobotCmd("dvrk", "MTMR"));
+    RobotStatePtr rStateIfc(new RobotState("dvrk", "MTMR"));
     FcnHandleBasePtr method_handle;
     Interpolate interpController;
     method_handle = interpController.get_method_by_name("interpolate_cp");
@@ -47,6 +47,7 @@ int main(){
 
 
     // And we can get and subcontroller method from the controller class as well
+    crtk::set_ns_and_arm("dvrk", "MTMR");
     Controllers controller;
     FcnHandleBasePtr interpolate_cp = controller.get_method_by_name("interpolate_cp");
     FcnHandleBasePtr interpolate_cr = controller.get_method_by_name("interpolate_cr");

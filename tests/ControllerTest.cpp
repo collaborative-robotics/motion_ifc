@@ -4,6 +4,7 @@
 int main(){
 
     //    Controllers controllers;
+    crtk::set_ns_and_arm("dvrk", "MTMR");
     MotionCmd motionCmd;
     ros::Rate rate(1000);
     int ctr = 0;

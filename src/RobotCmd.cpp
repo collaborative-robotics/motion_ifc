@@ -4,14 +4,15 @@
 /////
 /// \brief RobotCmd::RobotCmd
 ///
-RobotCmd::RobotCmd(){
-    servo_cp_ifc = commIfc.create_communication_interface("/dvrk/MTMR/servo_cp", OUTGOING);
-    servo_cv_ifc = commIfc.create_communication_interface("/dvrk/MTMR/servo_cv", OUTGOING);
-    servo_cf_ifc = commIfc.create_communication_interface("/dvrk/MTMR/servo_cf", OUTGOING);
+RobotCmd::RobotCmd(const string name_space, const string arm_name){
+    std::string prefix = "/" + name_space + "/" + arm_name+ "/";
+    servo_cp_ifc = commIfc.create_communication_interface(prefix + "servo_cp", OUTGOING);
+    servo_cv_ifc = commIfc.create_communication_interface(prefix + "servo_cv", OUTGOING);
+    servo_cf_ifc = commIfc.create_communication_interface(prefix + "servo_cf", OUTGOING);
 
-    servo_jp_ifc = commIfc.create_communication_interface("/dvrk/MTMR/servo_jp", OUTGOING);
-    servo_jv_ifc = commIfc.create_communication_interface("/dvrk/MTMR/servo_jv", OUTGOING);
-    servo_jf_ifc = commIfc.create_communication_interface("/dvrk/MTMR/servo_jf", OUTGOING);
+    servo_jp_ifc = commIfc.create_communication_interface(prefix + "servo_jp", OUTGOING);
+    servo_jv_ifc = commIfc.create_communication_interface(prefix + "servo_jv", OUTGOING);
+    servo_jf_ifc = commIfc.create_communication_interface(prefix + "servo_jf", OUTGOING);
 
     method_map["servo_cp"] = FcnHandleBasePtr(new FcnHandle<_cp_data_type>(&CommunicationBase::set_data, servo_cp_ifc.get()));
     method_map["servo_cv"] = FcnHandleBasePtr(new FcnHandle<_cv_data_type>(&CommunicationBase::set_data, servo_cv_ifc.get()));

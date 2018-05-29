@@ -5,20 +5,21 @@
 /// \brief MotoinCmd::MotoinCmd
 ///
 MotionCmd::MotionCmd(){
-    create_motion_command_interface("/motion_ifc/interpolate_cp", interpolate_cp_ifc, 1.0);
-    create_motion_command_interface("/motion_ifc/interpolate_cr", interpolate_cr_ifc, 1.0);
-    create_motion_command_interface("/motion_ifc/interpolate_cv", interpolate_cv_ifc, 1.0);
-    create_motion_command_interface("/motion_ifc/interpolate_cf", interpolate_cf_ifc, 1.0);
+    std::string prefix = "/motion_ifc/" + crtk::get_arm_name() + "/";
+    create_motion_command_interface(prefix + "interpolate_cp", interpolate_cp_ifc, 1.0);
+    create_motion_command_interface(prefix + "interpolate_cr", interpolate_cr_ifc, 1.0);
+    create_motion_command_interface(prefix + "interpolate_cv", interpolate_cv_ifc, 1.0);
+    create_motion_command_interface(prefix + "interpolate_cf", interpolate_cf_ifc, 1.0);
 
-    create_motion_command_interface("/motion_ifc/interpolate_jp", interpolate_jp_ifc, 1.0);
-    create_motion_command_interface("/motion_ifc/interpolate_jr", interpolate_jr_ifc, 1.0);
-    create_motion_command_interface("/motion_ifc/interpolate_jv", interpolate_jv_ifc, 1.0);
-    create_motion_command_interface("/motion_ifc/interpolate_jf", interpolate_jf_ifc, 1.0);
+    create_motion_command_interface(prefix + "interpolate_jp", interpolate_jp_ifc, 1.0);
+    create_motion_command_interface(prefix + "interpolate_jr", interpolate_jr_ifc, 1.0);
+    create_motion_command_interface(prefix + "interpolate_jv", interpolate_jv_ifc, 1.0);
+    create_motion_command_interface(prefix + "interpolate_jf", interpolate_jf_ifc, 1.0);
 
-    create_motion_command_interface("/motion_ifc/move_cp", move_cp_ifc, 5.0);
-    create_motion_command_interface("/motion_ifc/move_cr", move_cr_ifc, 5.0);
-    create_motion_command_interface("/motion_ifc/move_jp", move_jp_ifc, 5.0);
-    create_motion_command_interface("/motion_ifc/move_jr", move_jr_ifc, 5.0);
+    create_motion_command_interface(prefix + "move_cp", move_cp_ifc, 5.0);
+    create_motion_command_interface(prefix + "move_cr", move_cr_ifc, 5.0);
+    create_motion_command_interface(prefix + "move_jp", move_jp_ifc, 5.0);
+    create_motion_command_interface(prefix + "move_jr", move_jr_ifc, 5.0);
 
 }
 
